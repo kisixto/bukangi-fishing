@@ -270,7 +270,7 @@ const CONFIG = {
     { id:'indoor', no:0, name:'실내 낚시터', cost:0, affinity:'float', theme:'indoor', bukangi:false,
       desc:'튜토리얼 장소. 잔잔한 실내 수조에서 기본기를 익혀요.',
       fish:[['bungeo',70],['hyangeo',25],['ingeo',5]] },
-    { id:'river', no:1, name:'강', cost:200, affinity:'float', theme:'river', bukangi:true,
+    { id:'river', no:1, name:'강', cost:150, affinity:'float', theme:'river', bukangi:true,
       desc:'붕어·잉어는 찌로, 쏘가리·메기는 릴로. 드물게 철갑상어가 산다는 소문.',
       fish:[['pirami',35],['bungeo',28],['ingeo',14],['megi',12],['sogari',7],['jangeo',3],['cheolgap',0.6]] },
     { id:'pier', no:2, name:'방파제', cost:1500, affinity:'float', theme:'pier', bukangi:true,
@@ -543,7 +543,7 @@ function emit(ev){
 function finishTutorial(){
   S.tutorial.done = true; S.money += CONFIG.tutorial.reward; save(); refreshHud(); renderTut();
   openPanel('튜토리얼 완료', `<div class="catch"><h3>본 게임 시작!</h3>
-    <p>보상으로 <span class="price">${won(CONFIG.tutorial.reward)}원</span>을 받았어요.<br>돈을 모아 <b>강</b> 낚시터를 해금하고, 상점에서 장비를 강화하세요.<br>아주 드물게 낚이는 <b style="color:${CONFIG.specialGrade.color}">부캉이</b>를 잡으면 부산에 갈 수 있어요.</p>
+    <p>보상으로 <span class="price">${won(CONFIG.tutorial.reward)}원</span>을 받았어요.<br>이 돈으로 <b>강</b> 낚시터를 바로 해금할 수 있어요. 낚시터 화면에서 해금하세요.<br>아주 드물게 낚이는 <b style="color:${CONFIG.specialGrade.color}">부캉이</b>를 잡으면 부산에 갈 수 있어요.</p>
     <div class="foot" style="justify-content:center"><button class="btn hot" data-act="openStage">낚시터 고르기</button><button class="btn" data-act="close">계속 낚시</button></div></div>`);
 }
 function skipTutorial(){ S.tutorial.step = TUTORIAL.length; finishTutorial(); }
