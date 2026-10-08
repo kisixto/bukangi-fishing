@@ -426,7 +426,32 @@ const SFX = (()=>{
     reward(){ [784,988,1175,1568].forEach((f,i)=>tone(f,0.22,{type:'sine',vol:0.1,delay:0.5+i*0.09})); },
   };
 })();
-function buzz(pattern){ if(!S.sound) return; try{ if(navigator.vibrate) navigator.vibrate(pattern); }catch(e){} }
+// 진동: 안드로이드는 Vibration API, 아이폰(지원 안 함)은 iOS 18+ 스위치 토글 햅틱으로 대체
+const HAPTIC = (()=>{
+  const canVibrate = typeof navigator.vibrate === 'function';
+  const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+  let lbl = null;
+  function iosTick(){
+    try{
+      if(!lbl){
+        lbl = document.createElement('label'); lbl.setAttribute('aria-hidden','true');
+        lbl.style.cssText = 'position:fixed;left:-9999px;top:0;width:1px;height:1px;overflow:hidden;opacity:0';
+        const inp = document.createElement('input'); inp.type = 'checkbox'; inp.setAttribute('switch',''); inp.tabIndex = -1;
+        lbl.appendChild(inp); document.body.appendChild(lbl);
+      }
+      lbl.click();
+    }catch(e){}
+  }
+  return {
+    mode: canVibrate ? 'vibrate' : isIOS ? 'ios' : 'none',
+    play(pattern){
+      const pat = (Array.isArray(pattern) ? pattern : [pattern]).map((v,i)=> i%2===0 ? Math.max(30, v) : v);  // 30ms 미만은 기종에 따라 안 느껴짐
+      if(canVibrate){ try{ navigator.vibrate(pat); }catch(e){} return; }
+      if(isIOS){ let t = 0; pat.forEach((v,i)=>{ if(i%2===0) setTimeout(iosTick, t); t += v; }); }
+    },
+  };
+})();
+function buzz(pattern){ if(!S.sound) return; HAPTIC.play(pattern); }
 const REDUCED = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
 
 /* ===================== 4. FISHING ===================== */
@@ -1294,7 +1319,7 @@ $('btnShop').onclick = ()=>openShop();
 $('btnStage').onclick = openStage;
 $('btnDex').onclick = openDex;
 function refreshSound(){ const b = $('btnSound'); b.textContent = S.sound ? '소리 켬' : '소리 끔'; b.setAttribute('aria-pressed', String(!!S.sound)); }
-$('btnSound').onclick = ()=>{ S.sound = !S.sound; save(); refreshSound(); if(S.sound){ SFX.unlock(); SFX.coin(); } };
+$('btnSound').onclick = ()=>{ S.sound = !S.sound; save(); refreshSound(); if(S.sound){ SFX.unlock(); SFX.coin(); buzz(60); } };
 $('mFloat').onclick = ()=>setMethod('float');
 $('mReel').onclick = ()=>setMethod('reel');
 
