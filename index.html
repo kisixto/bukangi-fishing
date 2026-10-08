@@ -25,6 +25,10 @@
 html,body{height:100%}
 [hidden]{display:none!important}
 body{margin:0;background:var(--ink);color:var(--paper);font-family:var(--f-body);overflow:hidden;-webkit-tap-highlight-color:transparent}
+/* 휴대폰 연타 시 글자 선택·길게 누르기 메뉴·두 번 탭 확대 방지 (게임 화면 전체) */
+#app,.modal{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+body,button,.stage{touch-action:manipulation}
+#app ::selection,.modal ::selection{background:transparent}
 #app{height:100%;display:flex;flex-direction:column}
 button{font:inherit;color:inherit;cursor:pointer}
 button:focus-visible{outline:2px solid var(--float);outline-offset:2px}
@@ -1318,6 +1322,10 @@ window.addEventListener('keyup', e=>{
   if(e.code==='ArrowUp' || e.code==='KeyW') input.lift = false;
 });
 window.addEventListener('blur', ()=>{ input.reel = input.lift = false; });
+// 연타로 생기는 선택을 브라우저 단에서도 막음 (CSS를 무시하는 일부 모바일 브라우저 대비)
+document.addEventListener('selectstart', e=>e.preventDefault());
+document.addEventListener('dblclick', e=>e.preventDefault(), { passive:false });
+document.addEventListener('contextmenu', e=>{ if(e.target.closest('#app')) e.preventDefault(); });
 
 function update(dt){
   switch(G.phase){
