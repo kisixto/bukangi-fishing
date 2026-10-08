@@ -211,7 +211,16 @@ const CONFIG = {
   bukangi: { baseChance:0.004, luckMul:2.0, diff:0.25 },  // 부캉이 출현 확률 (입질 1회당)
   busan: { ticketSeconds:150 },   // 이용권 1장 = 150초
   tutorial: { reward:150 },
-  landing: { base:1.2, perGrade:0.2, reduced:0.5 },   // 포획 연출 시간(초): 기본 + 등급당
+  landing: { base:1.2, perGrade:0.2, reduced:0.5 },
+  // 캐스팅: 게이지 위치(0 가까이 ~ 1 멀리)로 던질 거리를 정함. 0.5가 기준 밸런스
+  cast: {
+    speed:1.4,                // 게이지 왕복 속도 (끝까지/초)
+    nearX:0.42, farX:0.88,    // 화면 폭 대비 착수 위치
+    nearM:12, farM:40,        // 표시 거리(m)
+    gradeBias:0.35,           // 등급 번호당 가중치 배율: (1+bias)^((파워−0.5)×2×등급번호)
+    startDistNear:0.85, startDistFar:1.15,   // 걸렸을 때 시작 거리 배수 (멀리 던질수록 끌어올 거리↑)
+    perfectFrom:0.93,         // 이 이상이면 '최대 캐스팅!'
+  },   // 포획 연출 시간(초): 기본 + 등급당
   // 낚시터 도감을 모두 채우면 받는 작은 편의 효과 (중복 없이 1회)
   dexRewards: {
     indoor: { perk:'net',   value:2,   text:'살림망 +2칸' },
@@ -337,8 +346,9 @@ function checkDexRewards(){
   return got;
 }
 
-function rollCatch(stage, method){
+function rollCatch(stage, method, power=0.5){
   const luck = gearLv('bait').luck;
+  const castF = (clamp(power,0,1)-0.5)*2;   // -1 가까이 ~ +1 멀리
   if(stage.bukangi && Math.random() < CONFIG.bukangi.baseChance*(1+luck*CONFIG.bukangi.luckMul)){
     return { kind:'bukangi', id:'bukangi', name:'부캉이', diff:CONFIG.bukangi.diff, method, len:0, price:0 };
   }
@@ -346,6 +356,7 @@ function rollCatch(stage, method){
     const f = CONFIG.fish[id]; let wt = w;
     wt *= 1 + luck*gradeIndex(f.price)*0.35;           // 미끼 행운: 비싼 종 가중치↑
     if(f.method===method) wt *= CONFIG.methodSpawnBonus;
+    wt *= Math.pow(1+CONFIG.cast.gradeBias, castF*gradeIndex(f.price));   // 멀리 던질수록 비싼 종↑, 가까이면↓
     return {id, wt};
   });
   const total = entries.reduce((a,e)=>a+e.wt,0);
@@ -423,10 +434,24 @@ function setPhase(p){ G.phase = p; G.t = 0; syncControls(); }
 function tryCast(){
   if(S.net.length >= netSize()){ toast('살림망이 가득 찼어요. 상점에서 팔고 오세요'); return; }
   if(S.stage==='busan' && S.busanLeft<=0){ leaveBusan(); return; }
-  G.castX = rand(0.6, 0.8);
-  G.catch = rollCatch(curStage(), S.method);
+  G.aim = { pos:0, dir:1 };
+  setPhase('aiming');
+}
+function updateAim(dt){
+  const a = G.aim; a.pos += a.dir*CONFIG.cast.speed*dt;
+  if(a.pos>1){ a.pos = 2-a.pos; a.dir = -1; }
+  if(a.pos<0){ a.pos = -a.pos; a.dir = 1; }
+}
+function releaseCast(){
+  const c = CONFIG.cast, pw = clamp(G.aim.pos,0,1);
+  G.castPower = pw;
+  G.castX = lerp(c.nearX, c.farX, pw);
+  G.castM = Math.round(lerp(c.nearM, c.farM, pw));
+  G.catch = rollCatch(curStage(), S.method, pw);
   setPhase('casting');
   SFX.cast();
+  if(pw >= c.perfectFrom){ toast(`최대 캐스팅! ${G.castM}m`); buzz([20,30,20]); }
+  else toast(`${G.castM}m 캐스팅` + (pw<0.3 ? ' · 너무 가까워요' : ''));
   emit('cast');
 }
 function beginWait(){
@@ -470,6 +495,7 @@ function action(){
   SFX.unlock();
   switch(G.phase){
     case 'idle': tryCast(); break;
+    case 'aiming': releaseCast(); break;
     case 'landing': if(G.land.t>0.35) finishLanding(); break;
     case 'waiting':
       if(S.method==='float'){
@@ -500,7 +526,7 @@ function startReel(perfect){
   const match = f.method===S.method ? CONFIG.methodMatch : CONFIG.methodMismatch;
   const zoneW = gearLv('rod').zone*(1 - d*c.zoneShrinkByDiff)*match.zoneMul;
   G.R = {
-    dist: perfect ? c.perfectStartDist : 1, T:0.35, hp:gearLv('line').hp, hpMax:gearLv('line').hp,
+    dist: (perfect ? c.perfectStartDist : 1)*lerp(CONFIG.cast.startDistNear, CONFIG.cast.startDistFar, G.castPower ?? 0.5), T:0.35, hp:gearLv('line').hp, hpMax:gearLv('line').hp,
     slack:0, angle:0, time:0,
     zLow: clamp(c.zoneCenter - zoneW/2, 0.05, 0.9), zHigh: clamp(c.zoneCenter + zoneW/2, 0.1, 0.97),
     baseForce: c.baseForce + d*c.hardForce, forceMul: match.forceMul,
@@ -579,7 +605,8 @@ function landCatch(){
     const e = S.dex.bukangi || (S.dex.bukangi = {count:0, maxLen:0, best:-1});
     e.count++;
   } else {
-    S.net.push({ id:c.id, name:c.name, len:c.len, weight:c.weight, price:c.price, grade:c.grade });
+    G.lastNet = { id:c.id, name:c.name, len:c.len, weight:c.weight, price:c.price, grade:c.grade };
+    S.net.push(G.lastNet);
     const e = S.dex[c.id] || (S.dex[c.id] = {count:0, maxLen:0, best:-1});
     if(e.count>0 && c.len>e.maxLen) record = true;
     e.count++; e.maxLen = Math.max(e.maxLen, c.len); e.best = Math.max(e.best, c.grade);
@@ -625,7 +652,7 @@ function leaveBusan(){
 
 /* ===================== 5. TUTORIAL ===================== */
 const TUTORIAL = [
-  { until:'cast',  text:'반가워요! 찌낚시부터 해볼까요? 아래 <b>던지기</b> 버튼(또는 스페이스)으로 찌를 던지세요.' },
+  { until:'cast',  text:'반가워요! 찌낚시부터 해볼까요? <b>던지기</b>(또는 스페이스)를 누르면 거리 게이지가 움직여요. <b>한 번 더 눌러</b> 던지세요. 멀리 던질수록 좋은 물고기가 잘 와요.' },
   { until:'hook',  text:'찌를 지켜보세요. 톡톡 흔들리는 건 간보기예요. 찌가 물속으로 <b>쑥 잠기는 순간</b> 챔질 버튼을 누르세요.', back:0 },
   { until:'catch', text:'걸었다! <b>감기</b>를 누르고 있으면 장력이 오르고, 떼면 내려가요. 오른쪽 장력 바늘을 <b>초록 구간</b> 안에 유지하세요.', back:0 },
   { until:'catch', text:'잘했어요! 같은 요령으로 한 마리 더 낚아보세요.' },
@@ -703,6 +730,7 @@ function rodTip(g){
   else if(G.phase==='bite'){ ang = -0.72 + Math.sin(G.time*40)*0.05 + 0.08; }
   else if(G.phase==='hookGauge'){ ang = -0.66 + Math.sin(G.time*25)*0.02; }
   else if(G.phase==='casting'){ ang = -1.3 + Math.min(1,G.t/0.25)*0.58; }
+  else if(G.phase==='aiming'){ ang = -0.95 - G.aim.pos*0.35; }
   if(G.hookFx>0) ang -= G.hookFx*0.4;
   return { x:g.handX+Math.cos(ang)*g.rodLen, y:g.handY+Math.sin(ang)*g.rodLen, ang };
 }
@@ -751,6 +779,7 @@ function render(){
   ctx.fillStyle='rgba(255,255,255,.85)';
   G.particles.forEach(p=>{ ctx.beginPath(); ctx.arc(p.x,p.y,2.2,0,Math.PI*2); ctx.fill(); });
   // UI 레이어
+  if(G.phase==='aiming') drawAim(g);
   if(G.phase==='landing') drawLanding();
   if(G.phase==='bite') drawBang(tip);
   if(G.phase==='hookGauge') drawGauge();
@@ -860,7 +889,7 @@ function drawLine(g, tip){
   ctx.strokeStyle='rgba(255,255,255,.75)'; ctx.lineWidth=1;
   const wl = g.wl, cx = G.castX*CW;
   let ex, ey, sag = 0;
-  if(G.phase==='idle' || G.phase==='result'){ ex = tip.x; ey = tip.y + 40; }
+  if(G.phase==='idle' || G.phase==='result' || G.phase==='aiming'){ ex = tip.x; ey = tip.y + 40; }
   else if(G.phase==='casting'){ const k = clamp(G.t/0.6,0,1); ex = lerp(tip.x, cx, k); ey = lerp(tip.y, wl, k) - Math.sin(k*Math.PI)*CH*0.2; }
   else if(G.phase==='reeling'){ const fp = fishPos(); ex = fp.x; ey = fp.y; sag = Math.max(0, 0.4 - G.R.T)*40; }
   else if(G.phase==='lost'){ ex = tip.x + 10; ey = tip.y + 40; }
@@ -870,7 +899,7 @@ function drawLine(g, tip){
   // 찌 / 루어
   if(S.method==='float' && (G.phase==='waiting' || G.phase==='casting')) drawBobber(ex, ey);
   else if(G.phase==='waiting' || G.phase==='bite' || G.phase==='hookGauge'){ ctx.fillStyle='#ffd04a'; ctx.beginPath(); ctx.ellipse(ex, ey+30, 6, 3, 0.4, 0, Math.PI*2); ctx.fill(); ctx.strokeStyle='rgba(255,255,255,.5)'; ctx.beginPath(); ctx.moveTo(ex,ey); ctx.lineTo(ex,ey+28); ctx.stroke(); }
-  else if(G.phase==='idle'){ ctx.fillStyle='#ffd04a'; ctx.beginPath(); ctx.arc(ex,ey,3,0,Math.PI*2); ctx.fill(); }
+  else if(G.phase==='idle' || G.phase==='aiming'){ ctx.fillStyle='#ffd04a'; ctx.beginPath(); ctx.arc(ex,ey,3,0,Math.PI*2); ctx.fill(); }
 }
 function drawBobber(x, y){
   let off = 0;
@@ -888,6 +917,27 @@ function drawBobber(x, y){
   ctx.save(); ctx.beginPath(); ctx.rect(0,y,CW,CH); ctx.clip();
   ctx.fillStyle='rgba(255,255,255,.5)'; ctx.beginPath(); ctx.ellipse(x,by,5,8,0,0,Math.PI); ctx.fill();
   ctx.restore();
+}
+function drawAim(g){
+  const c = CONFIG.cast, pos = G.aim.pos;
+  // 착수 예상 지점
+  const tx = lerp(c.nearX, c.farX, pos)*CW, wl = g.wl;
+  ctx.save(); ctx.setLineDash([5,5]); ctx.strokeStyle = pos>=c.perfectFrom ? '#ffd04a' : 'rgba(255,255,255,.8)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.ellipse(tx, wl+4, 16, 5, 0, 0, Math.PI*2); ctx.stroke(); ctx.restore();
+  // 거리 게이지
+  const w = Math.min(CW*0.75, 480), h = 22, x = (CW-w)/2, y = CH*0.74;
+  panelBox(x-12, y-34, w+24, h+52);
+  ctx.textBaseline='middle'; ctx.font=`16px ${FD}`; ctx.fillStyle='#f4ecd9'; ctx.textAlign='center';
+  ctx.fillText('멀리 던질수록 좋은 물고기!', CW/2, y-17);
+  const gr = ctx.createLinearGradient(x,0,x+w,0); gr.addColorStop(0,'#3b6f7c'); gr.addColorStop(0.5,'#5cc27a'); gr.addColorStop(1,'#ffd04a');
+  ctx.fillStyle='#22525e'; roundRect(x,y,w,h,8); ctx.fill();
+  ctx.fillStyle=gr; roundRect(x,y,Math.max(8,w*pos),h,8); ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,.35)'; ctx.fillRect(x+w*c.perfectFrom, y, 2, h);
+  ctx.font=`600 11px ${FB}`; ctx.fillStyle='#9fbcc0';
+  ctx.textAlign='left'; ctx.fillText(`가까이 ${c.nearM}m`, x, y+h+11);
+  ctx.textAlign='right'; ctx.fillText(`멀리 ${c.farM}m`, x+w, y+h+11);
+  ctx.textAlign='center'; ctx.fillStyle='#f4ecd9'; ctx.fillText(`${Math.round(lerp(c.nearM,c.farM,pos))}m`, x+w*pos, y+h+11);
+  ctx.textAlign='left';
 }
 function drawLanding(){
   const L = G.land, c = G.catch, gi = gradeInfo(c), p = landPos();
@@ -960,7 +1010,7 @@ function drawReelUI(){
   ctx.fillStyle='#22525e'; ctx.fillRect(bx, by+18, bw, 6);
   ctx.fillStyle='#ffd04a'; ctx.fillRect(bx, by+18, bw*clamp(1-R.dist,0,1), 6);
   ctx.fillStyle='#f4ecd9'; ctx.font=`600 13px ${FB}`; ctx.textBaseline='middle';
-  ctx.fillText(`거리 ${(Math.max(0,R.dist)*CONFIG.maxMeters).toFixed(1)}m`, bx, by+6);
+  ctx.fillText(`거리 ${(Math.max(0,R.dist)*(G.castM||CONFIG.maxMeters)).toFixed(1)}m`, bx, by+6);
   ctx.textAlign='right'; ctx.fillStyle = R.match ? '#9ef0b4' : '#ffb3a6';
   ctx.fillText(R.match ? '유리한 방식' : '불리한 방식', bx+bw, by+6); ctx.textAlign='left';
   // 장력 게이지
@@ -1000,6 +1050,7 @@ function drawCenterText(txt, color){
 }
 function hintText(){
   const p = G.phase, f = S.method==='float';
+  if(p==='aiming') return '한 번 더 눌러 던지세요';
   if(p==='idle') return S.net.length>=netSize() ? '살림망이 가득! 상점에서 판매하세요' : (f?'찌를 던지세요':'채비를 던지세요') + ` · 살림망 ${S.net.length}/${netSize()}`;
   if(p==='waiting') return f ? '찌가 쑥 잠길 때 챔질! 톡톡은 속임수' : '입질을 기다리는 중…';
   if(p==='reeling') return f ? '감기를 눌렀다 뗐다 하며 장력을 초록 구간에' : '들기로 끌어오고, 대를 내리며 감기';
@@ -1090,7 +1141,7 @@ function syncControls(){
   $('mFloat').setAttribute('aria-pressed', String(!isReel));
   $('mReel').setAttribute('aria-pressed', String(isReel));
   $('mFloat').disabled = $('mReel').disabled = p!=='idle';
-  const labels = { landing:'…', idle:'던지기', casting:'…', waiting: isReel?'입질 대기':'챔질!', bite:'입질!', hookGauge:'챔질!', reeling:'감기 (누르고 있기)', lost:'…', result:'…' };
+  const labels = { aiming:'던지기!', landing:'…', idle:'던지기', casting:'…', waiting: isReel?'입질 대기':'챔질!', bite:'입질!', hookGauge:'챔질!', reeling:'감기 (누르고 있기)', lost:'…', result:'…' };
   a.textContent = labels[p];
   a.disabled = ['casting','bite','lost','result'].includes(p);
   if(p==='landing'){ a.disabled = false; a.textContent = '넘기기'; }
@@ -1122,7 +1173,7 @@ function showCatch(c, record, rewards){
        ${record ? '<div class="record">최대 크기 갱신!</div>' : (S.dex[c.id].count===1 ? '<div class="record">도감 등록!</div>' : '')}
        <div class="stats"><div>크기<b>${c.len}cm</b></div><div>무게<b>${fmtWeight(c.weight)}</b></div><div>가격<b class="price">${won(c.price)}원</b></div></div>
        <p class="s" style="color:var(--muted);font-size:12px">살림망 ${S.net.length}/${netSize()}</p>${rw}
-       <div class="foot" style="justify-content:center"><button class="btn hot" data-act="close">계속 낚시</button></div></div>`;
+       <div class="foot" style="justify-content:center"><button class="btn" data-act="quickSell">바로 팔기 +${won(c.price)}원</button><button class="btn hot" data-act="close">계속 낚시</button></div></div>`;
   openPanel(c.kind==='bukangi' ? '특별한 손맛' : '포획 성공', body);
 }
 
@@ -1149,6 +1200,13 @@ function openShop(tab){
 function sellAt(i){
   const f = S.net.splice(i,1)[0]; if(!f) return;
   S.money += f.price; save(); refreshHud(); SFX.coin(); toast(`${f.name} 판매 +${won(f.price)}원`); if(!modal.hidden) openShop(); emit('sell');
+}
+function quickSell(){
+  const i = S.net.indexOf(G.lastNet); G.lastNet = null;
+  if(i<0){ closeModal(); return; }
+  const f = S.net.splice(i,1)[0];
+  S.money += f.price; save(); refreshHud(); SFX.coin(); toast(`${f.name} 판매 +${won(f.price)}원`);
+  closeModal(); emit('sell');
 }
 function sellAll(){
   const total = S.net.reduce((a,f)=>a+f.price,0); if(!total) return;
@@ -1214,6 +1272,7 @@ document.addEventListener('click', e=>{
     case 'shopTab': openShop(v); break;
     case 'sell': sellAt(+v); break;
     case 'sellAll': sellAll(); break;
+    case 'quickSell': quickSell(); break;
     case 'upgrade': upgrade(v); break;
     case 'openStage': if(G.phase==='result') setPhase('idle'); openStage(); break;
     case 'goStage': goStage(v); break;
@@ -1259,6 +1318,7 @@ window.addEventListener('blur', ()=>{ input.reel = input.lift = false; });
 
 function update(dt){
   switch(G.phase){
+    case 'aiming': updateAim(dt); break;
     case 'casting': G.t += dt; if(G.t>=0.6) beginWait(); break;
     case 'waiting': updateWait(dt); break;
     case 'bite': G.t += dt; if(G.t>=0.5) beginGauge(); break;
@@ -1269,7 +1329,7 @@ function update(dt){
   }
   if(S.stage==='busan' && S.busanLeft>0){
     S.busanLeft -= dt;
-    if(S.busanLeft<=0 && ['idle','waiting','casting'].includes(G.phase)) leaveBusan();
+    if(S.busanLeft<=0 && ['idle','aiming','waiting','casting'].includes(G.phase)) leaveBusan();
   }
 }
 let last = performance.now(), saveTick = 0;
