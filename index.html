@@ -1,3 +1,8 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>부캉이 낚시터</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,7 +23,8 @@
   color-scheme:dark;
 }
 html,body{height:100%}
-body{background:var(--ink);color:var(--paper);font-family:var(--f-body);overflow:hidden;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+body{margin:0;background:var(--ink);color:var(--paper);font-family:var(--f-body);overflow:hidden;-webkit-tap-highlight-color:transparent}
 #app{height:100%;display:flex;flex-direction:column}
 button{font:inherit;color:inherit;cursor:pointer}
 button:focus-visible{outline:2px solid var(--float);outline-offset:2px}
@@ -111,6 +117,8 @@ button:focus-visible{outline:2px solid var(--float);outline-offset:2px}
 .foot{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
 @media (prefers-reduced-motion:reduce){.toast{transition:none}}
 </style>
+</head>
+<body>
 
 <div id="app">
   <header class="hud">
@@ -1124,3 +1132,5 @@ window.claude?.hot?.snapshot?.(()=>({ S }));
 const boot = data => { if(data && data.S) S = Object.assign(defaultSave(), data.S); start(); };
 window.claude?.hot?.ready ? window.claude.hot.ready(boot) : boot(window.claude?.hot?.data ?? {});
 </script>
+</body>
+</html>
