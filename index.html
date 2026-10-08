@@ -465,16 +465,16 @@ function beginWait(){
   const fh = CONFIG.floatHook;
   G.wait = { at, nibbles, window: lerp(fh.windowEasy, fh.windowHard, G.catch.diff)*(1+perk('hook')) };
   SFX.plop();
-  splash(G.castX*W(), waterY(), 6);
-  ripple(G.castX*W(), waterY());
+  splash(G.castX*W(), surfY(), 6);
+  ripple(G.castX*W(), surfY());
   setPhase('waiting');
 }
 function updateWait(dt){
   G.t += dt;
   const w = G.wait;
   if(S.method==='float'){
-    w.nibbles.forEach((n,i)=>{ if(G.t>=n && !w['r'+i]){ w['r'+i]=1; ripple(G.castX*W(), waterY()); SFX.nibble(); } });
-    if(G.t>=w.at && !w.dipFx){ w.dipFx=1; ripple(G.castX*W(), waterY()); ripple(G.castX*W(), waterY()); SFX.bite(); buzz(60); }
+    w.nibbles.forEach((n,i)=>{ if(G.t>=n && !w['r'+i]){ w['r'+i]=1; ripple(G.castX*W(), surfY()); SFX.nibble(); } });
+    if(G.t>=w.at && !w.dipFx){ w.dipFx=1; ripple(G.castX*W(), surfY()); ripple(G.castX*W(), surfY()); SFX.bite(); buzz(60); }
     if(G.t >= w.at + w.window) lose('찌가 다시 떠올랐어요. 놓쳤다!');
   } else if(G.t >= w.at){ setPhase('bite'); SFX.alert(); buzz(60); }
 }
@@ -552,7 +552,7 @@ function updateReel(dt){
     const s = c.burstStrength*(0.35+d)*rand(0.6,1.2);
     R.burstStr = Math.random()<c.burstSlackChance ? -s*0.7 : s;
     R.burstT = lerp(c.burstEveryEasy, c.burstEveryHard, d)*rand(0.6,1.4);
-    if(R.burstStr>0){ const fp = fishPos(); splash(fp.x, waterY(), 5); SFX.thrash(); }
+    if(R.burstStr>0){ const fp = fishPos(); splash(fp.x, fp.surf, 5); SFX.thrash(); }
   }
   let force = R.baseForce + Math.sin(R.time*R.wobF)*R.wobA + Math.sin(R.time*R.wobF*2.7)*R.wobA*0.5;
   if(R.burstLeft>0){ R.burstLeft -= dt; force += R.burstStr*(isReel ? 1 - R.absorb*R.angle : 1); }
@@ -598,7 +598,7 @@ function toIdle(){
 }
 function landCatch(){
   const c = G.catch;
-  const fp = fishPos(); splash(fp.x, waterY(), 24);
+  const fp = fishPos(); splash(fp.x, fp.surf, 24);
   let record = false;
   if(c.kind==='bukangi'){
     S.tickets++;
@@ -614,7 +614,7 @@ function landCatch(){
   const rewards = checkDexRewards();
   save();
   const gIdx = c.kind==='bukangi' ? 4 : c.grade;
-  G.land = { t:0, x0:fp.x, y0:waterY(), record, rewards, gIdx, sung:false,
+  G.land = { t:0, x0:fp.x, y0:fp.surf, record, rewards, gIdx, sung:false,
              dur: REDUCED ? CONFIG.landing.reduced : CONFIG.landing.base + gIdx*CONFIG.landing.perGrade };
   SFX.splash(); buzz(40);
   setPhase('landing');
@@ -698,7 +698,9 @@ const ready = img => img && img.complete && img.naturalWidth>0;
 const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
 let CW = 800, CH = 450;
 const W = ()=>CW, H = ()=>CH;
-const waterY = ()=>CH*0.5;
+const waterY = ()=>CH*0.5;   // 수평선(먼 물가)
+// 찌·물고기가 있는 수면 높이. 원근: 가까이(파워 0) 던지면 앞쪽(아래), 멀리 던지면 수평선 쪽. 항상 수평선보다 아래라 산·물가에 걸리지 않음
+const surfY = (pw = G.castPower ?? 0.5)=>CH*0.5 + lerp(CH*0.17, Math.max(14, CH*0.04), clamp(pw,0,1));
 function resize(){
   const r = cv.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio||1);
   CW = Math.max(200, r.width); CH = Math.max(200, r.height);
@@ -737,8 +739,9 @@ function rodTip(g){
 function fishPos(){
   const g = geo(), d = G.R ? G.R.dist : 1;
   const x = clamp(g.handX + (G.castX*CW - g.handX)*Math.min(d,1.25), g.handX+20, CW-20);
-  const y = g.wl + 26 + 40*clamp(d,0,1) + Math.sin(G.time*2.2)*6;
-  return { x, y };
+  const sy = lerp(g.wl + CH*0.2, surfY(), clamp(d,0,1));
+  const y = sy + 24 + Math.sin(G.time*2.2)*6;
+  return { x, y, surf:sy };
 }
 function landPos(){
   const L = G.land, c = G.catch, g = geo();
@@ -890,11 +893,11 @@ function drawLine(g, tip){
   const wl = g.wl, cx = G.castX*CW;
   let ex, ey, sag = 0;
   if(G.phase==='idle' || G.phase==='result' || G.phase==='aiming'){ ex = tip.x; ey = tip.y + 40; }
-  else if(G.phase==='casting'){ const k = clamp(G.t/0.6,0,1); ex = lerp(tip.x, cx, k); ey = lerp(tip.y, wl, k) - Math.sin(k*Math.PI)*CH*0.2; }
+  else if(G.phase==='casting'){ const k = clamp(G.t/0.6,0,1); ex = lerp(tip.x, cx, k); ey = lerp(tip.y, surfY(), k) - Math.sin(k*Math.PI)*CH*0.2; }
   else if(G.phase==='reeling'){ const fp = fishPos(); ex = fp.x; ey = fp.y; sag = Math.max(0, 0.4 - G.R.T)*40; }
   else if(G.phase==='lost'){ ex = tip.x + 10; ey = tip.y + 40; }
   else if(G.phase==='landing'){ const p = landPos(); ex = p.x - p.size*0.4; ey = p.y; sag = 0; }
-  else { ex = cx; ey = wl; sag = 18; }
+  else { ex = cx; ey = surfY(); sag = 18; }
   ctx.beginPath(); ctx.moveTo(tip.x, tip.y); ctx.quadraticCurveTo((tip.x+ex)/2, Math.max(tip.y,ey)+sag, ex, ey); ctx.stroke();
   // 찌 / 루어
   if(S.method==='float' && (G.phase==='waiting' || G.phase==='casting')) drawBobber(ex, ey);
@@ -923,7 +926,7 @@ function drawAim(g){
   // 착수 예상 지점
   const tx = lerp(c.nearX, c.farX, pos)*CW, wl = g.wl;
   ctx.save(); ctx.setLineDash([5,5]); ctx.strokeStyle = pos>=c.perfectFrom ? '#ffd04a' : 'rgba(255,255,255,.8)'; ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.ellipse(tx, wl+4, 16, 5, 0, 0, Math.PI*2); ctx.stroke(); ctx.restore();
+  ctx.beginPath(); ctx.ellipse(tx, surfY(pos), 16, 5, 0, 0, Math.PI*2); ctx.stroke(); ctx.restore();
   // 거리 게이지
   const w = Math.min(CW*0.75, 480), h = 22, x = (CW-w)/2, y = CH*0.74;
   panelBox(x-12, y-34, w+24, h+52);
