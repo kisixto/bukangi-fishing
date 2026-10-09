@@ -258,6 +258,10 @@ const CONFIG = {
     river:  { perk:'hook',  value:0.1, text:'챔질 판정 10% 넓어짐' },
     pier:   { perk:'slack', value:0.3, text:'느슨함 허용 +0.3초' },
     boat:   { perk:'wait',  value:0.1, text:'입질 대기 10% 단축' },
+    stream: { perk:'net',   value:1,    text:'살림망 +1칸' },
+    dokdo:  { perk:'hook',  value:0.05, text:'챔질 판정 5% 넓어짐' },
+    amazon: { perk:'slack', value:0.2,  text:'느슨함 허용 +0.2초' },
+    alaska: { perk:'wait',  value:0.05, text:'입질 대기 5% 단축' },
     busan:  { perk:'busan', value:30,  text:'부산 이용 시간 +30초' },
   },
 
@@ -313,6 +317,31 @@ const CONFIG = {
     bangeo:   { name:'방어',       method:'reel',  len:[50,110],  price:1400,  power:0.75, color:'#6f8fa8', pattern:'band', accent:'#f2d04a' },
     busiri:   { name:'부시리',     method:'reel',  len:[60,140],  price:2200,  power:0.85, color:'#7ea0b0', pattern:'band', accent:'#e8c64a' },
     chamchi:  { name:'참다랑어',   method:'reel',  len:[100,280], price:9000,  power:0.97, color:'#2f4a66', shape:'tuna' },
+    // 하천
+    beodeulchi:{ name:'버들치',     method:'float', len:[5,12],    price:8,     power:0.08, color:'#a49a74', pattern:'spots', accent:'#6b6248' },
+    galgyeoni:{ name:'갈겨니',      method:'float', len:[8,18],    price:12,    power:0.12, color:'#9cb0bc', pattern:'band', accent:'#3d5a6a' },
+    molaemuji:{ name:'모래무지',    method:'float', len:[10,25],   price:25,    power:0.18, color:'#cdbf98', pattern:'spots', accent:'#7e6f4c', shape:'slim' },
+    kkeokji:  { name:'꺽지',        method:'reel',  len:[10,25],   price:70,    power:0.35, color:'#5f6a4a', pattern:'stripes', accent:'#3a4230' },
+    euneo:    { name:'은어',        method:'reel',  len:[12,28],   price:150,   power:0.4,  color:'#b9c6c2', pattern:'band', accent:'#e7c45a', shape:'slim' },
+    // 독도
+    bollak:   { name:'볼락',        method:'float', len:[15,30],   price:120,   power:0.35, color:'#7a5a4a', pattern:'stripes', accent:'#4e382e' },
+    noraemi:  { name:'쥐노래미',    method:'float', len:[20,45],   price:180,   power:0.45, color:'#8a6e4a', pattern:'spots', accent:'#5a4630' },
+    hokdom:   { name:'혹돔',        method:'reel',  len:[40,90],   price:1800,  power:0.85, color:'#c46a5a', pattern:'band', accent:'#9a4a3e' },
+    // 아마존
+    piranha:  { name:'피라냐',      method:'float', len:[15,35],   price:300,   power:0.5,  color:'#8c9aa0', pattern:'belly', accent:'#d8432e' },
+    pacu:     { name:'파쿠',        method:'float', len:[30,80],   price:700,   power:0.55, color:'#5e6a70', pattern:'belly', accent:'#c9a24a' },
+    peacock:  { name:'피콕배스',    method:'reel',  len:[30,70],   price:1500,  power:0.7,  color:'#c8b03a', pattern:'stripes', accent:'#3a4a2a' },
+    redtail:  { name:'레드테일 캣피시', method:'reel', len:[60,140], price:2600, power:0.8, color:'#3e3a36', pattern:'belly', accent:'#e8e0cc' },
+    arowana:  { name:'아로와나',    method:'reel',  len:[50,100],  price:2800,  power:0.75, color:'#c8ccbf', pattern:'spots', accent:'#a8b090', shape:'slim' },
+    arapaima: { name:'피라루쿠',    method:'reel',  len:[150,300], price:16000, power:0.99, color:'#4a5248', pattern:'spots', accent:'#b8432e', shape:'slim' },
+    // 알래스카
+    rtrout:   { name:'무지개송어',  method:'float', len:[30,80],   price:1000,  power:0.5,  color:'#9aa89a', pattern:'band', accent:'#e07a8e' },
+    sockeye:  { name:'홍연어',      method:'float', len:[45,80],   price:1800,  power:0.6,  color:'#c8423a', pattern:'belly', accent:'#4a6a4a' },
+    arcchar:  { name:'북극곤들매기', method:'float', len:[40,80],  price:2400,  power:0.65, color:'#5a6a6a', pattern:'spots', accent:'#f2b48a' },
+    coho:     { name:'은연어',      method:'reel',  len:[50,90],   price:2000,  power:0.7,  color:'#a8b8c4', pattern:'spots', accent:'#4a5a6a' },
+    lingcod:  { name:'링코드',      method:'reel',  len:[50,120],  price:3500,  power:0.8,  color:'#6a6a4a', pattern:'spots', accent:'#3e3e2a', shape:'slim' },
+    kingsal:  { name:'왕연어',      method:'reel',  len:[70,140],  price:5000,  power:0.9,  color:'#7a8a9a', pattern:'spots', accent:'#2e3a46' },
+    halibut:  { name:'핼리벗',      method:'reel',  len:[80,250],  price:14000, power:0.99, color:'#6a5e4a', shape:'flat', pattern:'spots', accent:'#4a4232' },
     // 부산 전용
     hwanggeum:{ name:'황금 고등어',   method:'reel',  len:[30,55],  price:2500,  power:0.60, color:'#e8b84a', pattern:'stripes', accent:'#a87a1a', busan:true },
     eungalchi:{ name:'해운대 은갈치', method:'reel',  len:[90,180], price:1800,  power:0.55, color:'#eef3f6', shape:'long', busan:true },
@@ -320,21 +349,34 @@ const CONFIG = {
     dotdom:   { name:'오륙도 돗돔',   method:'reel',  len:[100,220],price:20000, power:0.99, color:'#4a4f55', pattern:'stripes', accent:'#2a2e33', busan:true },
   },
 
+  // travel: 이동 연출 탈것 (bike 자전거 / car 자동차 / train KTX / boat 어선 / ferry 여객선 / plane 비행기). 두 맵 중 더 먼 쪽 탈것을 씀
   stages: [
-    { id:'indoor', no:0, name:'실내 낚시터', cost:0, affinity:'float', theme:'indoor', bukangi:false,
+    { id:'indoor', no:0, name:'실내 낚시터', cost:0, affinity:'float', theme:'indoor', travel:'bike', bukangi:false,
       desc:'튜토리얼 장소. 잔잔한 실내 수조에서 기본기를 익혀요.',
       fish:[['bungeo',70],['hyangeo',25],['ingeo',5]] },
-    { id:'river', no:1, name:'강', cost:150, affinity:'float', theme:'river', bukangi:true,
+    { id:'stream', no:1, name:'하천', cost:150, affinity:'float', theme:'stream', travel:'bike', bukangi:true,
+      desc:'징검다리 건너 맑은 동네 하천. 작은 물고기가 많고, 여울에서 은어가 뛰어요.',
+      fish:[['beodeulchi',25],['pirami',20],['galgyeoni',20],['molaemuji',15],['kkeokji',12],['euneo',6]] },
+    { id:'river', no:2, name:'강', cost:600, affinity:'float', theme:'river', travel:'car', bukangi:true,
       desc:'붕어·잉어는 찌로, 쏘가리·메기는 릴로. 드물게 철갑상어가 산다는 소문.',
       fish:[['pirami',35],['bungeo',28],['ingeo',14],['megi',12],['sogari',7],['jangeo',3],['cheolgap',0.6]] },
-    { id:'pier', no:2, name:'방파제', cost:1500, affinity:'float', theme:'pier', bukangi:true,
+    { id:'pier', no:3, name:'방파제', cost:1500, affinity:'float', theme:'pier', travel:'car', bukangi:true,
       desc:'테트라포드 사이 감성돔 찌낚시의 성지. 농어는 릴로 노려요.',
       fish:[['mangdung',30],['jeongaengi',22],['godeungeo',18],['ureok',12],['gamseong',8],['nongeo',5],['bengedom',3.5],['doldom',1]] },
-    { id:'boat', no:3, name:'배낚시', cost:4000, affinity:'reel', theme:'boat', bukangi:true,
+    { id:'dokdo', no:4, name:'독도', cost:3000, affinity:'float', theme:'dokdo', travel:'ferry', bukangi:true,
+      desc:'여객선을 타고 가는 동해 끝 섬. 갯바위 찌낚시로 볼락·노래미, 깊은 곳엔 혹돔.',
+      fish:[['bollak',30],['noraemi',24],['ureok',15],['gamseong',12],['bengedom',8],['bangeo',5],['hokdom',2]] },
+    { id:'boat', no:5, name:'배낚시', cost:8000, affinity:'reel', theme:'boat', travel:'boat', bukangi:true,
       desc:'먼바다로 나가는 선상 낚시. 힘센 대물은 릴낚시가 유리해요.',
       fish:[['galchi',30],['gwangeo',24],['chamdom',18],['bangeo',13],['busiri',8],['chamchi',2]] },
-    { id:'busan', no:'SP', name:'부산', cost:null, ticket:true, affinity:'reel', theme:'busan', bukangi:false,
-      desc:'부산 이용권으로만 입장. 광안대교 아래 부산 전용 대물이 나와요.',
+    { id:'amazon', no:6, name:'아마존', cost:25000, affinity:'reel', theme:'amazon', travel:'plane', bukangi:true,
+      desc:'비행기를 타고 남미 정글로. 피라냐 떼 사이로 전설의 피라루쿠가 산대요.',
+      fish:[['piranha',30],['pacu',22],['peacock',18],['redtail',12],['arowana',8],['arapaima',2]] },
+    { id:'alaska', no:7, name:'알래스카', cost:50000, affinity:'reel', theme:'alaska', travel:'plane', bukangi:true,
+      desc:'빙하가 녹아내리는 북쪽 끝 바다. 연어 떼와 문짝만 한 핼리벗.',
+      fish:[['rtrout',26],['sockeye',22],['coho',18],['arcchar',12],['lingcod',10],['kingsal',7],['halibut',2]] },
+    { id:'busan', no:'SP', name:'부산', cost:null, ticket:true, affinity:'reel', theme:'busan', travel:'train', bukangi:false,
+      desc:'부산 이용권으로만 입장. KTX 타고 광안대교 아래로, 부산 전용 대물이 나와요.',
       fish:[['chamdom',20],['bangeo',15],['busiri',12],['eungalchi',20],['hwanggeum',15],['dageumbari',6],['dotdom',1.5]] },
   ],
 };
@@ -462,6 +504,14 @@ const SFX = (()=>{
     fail(){ tone(440,0.16,{type:'triangle',slide:-100,vol:0.1}); tone(330,0.24,{type:'triangle',slide:-80,vol:0.1,delay:0.14}); },
     splash(){ noise(0.45,{freq:1200,sweep:400,vol:0.22}); },
     catch(g){ const n = 3+g; for(let i=0;i<n;i++) tone(NOTES[Math.min(i+Math.max(0,g-2),7)],0.2,{type:'triangle',vol:0.11,delay:i*0.075}); if(g>=3) for(let i=0;i<6;i++) tone(2093+i*190,0.08,{type:'sine',vol:0.04,delay:0.35+i*0.05}); },
+    travel(kind){
+      if(kind==='plane'){ noise(2.2,{freq:300,sweep:1400,vol:0.12}); tone(110,2,{type:'sawtooth',slide:60,vol:0.025}); }
+      else if(kind==='ferry'){ tone(140,0.9,{type:'triangle',vol:0.18}); tone(140,1.1,{type:'triangle',vol:0.18,delay:1.1}); noise(2.4,{freq:500,vol:0.05}); }
+      else if(kind==='boat'){ tone(70,2.2,{type:'sawtooth',slide:20,vol:0.035}); noise(2.4,{freq:700,vol:0.06}); }
+      else if(kind==='train'){ [659,784,988,1319].forEach((f,i)=>tone(f,0.28,{type:'sine',vol:0.08,delay:i*0.18})); noise(2.4,{freq:900,vol:0.03,delay:0.8}); }
+      else if(kind==='bike'){ tone(1900,0.12,{type:'sine',vol:0.08}); tone(1900,0.16,{type:'sine',vol:0.08,delay:0.16}); }
+      else { tone(85,1.6,{type:'sawtooth',slide:50,vol:0.03}); noise(1.8,{freq:400,vol:0.05}); }
+    },
     coin(){ tone(1319,0.07,{type:'square',vol:0.05}); tone(1760,0.14,{type:'square',vol:0.05,delay:0.06}); },
     upgrade(){ [523,784,1047].forEach((f,i)=>tone(f,0.16,{type:'triangle',vol:0.1,delay:i*0.07})); },
     reward(){ [784,988,1175,1568].forEach((f,i)=>tone(f,0.22,{type:'sine',vol:0.1,delay:0.5+i*0.09})); },
@@ -566,6 +616,7 @@ function action(){
   switch(G.phase){
     case 'idle': tryCast(); break;
     case 'aiming': releaseCast(); break;
+    case 'travel': if(G.travel.t > 0.3) finishTravel(); break;
     case 'landing': if(G.land.t>0.35) finishLanding(); break;
     case 'waiting':
       if(S.method==='float'){
@@ -767,17 +818,38 @@ function openNetPanel(){
 }
 
 /* 부산 */
+/* 맵 이동 연출: 상태는 바로 바꾸고, 이동 장면은 화면 연출만 담당 */
+const TRAVEL_RANK = { bike:1, car:2, train:3, boat:4, ferry:5, plane:6 };
+const TRAVEL_NAME = { bike:'자전거를 타고', car:'자동차를 타고', train:'KTX를 타고', boat:'낚싯배를 타고', ferry:'여객선을 타고', plane:'비행기를 타고' };
+function travelKind(from, to){
+  const a = (stageById(from)||{}).travel || 'car', b = (stageById(to)||{}).travel || 'car';
+  return TRAVEL_RANK[a] > TRAVEL_RANK[b] ? a : b;
+}
+function josaRo(word){ const c = word.charCodeAt(word.length-1) - 0xAC00; if(c<0 || c>11171) return '로'; const jong = c % 28; return (jong===0 || jong===8) ? '로' : '으로'; }
+function startTravel(from, to){
+  if(from===to){ setPhase('idle'); return; }
+  const kind = travelKind(from, to);
+  G.travel = { t:0, dur: REDUCED ? 0.9 : 3.2, kind, from, to };
+  G.R = null; G.land = null; input.reel = input.lift = false;
+  setPhase('travel'); SFX.travel(kind);
+}
+function finishTravel(){
+  if(G.phase!=='travel') return;
+  const to = stageById(G.travel.to);
+  G.arrive = 1; setPhase('idle');
+  toast(to.id==='busan' ? `부산 도착! 제한 시간 ${Math.round(S.busanLeft)}초` : `${to.name}에 도착했어요`);
+}
 function enterBusan(){
   if(S.tickets<=0) return;
   S.tickets--; if(S.stage!=='busan') S.prevStage = S.stage;
+  const from = S.stage;
   S.stage = 'busan'; S.busanLeft = CONFIG.busan.ticketSeconds + perk('busan');
-  save(); closeModal(); refreshHud(); toast('부산 도착! 제한 시간 '+Math.round(S.busanLeft)+'초'); SFX.upgrade();
+  save(); closeModal(); refreshHud(); startTravel(from, 'busan');
 }
 function leaveBusan(){
   S.stage = S.prevStage && S.prevStage!=='busan' ? S.prevStage : 'river';
   S.busanLeft = 0; save(); refreshHud();
-  if(G.phase!=='idle') setPhase('idle');
-  toast('부산 이용 시간이 끝났어요');
+  toast('부산 이용 시간이 끝났어요'); startTravel('busan', S.stage);
 }
 
 /* ===================== 5. TUTORIAL ===================== */
@@ -805,7 +877,7 @@ function emit(ev){
 function finishTutorial(){
   S.tutorial.done = true; S.money += CONFIG.tutorial.reward; save(); refreshHud(); renderTut();
   openPanel('튜토리얼 완료', `<div class="catch"><h3>본 게임 시작!</h3>
-    <p>보상으로 <span class="price">${won(CONFIG.tutorial.reward)}원</span>을 받았어요.<br>이 돈으로 <b>강</b> 낚시터를 바로 해금할 수 있어요. 낚시터 화면에서 해금하세요.<br>아주 드물게 낚이는 <b style="color:${CONFIG.specialGrade.color}">부캉이</b>를 잡으면 부산에 갈 수 있어요.</p>
+    <p>보상으로 <span class="price">${won(CONFIG.tutorial.reward)}원</span>을 받았어요.<br>이 돈으로 <b>하천</b> 낚시터를 바로 해금할 수 있어요. 낚시터 화면에서 해금하세요.<br>아주 드물게 낚이는 <b style="color:${CONFIG.specialGrade.color}">부캉이</b>를 잡으면 부산에 갈 수 있어요.</p>
     <div class="foot" style="justify-content:center"><button class="btn hot" data-act="openStage">낚시터 고르기</button><button class="btn" data-act="close">계속 낚시</button></div></div>`);
 }
 function skipTutorial(){ S.tutorial.step = TUTORIAL.length; finishTutorial(); }
@@ -845,6 +917,10 @@ const THEMES = {
   pier:  { sky:['#86c3e6','#e9f4f2'], water:['#2f86ad','#134a6e'], deck:'#d6d2c8' },
   boat:  { sky:['#9fcde8','#e3f0f5'], water:['#2c6c96','#113d61'], deck:'#f2f2ee' },
   busan: { sky:['#2b2f5c','#e48a6a'], water:['#2d4170','#121f42'], deck:'#7b7a86' },
+  stream:{ sky:['#9ed4ee','#eef6e4'], water:['#79bfb6','#3f8c84'], deck:'#7aa65a' },
+  dokdo: { sky:['#5fb0e6','#e2f1f7'], water:['#1f6fa8','#0b3a62'], deck:'#4a4440' },
+  amazon:{ sky:['#c9d9a8','#f1ead0'], water:['#8a6a3a','#4e3a20'], deck:'#7a5a36' },
+  alaska:{ sky:['#7fb4dc','#e6f0f6'], water:['#3f6e8c','#16364c'], deck:'#5a5a5e' },
 };
 function geo(){
   const wl = waterY(), th = curStage().theme;
@@ -910,6 +986,7 @@ function render(){
   const th = curStage().theme, T = THEMES[th];
   const g = geo();
   ctx.clearRect(0,0,CW,CH);
+  if(G.phase==='travel'){ drawTravel(); return; }
   // 배경
   if(ready(SPRITES.bg[th])) ctx.drawImage(SPRITES.bg[th],0,0,CW,CH);
   else drawBackground(th, T, g);
@@ -944,48 +1021,484 @@ function render(){
   if(G.phase==='lost') drawCenterText(G.lostMsg, G.lostKind==='snap'?'#ff8a7a':'#fff');
   drawHint();
   if(S.stage==='busan') drawBusanTimer();
+  if(G.arrive>0){ ctx.fillStyle = `rgba(244,236,217,${G.arrive*0.9})`; ctx.fillRect(0,0,CW,CH); }
+}
+/* ---------- 이동 장면 ---------- */
+const LAND_COLOR = { indoor:'#9fb7a5', stream:'#9cc47e', river:'#8bb57a', pier:'#9fb7a5', dokdo:'#7fa080', boat:'#8fb0a0', amazon:'#4f7a34', alaska:'#e4edf4', busan:'#2a2f55' };
+function ease(p){ return p<0.5 ? 2*p*p : 1 - Math.pow(-2*p+2, 2)/2; }
+function drawTravel(){
+  const T = G.travel, p = clamp(T.t/T.dur, 0, 1), to = stageById(T.to), from = stageById(T.from);
+  const TD = THEMES[to.theme], sc = clamp(Math.min(CW,CH)/450, 0.7, 1.6), t = G.time;
+  ctx.fillStyle = grad(0, CH, TD.sky[0], TD.sky[1]); ctx.fillRect(0,0,CW,CH);
+  const land = LAND_COLOR[to.theme] || '#8bb57a', vx = lerp(CW*0.22, CW*0.62, ease(p));
+  if(T.kind==='plane'){
+    // 구름 사이를 나는 비행기, 아래로 목적지 땅
+    const gy = CH*0.84;
+    ctx.fillStyle = land; ctx.fillRect(0, gy, CW, CH-gy);
+    if(to.theme==='alaska'){ ctx.fillStyle='#b8cad8'; for(let i=0;i<12;i++){ const x = ((i*120 - t*60) % (CW+120) + CW+120) % (CW+120) - 60; ctx.beginPath(); ctx.moveTo(x-40, gy+30); ctx.lineTo(x, gy+4); ctx.lineTo(x+40, gy+30); ctx.fill(); } }
+    else if(to.theme==='amazon'){ ctx.strokeStyle='#8a6a3a'; ctx.lineWidth=6; ctx.beginPath(); for(let x=0;x<=CW;x+=10){ const y = gy + (CH-gy)*0.5 + Math.sin((x + t*60)*0.02)*10; x ? ctx.lineTo(x,y) : ctx.moveTo(x,y); } ctx.stroke();
+      ctx.fillStyle='#3f6e2c'; for(let i=0;i<24;i++){ const x = ((i*61 - t*60) % (CW+60) + CW+60) % (CW+60) - 30; ctx.beginPath(); ctx.arc(x, gy + 6 + (i%3)*8, 7, 0, Math.PI*2); ctx.fill(); } }
+    else { ctx.fillStyle='rgba(0,0,0,.08)'; for(let i=0;i<10;i++){ const x = ((i*150 - t*60) % (CW+150) + CW+150) % (CW+150) - 75; ctx.fillRect(x, gy + 8 + (i%3)*10, 50, 5); } }
+    ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fillRect(0, gy-6, CW, 8);   // 지평선 안개
+    for(let layer=0; layer<2; layer++){
+      const sp = layer ? 260 : 120, a = layer ? 0.9 : 0.6, k = layer ? 1.4 : 0.9;
+      for(let i=0;i<5;i++){ const span = CW+300, x = ((i*span/5 - t*sp) % span + span) % span - 150, y = CH*(layer ? 0.62 : 0.28) + (i%2)*CH*0.08;
+        ctx.fillStyle = `rgba(255,255,255,${a})`; [[0,0,40,14],[-30,5,26,11],[28,4,30,12],[6,-10,24,12]].forEach(([dx,dy,rx,ry])=>{ ctx.beginPath(); ctx.ellipse(x+dx*k, y+dy*k, rx*k, ry*k, 0, 0, Math.PI*2); ctx.fill(); }); }
+      if(layer===0) drawPlane(vx, CH*0.45 + Math.sin(t*1.8)*6, sc, Math.sin(t*1.2)*0.04 - 0.03);
+    }
+  } else if(T.kind==='boat' || T.kind==='ferry'){
+    const hz = CH*0.52;
+    ctx.fillStyle = grad(hz, CH, '#2f7fb0', '#123e66'); ctx.fillRect(0, hz, CW, CH-hz);
+    ctx.fillStyle = '#9fb6c0'; for(let i=0;i<4;i++){ const x = ((i*CW*0.4 - t*10) % (CW*1.6) + CW*1.6) % (CW*1.6) - CW*0.3, w = CW*0.14; ctx.beginPath(); ctx.moveTo(x-w, hz); ctx.quadraticCurveTo(x, hz-CH*0.05, x+w, hz); ctx.fill(); }
+    if(to.id==='dokdo' && p>0.35){   // 독도가 보이기 시작
+      const k = ease((p-0.35)/0.65), ix = lerp(CW+80, CW*0.8, k), h = CH*0.14;
+      ctx.fillStyle='#6a5e52'; ctx.beginPath(); ctx.moveTo(ix-CW*0.12, hz); ctx.lineTo(ix-CW*0.06, hz-h); ctx.lineTo(ix-CW*0.02, hz-h*0.7); ctx.lineTo(ix+CW*0.03, hz-h*0.6); ctx.lineTo(ix+CW*0.08, hz-h*0.4); ctx.lineTo(ix+CW*0.11, hz); ctx.fill();
+      ctx.fillStyle='#6f8f4a'; ctx.fillRect(ix-CW*0.075, hz-h*0.95, CW*0.03, 4);
+    }
+    ctx.strokeStyle='rgba(255,255,255,.35)'; ctx.lineWidth=2;
+    for(let i=0;i<14;i++){ const y = hz + 8 + i*(CH-hz)/14, x = ((i*97 - t*(80 + i*12)) % (CW+80) + CW+80) % (CW+80) - 40; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 26 + i*2, y); ctx.stroke(); }
+    const by = hz + (CH-hz)*0.35 + Math.sin(t*2)*4;
+    if(T.kind==='ferry') drawFerry(vx, by, sc, Math.sin(t*1.6)*0.02, to.name+'행'); else drawFishingBoat(vx, by, sc, Math.sin(t*2.2)*0.05);
+    // 뱃머리 물보라
+    ctx.fillStyle='rgba(255,255,255,.75)'; for(let i=0;i<6;i++){ const a = (t*3 + i) % 1; ctx.beginPath(); ctx.arc(vx + (T.kind==='ferry'?110:60)*sc - a*30*sc, by + 4*sc - Math.sin(a*Math.PI)*12*sc, 2.5*sc*(1-a), 0, Math.PI*2); ctx.fill(); }
+  } else {
+    // 땅 위 이동: 자전거·자동차·KTX
+    const hz = CH*0.58;
+    ctx.fillStyle = land; ctx.beginPath(); ctx.moveTo(0, hz);
+    for(let x=0;x<=CW;x+=12){ ctx.lineTo(x, hz - CH*0.07*(0.5+0.5*Math.sin((x + t*30)*0.008)) ); } ctx.lineTo(CW, hz); ctx.fill();
+    ctx.fillStyle = land; ctx.fillRect(0, hz, CW, CH-hz);
+    ctx.fillStyle='rgba(0,0,0,.12)'; ctx.fillRect(0, hz, CW, CH*0.03);
+    const roadY = CH*0.74, sp = T.kind==='train' ? 520 : T.kind==='bike' ? 160 : 340;
+    // 지나가는 나무·전봇대
+    for(let i=0;i<8;i++){ const span = CW+200, x = ((i*span/8 - t*sp*0.6) % span + span) % span - 100;
+      if(T.kind==='train'){ ctx.fillStyle='#5a5e62'; ctx.fillRect(x, roadY-CH*0.2, 4, CH*0.2); ctx.fillRect(x-14, roadY-CH*0.2, 32, 3); }
+      else if(to.theme==='busan'){ ctx.fillStyle='#1f2547'; ctx.fillRect(x-14, roadY-CH*0.18, 28, CH*0.16); }
+      else treeBlob(x, roadY - CH*0.13, CH*0.04, '#5f8f4f', '#4a7a3e'); }
+    if(T.kind==='train'){
+      ctx.fillStyle='#6a6058'; ctx.fillRect(0, roadY+2, CW, 8*sc);
+      ctx.fillStyle='#4a3a2a'; for(let i=0;i<CW/18+2;i++){ const x = ((i*18 - t*sp) % (CW+18) + CW+18) % (CW+18) - 9; ctx.fillRect(x, roadY+3, 8, 7*sc); }
+      ctx.fillStyle='#9aa0a4'; ctx.fillRect(0, roadY+2, CW, 2); ctx.fillRect(0, roadY+7*sc, CW, 2);
+      drawTrain(vx + CW*0.12, roadY, sc);
+    } else {
+      ctx.fillStyle = T.kind==='bike' ? '#b9a27a' : '#55595e'; ctx.fillRect(0, roadY - 10*sc, CW, 26*sc);
+      if(T.kind==='car'){ ctx.fillStyle='#f4ecd9'; for(let i=0;i<CW/60+2;i++){ const x = ((i*60 - t*sp) % (CW+60) + CW+60) % (CW+60) - 30; ctx.fillRect(x, roadY+2*sc, 26, 3*sc); } }
+      if(T.kind==='bike') drawBike(vx, roadY+8*sc, sc*1.35, t); else drawCar(vx, roadY+10*sc, sc, t);
+      // 속도선
+      ctx.strokeStyle='rgba(255,255,255,.5)'; ctx.lineWidth=1.5; for(let i=0;i<4;i++){ const y = roadY - (10+i*9)*sc, x = vx - (60 + ((t*400 + i*37) % 60))*sc; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x-24*sc, y); ctx.stroke(); }
+    }
+  }
+  // 상단 안내와 하단 경로 막대
+  const title = `${to.name}${josaRo(to.name)} 가는 중`, sub = `${TRAVEL_NAME[T.kind]} 이동 중 · 누르면 건너뛰기`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.font = `600 12px ${FB}`; const subW = ctx.measureText(sub).width;
+  ctx.font = `${Math.round(26*Math.min(1.2,sc))}px ${FD}`; const tw = Math.min(CW-32, Math.max(ctx.measureText(title).width, subW) + 40);
+  panelBox(CW/2 - tw/2, 16, tw, 74);
+  ctx.fillStyle='#f4ecd9'; ctx.fillText(title, CW/2, 42, CW-48);
+  ctx.font = `600 12px ${FB}`; ctx.fillStyle='#9fbcc0'; ctx.fillText(sub, CW/2, 70, CW-48);
+  const bw = Math.min(CW-64, 420), bx = (CW-bw)/2, by = CH - 26;
+  panelBox(bx-16, by-34, bw+32, 50);
+  ctx.strokeStyle='rgba(244,236,217,.35)'; ctx.setLineDash([4,5]); ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(bx+40, by); ctx.lineTo(bx+bw-40, by); ctx.stroke(); ctx.setLineDash([]);
+  ctx.strokeStyle='#ffd04a'; ctx.beginPath(); ctx.moveTo(bx+40, by); ctx.lineTo(lerp(bx+40, bx+bw-40, ease(p)), by); ctx.stroke();
+  ctx.fillStyle='#ff5a3c'; ctx.beginPath(); ctx.arc(lerp(bx+40, bx+bw-40, ease(p)), by, 5, 0, Math.PI*2); ctx.fill();
+  ctx.font = `600 12px ${FB}`; ctx.fillStyle='#f4ecd9';
+  ctx.textAlign='left'; ctx.fillText(from ? from.name : '', bx+30, by-18, bw*0.45); ctx.textAlign='right'; ctx.fillText(to.name, bx+bw-30, by-18, bw*0.45); ctx.textAlign='left';
+  ctx.fillStyle='rgba(244,236,217,.6)'; ctx.beginPath(); ctx.arc(bx+40, by, 3, 0, Math.PI*2); ctx.arc(bx+bw-40, by, 3, 0, Math.PI*2); ctx.fill();
+  // 시작·끝 페이드
+  const fa = Math.max(0, 1 - T.t/0.3); if(fa>0){ ctx.fillStyle=`rgba(244,236,217,${fa*0.9})`; ctx.fillRect(0,0,CW,CH); }
+}
+function drawCar(x, y, s, t){
+  ctx.save(); ctx.translate(x, y + Math.sin(t*14)*0.8); ctx.scale(s, s);
+  ctx.fillStyle='rgba(0,0,0,.2)'; ctx.beginPath(); ctx.ellipse(0, 4, 50, 5, 0, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle='#d8432e'; roundRect(-48, -22, 96, 20, 6); ctx.fill();                       // 차체
+  ctx.beginPath(); ctx.moveTo(-28,-22); ctx.lineTo(-18,-38); ctx.lineTo(18,-38); ctx.lineTo(32,-22); ctx.fill();   // 지붕
+  ctx.fillStyle='#bfe0f0'; ctx.beginPath(); ctx.moveTo(-24,-23); ctx.lineTo(-16,-35); ctx.lineTo(-2,-35); ctx.lineTo(-2,-23); ctx.fill(); ctx.beginPath(); ctx.moveTo(2,-23); ctx.lineTo(2,-35); ctx.lineTo(16,-35); ctx.lineTo(27,-23); ctx.fill();
+  ctx.fillStyle='#f0c8a0'; ctx.beginPath(); ctx.arc(10,-28,4.5,0,Math.PI*2); ctx.fill(); ctx.fillStyle='#d8b84a'; ctx.fillRect(4,-34,12,3);   // 운전자
+  ctx.fillStyle='#ffe9a0'; ctx.fillRect(44,-17,4,5); ctx.fillStyle='#8a1a10'; ctx.fillRect(-48,-17,3,5);
+  ctx.strokeStyle='#2c4a5a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(-34,-40); ctx.lineTo(40,-46); ctx.stroke();   // 지붕 위 낚싯대
+  ctx.fillStyle='#3a4a52'; ctx.fillRect(-20,-40,4,3); ctx.fillRect(16,-41,4,3);
+  [-28, 28].forEach(wx=>{ ctx.fillStyle='#1d2328'; ctx.beginPath(); ctx.arc(wx, -2, 9, 0, Math.PI*2); ctx.fill(); ctx.fillStyle='#9aa0a4'; ctx.beginPath(); ctx.arc(wx, -2, 4, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle='#1d2328'; ctx.lineWidth=1.5; const a = -t*18; ctx.beginPath(); ctx.moveTo(wx + Math.cos(a)*4, -2 + Math.sin(a)*4); ctx.lineTo(wx - Math.cos(a)*4, -2 - Math.sin(a)*4); ctx.stroke(); });
+  ctx.restore();
+}
+function drawBike(x, y, s, t){
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+  const wr = 13, a = t*10;
+  [-20, 20].forEach(wx=>{ ctx.strokeStyle='#1d2328'; ctx.lineWidth=2.5; ctx.beginPath(); ctx.arc(wx, -wr, wr, 0, Math.PI*2); ctx.stroke();
+    ctx.lineWidth=1; for(let k=0;k<4;k++){ const b = a + k*Math.PI/4; ctx.beginPath(); ctx.moveTo(wx + Math.cos(b)*wr, -wr + Math.sin(b)*wr); ctx.lineTo(wx - Math.cos(b)*wr, -wr - Math.sin(b)*wr); ctx.stroke(); } });
+  ctx.strokeStyle='#2f7fb5'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(-20,-wr); ctx.lineTo(-4,-wr); ctx.lineTo(12,-30); ctx.lineTo(-8,-30); ctx.lineTo(-4,-wr); ctx.moveTo(12,-30); ctx.lineTo(20,-wr); ctx.moveTo(-8,-30); ctx.lineTo(-10,-34); ctx.moveTo(12,-30); ctx.lineTo(14,-36); ctx.stroke();
+  const pa = a*0.5, px = -4 + Math.cos(pa)*6, py = -wr + Math.sin(pa)*6;   // 페달 밟는 다리
+  ctx.strokeStyle='#2b3a40'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(-8,-38); ctx.lineTo(-2,-26); ctx.lineTo(px, py); ctx.stroke();
+  ctx.fillStyle='#8a9a52'; roundRect(-14,-58,14,22,4); ctx.fill();               // 조끼
+  ctx.strokeStyle='#e8e2d2'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(-6,-52); ctx.lineTo(12,-38); ctx.stroke();
+  ctx.fillStyle='#f0c8a0'; ctx.beginPath(); ctx.arc(-4,-64,6,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#d8b84a'; ctx.beginPath(); ctx.ellipse(-4,-69,10,3,0,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='#2c4a5a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(-20,-40); ctx.lineTo(4,-84); ctx.stroke();   // 등에 멘 낚싯대
+  ctx.restore();
+}
+function drawTrain(x, y, s){
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+  const len = 420;
+  ctx.fillStyle='#f2f4f6'; ctx.beginPath(); ctx.moveTo(-len, -6); ctx.lineTo(-len, -40); ctx.lineTo(30, -40); ctx.quadraticCurveTo(70, -38, 86, -6); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#2f5aa8'; ctx.fillRect(-len, -18, len+60, 6); ctx.beginPath(); ctx.moveTo(30,-18); ctx.lineTo(80,-18); ctx.lineTo(84,-12); ctx.lineTo(30,-12); ctx.fill();
+  ctx.fillStyle='#3a4a5a'; ctx.beginPath(); ctx.moveTo(34,-36); ctx.quadraticCurveTo(60,-34,70,-24); ctx.lineTo(34,-24); ctx.fill();   // 앞 유리
+  for(let wx=-len+10; wx<20; wx+=22){ ctx.fillStyle='#3a4a5a'; roundRect(wx, -34, 14, 9, 2); ctx.fill(); }
+  ctx.fillStyle='rgba(0,0,0,.25)'; for(let cx=-len+100; cx<20; cx+=110) ctx.fillRect(cx, -40, 2, 34);
+  ctx.fillStyle='#1d2328'; for(let wx=-len+20; wx<60; wx+=50){ ctx.beginPath(); ctx.arc(wx, -4, 4, 0, Math.PI*2); ctx.fill(); }
+  ctx.restore();
+}
+function drawFishingBoat(x, y, s, rot){
+  ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(s, s);
+  ctx.fillStyle='#f2f2ee'; ctx.beginPath(); ctx.moveTo(-60,-14); ctx.lineTo(62,-14); ctx.lineTo(48,6); ctx.lineTo(-54,6); ctx.fill();
+  ctx.fillStyle='#1f5a8a'; ctx.fillRect(-56,-2,104,5); ctx.fillStyle='#d8432e'; ctx.fillRect(-55,3,100,3);
+  ctx.fillStyle='#e8ecee'; ctx.fillRect(-30,-36,34,22); ctx.fillStyle='#3a4a52'; ctx.fillRect(-26,-32,26,7);
+  ctx.strokeStyle='#3a4a52'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(-14,-36); ctx.lineTo(-14,-60); ctx.stroke();
+  ctx.fillStyle='#ff5a3c'; ctx.beginPath(); ctx.moveTo(-14,-60); ctx.lineTo(0,-55); ctx.lineTo(-14,-50); ctx.fill();
+  ctx.strokeStyle='#2c4a5a'; ctx.beginPath(); ctx.moveTo(30,-14); ctx.lineTo(56,-46); ctx.stroke();
+  ctx.fillStyle='#f0c8a0'; ctx.beginPath(); ctx.arc(14,-22,4.5,0,Math.PI*2); ctx.fill(); ctx.fillStyle='#d8b84a'; ctx.fillRect(8,-28,12,3); ctx.fillStyle='#8a9a52'; ctx.fillRect(10,-18,9,4);
+  ctx.restore();
+}
+function drawFerry(x, y, s, rot, label){
+  ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(s, s);
+  ctx.fillStyle='#1f3f6a'; ctx.beginPath(); ctx.moveTo(-120,-10); ctx.lineTo(118,-10); ctx.lineTo(98,12); ctx.lineTo(-112,12); ctx.fill();
+  ctx.fillStyle='#f4f4f0'; ctx.fillRect(-116,-30,226,20); ctx.fillRect(-90,-48,170,18); ctx.fillRect(-50,-62,90,14);
+  ctx.fillStyle='#3a5a8a'; for(let wx=-108; wx<100; wx+=14) ctx.fillRect(wx, -25, 8, 6); for(let wx=-82; wx<74; wx+=14) ctx.fillRect(wx, -43, 8, 6);
+  ctx.fillStyle='#d8432e'; ctx.fillRect(-116,-12,226,3);
+  ctx.fillStyle='#e8e6e0'; ctx.fillRect(-20,-84,20,22); ctx.fillStyle='#d8432e'; ctx.fillRect(-20,-80,20,5);   // 굴뚝
+  for(let i=0;i<4;i++){ const k = (G.time*0.6 + i*0.25) % 1; ctx.fillStyle=`rgba(230,230,230,${0.6*(1-k)})`; ctx.beginPath(); ctx.arc(-10 - k*50, -90 - k*30, 6 + k*10, 0, Math.PI*2); ctx.fill(); }
+  ctx.fillStyle='#f4f4f0'; ctx.font=`bold 10px ${FB}`; ctx.textAlign='center'; ctx.fillStyle='#1f3f6a'; ctx.fillText(label||'', 40, -54); ctx.textAlign='left';
+  ctx.restore();
+}
+function drawPlane(x, y, s, rot){
+  ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(s, s);
+  // 비행운
+  ctx.strokeStyle='rgba(255,255,255,.7)'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(-70,-4); ctx.lineTo(-CW, -4); ctx.moveTo(-40, 14); ctx.lineTo(-CW, 16); ctx.stroke();
+  ctx.fillStyle='#c9ced4'; ctx.beginPath(); ctx.moveTo(-10,4); ctx.lineTo(30,4); ctx.lineTo(-20,40); ctx.lineTo(-36,40); ctx.fill();   // 아래 날개
+  ctx.fillStyle='#f6f7f8'; ctx.beginPath(); ctx.moveTo(-90,-8); ctx.lineTo(70,-10); ctx.quadraticCurveTo(100,-6,98,2); ctx.quadraticCurveTo(96,10,70,10); ctx.lineTo(-84,8); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#2f5aa8'; ctx.fillRect(-84,0,170,4);
+  ctx.fillStyle='#2f5aa8'; ctx.beginPath(); ctx.moveTo(-88,-8); ctx.lineTo(-104,-38); ctx.lineTo(-86,-38); ctx.lineTo(-62,-8); ctx.fill();   // 꼬리
+  ctx.fillStyle='#3a4a5a'; for(let wx=-60; wx<64; wx+=10){ ctx.beginPath(); ctx.arc(wx, -4, 2, 0, Math.PI*2); ctx.fill(); }
+  ctx.fillStyle='#2a3a48'; ctx.beginPath(); ctx.moveTo(78,-8); ctx.quadraticCurveTo(92,-6,94,-1); ctx.lineTo(80,-1); ctx.fill();
+  ctx.fillStyle='#dfe3e8'; ctx.beginPath(); ctx.moveTo(-6,-6); ctx.lineTo(26,-6); ctx.lineTo(-14,-26); ctx.lineTo(-26,-26); ctx.fill();   // 위 날개
+  ctx.fillStyle='#9aa0a8'; roundRect(-4,10,22,9,4); ctx.fill();
+  ctx.restore();
 }
 function grad(y0,y1,c0,c1){ const gr = ctx.createLinearGradient(0,y0,0,y1); gr.addColorStop(0,c0); gr.addColorStop(1,c1); return gr; }
 function drawBackground(th, T, g){
   const wl = g.wl;
   ctx.fillStyle = grad(0,wl,T.sky[0],T.sky[1]); ctx.fillRect(0,0,CW,wl);
-  if(th==='indoor'){
-    ctx.strokeStyle='rgba(15,43,51,.08)'; ctx.lineWidth=1;
-    for(let x=0;x<CW;x+=28){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,wl); ctx.stroke(); }
-    for(let y=0;y<wl;y+=28){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(CW,y); ctx.stroke(); }
-    for(let i=0;i<4;i++){ const x=CW*(0.2+i*0.22); ctx.fillStyle='#fff7d6'; ctx.beginPath(); ctx.ellipse(x,14,26,7,0,0,Math.PI*2); ctx.fill(); ctx.fillStyle='rgba(255,247,214,.18)'; ctx.beginPath(); ctx.moveTo(x-24,16); ctx.lineTo(x+24,16); ctx.lineTo(x+70,wl); ctx.lineTo(x-70,wl); ctx.fill(); }
-    ctx.font=`18px ${FD}`; ctx.textBaseline='middle';
-    const sign = '실내 낚시터 · 1시간 만원', sw = Math.min(ctx.measureText(sign).width + 20, CW*0.4);
-    ctx.fillStyle='#2f6b7c'; ctx.fillRect(CW*0.58,wl*0.22,sw,34);
-    ctx.fillStyle='#f4ecd9'; ctx.fillText(sign, CW*0.58+10, wl*0.22+17, sw-20);
-    ctx.fillStyle='#7fb7c6'; ctx.fillRect(0,wl-8,CW,8);
-  } else if(th==='river'){
-    hills(wl, '#8bb57a', 0.35, 0.6); hills(wl, '#6c9a60', 0.22, 1.3);
-  } else if(th==='pier'){
-    drawPierSky(wl);
-  } else if(th==='boat'){
-    ctx.fillStyle = '#8fa9b5';
-    for(let i=0;i<3;i++){ const x=CW*(0.45+i*0.2), w=CW*0.12; ctx.beginPath(); ctx.moveTo(x-w,wl); ctx.quadraticCurveTo(x,wl-CH*(0.06+i*0.02),x+w,wl); ctx.fill(); }
-  } else if(th==='busan'){
-    ctx.fillStyle='rgba(255,255,255,.7)'; for(let i=0;i<20;i++){ ctx.fillRect((i*137)%CW,(i*53)%(wl*0.4),1.5,1.5); }
-    ctx.fillStyle='#1f2547';
-    for(let i=0;i<22;i++){ const bw=CW/22, bh=CH*(0.06+((i*7)%5)*0.025); ctx.fillRect(i*bw, wl-bh, bw-2, bh); }
-    ctx.fillStyle='rgba(255,214,120,.8)';
-    for(let i=0;i<22;i++){ const bw=CW/22, bh=CH*(0.06+((i*7)%5)*0.025); for(let k=6;k<bh-4;k+=9) if((i+k)%3) ctx.fillRect(i*bw+bw*0.3, wl-bh+k, 2, 3); }
-    // 광안대교
-    const t1=CW*0.42, t2=CW*0.78, top=wl-CH*0.2, deck=wl-CH*0.06;
-    ctx.strokeStyle='#c9cbe8'; ctx.lineWidth=3;
-    [t1,t2].forEach(x=>{ ctx.beginPath(); ctx.moveTo(x,wl); ctx.lineTo(x,top); ctx.stroke(); });
-    ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(CW*0.22,deck); ctx.quadraticCurveTo((CW*0.22+t1)/2,deck-10,t1,top); ctx.quadraticCurveTo((t1+t2)/2,deck+20,t2,top); ctx.quadraticCurveTo((t2+CW)/2,deck-10,CW,deck); ctx.stroke();
-    ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(CW*0.22,deck); ctx.lineTo(CW,deck); ctx.stroke();
-    for(let x=CW*0.24;x<CW;x+=14){ const hue = (x/CW*360 + G.time*60)%360; ctx.fillStyle=`hsl(${hue},90%,70%)`; ctx.fillRect(x,deck-3,3,3); }
-  }
+  (BG[th] || (()=>{}))(wl, g);
   // 물
   ctx.fillStyle = grad(wl,CH,T.water[0],T.water[1]); ctx.fillRect(0,wl,CW,CH-wl);
-  ctx.strokeStyle='rgba(255,255,255,.18)'; ctx.lineWidth=2;
-  if(th==='pier') drawPierWater(wl);
+  if(WATERFX[th]) WATERFX[th](wl);
+  ctx.strokeStyle = th==='amazon' ? 'rgba(255,240,200,.14)' : 'rgba(255,255,255,.18)'; ctx.lineWidth=2;
   for(let i=0;i<9;i++){ const y = wl + 14 + i*(CH-wl)/9, off = (G.time*18*(1+i*0.1) + i*90) % (CW+120) - 60; ctx.beginPath(); ctx.moveTo(off,y); ctx.lineTo(off+30+i*3,y); ctx.stroke(); }
+  if(AFTERWATER[th]) AFTERWATER[th](wl);
 }
+/* ---- 공용 배경 조각 ---- */
+function drawSun(x, y, r, core='#fff8dc', glow='255,248,214'){
+  const sg = ctx.createRadialGradient(x,y,0,x,y,r*5); sg.addColorStop(0,`rgba(${glow},.8)`); sg.addColorStop(1,`rgba(${glow},0)`);
+  ctx.fillStyle = sg; ctx.fillRect(x-r*5, y-r*5, r*10, r*10);
+  ctx.fillStyle = core; ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
+}
+function drawClouds(wl, n, alpha=0.8, speed=5, rgb='255,255,255'){
+  for(let i=0;i<n;i++){
+    const span = CW+260, x = ((i*0.31*span + G.time*(speed+i*2)) % span) - 130, y = wl*(0.12 + (i%3)*0.13), k = 0.65 + (i%2)*0.45;
+    ctx.fillStyle = `rgba(${rgb},${alpha - i*0.06})`;
+    [[0,0,34,13],[-26,4,22,10],[24,3,26,11],[6,-9,20,11]].forEach(([dx,dy,rx,ry])=>{ ctx.beginPath(); ctx.ellipse(x+dx*k, y+dy*k, rx*k, ry*k, 0, 0, Math.PI*2); ctx.fill(); });
+  }
+}
+function drawBirds(wl, n, color='#3f4f57', yk=0.32){
+  ctx.strokeStyle = color; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
+  for(let i=0;i<n;i++){
+    const span = CW+120, x = ((G.time*(18+i*5) + i*170) % span) - 60, y = wl*(yk+(i%3)*0.09) + Math.sin(G.time*1.3+i)*8;
+    const f = Math.sin(G.time*7 + i*2)*5, w = 7 + (i%3);
+    ctx.beginPath(); ctx.moveTo(x-w, y-f); ctx.quadraticCurveTo(x-w*0.4, y-4-f*0.3, x, y); ctx.quadraticCurveTo(x+w*0.4, y-4-f*0.3, x+w, y-f); ctx.stroke();
+  }
+}
+function drawGlints(sx, wl, rgb='255,250,225', n=20){
+  for(let i=0;i<n;i++){
+    const y = wl + 6 + (i*i*0.9) % ((CH-wl)*0.7), spread = 8 + (y-wl)*0.35;
+    const x = sx + Math.sin(i*12.9898)*spread, a = Math.max(0, Math.sin(G.time*3 + i*1.7));
+    ctx.fillStyle = `rgba(${rgb},${a*0.75})`; ctx.fillRect(x, y, 6 + (y-wl)*0.04, 1.6);
+  }
+}
+function treeBlob(x, y, r, c1, c2){
+  ctx.fillStyle = c2; ctx.beginPath(); ctx.arc(x+r*0.15, y+r*0.1, r, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = c1; ctx.beginPath(); ctx.arc(x, y, r*0.92, 0, Math.PI*2); ctx.arc(x-r*0.6, y+r*0.25, r*0.62, 0, Math.PI*2); ctx.arc(x+r*0.6, y+r*0.3, r*0.6, 0, Math.PI*2); ctx.fill();
+}
+function pineTree(x, base, h, c, snow){
+  ctx.fillStyle = '#4a3a2a'; ctx.fillRect(x-h*0.04, base-h*0.15, h*0.08, h*0.15);
+  for(let k=0;k<3;k++){
+    const y0 = base - h*0.15 - k*h*0.26, w = h*(0.42-k*0.1);
+    ctx.fillStyle = c; ctx.beginPath(); ctx.moveTo(x-w/2, y0); ctx.lineTo(x+w/2, y0); ctx.lineTo(x, y0-h*0.42); ctx.fill();
+    if(snow){ ctx.fillStyle = '#f4f8fb'; ctx.beginPath(); ctx.moveTo(x-w*0.22, y0-h*0.24); ctx.lineTo(x+w*0.22, y0-h*0.24); ctx.lineTo(x, y0-h*0.42); ctx.fill(); }
+  }
+}
+const BG = {}, WATERFX = {}, AFTERWATER = {}, PLAT = {};
+
+/* ---- 실내 낚시터 ---- */
+BG.indoor = (wl)=>{
+  ctx.strokeStyle='rgba(15,43,51,.08)'; ctx.lineWidth=1;
+  for(let x=0;x<CW;x+=28){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,wl); ctx.stroke(); }
+  for(let y=0;y<wl;y+=28){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(CW,y); ctx.stroke(); }
+  ctx.fillStyle='rgba(47,107,124,.18)'; ctx.fillRect(0, wl*0.62, CW, 6);   // 벽 띠
+  for(let i=0;i<4;i++){ const x=CW*(0.2+i*0.22); ctx.fillStyle='#fff7d6'; ctx.beginPath(); ctx.ellipse(x,14,26,7,0,0,Math.PI*2); ctx.fill(); ctx.fillStyle='rgba(255,247,214,.16)'; ctx.beginPath(); ctx.moveTo(x-24,16); ctx.lineTo(x+24,16); ctx.lineTo(x+70,wl); ctx.lineTo(x-70,wl); ctx.fill(); }
+  // 천장 선풍기
+  [0.31, 0.75].forEach((k,i)=>{ const x = CW*k, y = 34; ctx.fillStyle='#2f4a52'; ctx.fillRect(x-1.5, 0, 3, y); ctx.save(); ctx.translate(x,y); ctx.scale(1,0.28); ctx.rotate(G.time*6 + i);
+    ctx.fillStyle='rgba(47,74,82,.85)'; for(let b=0;b<3;b++){ ctx.rotate(Math.PI*2/3); ctx.beginPath(); ctx.ellipse(18,0,18,5,0,0,Math.PI*2); ctx.fill(); } ctx.restore();
+    ctx.fillStyle='#2f4a52'; ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2); ctx.fill(); });
+  // 간판
+  ctx.font=`18px ${FD}`; ctx.textBaseline='middle';
+  const sign = '실내 낚시터 · 1시간 만원', sw = Math.min(ctx.measureText(sign).width + 20, CW*0.4);
+  ctx.fillStyle='#2f6b7c'; ctx.fillRect(CW*0.58,wl*0.22,sw,34);
+  ctx.fillStyle='#f4ecd9'; ctx.fillText(sign, CW*0.58+10, wl*0.22+17, sw-20);
+  // 벽시계
+  const cx = CW*0.44, cy = wl*0.3, cr = Math.max(10, CH*0.03);
+  ctx.fillStyle='#f4f2ec'; ctx.beginPath(); ctx.arc(cx,cy,cr,0,Math.PI*2); ctx.fill(); ctx.strokeStyle='#2f4a52'; ctx.lineWidth=2; ctx.stroke();
+  const t = G.time*0.2; ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+Math.cos(t)*cr*0.75, cy+Math.sin(t)*cr*0.75); ctx.moveTo(cx,cy); ctx.lineTo(cx+Math.cos(t/12-1)*cr*0.5, cy+Math.sin(t/12-1)*cr*0.5); ctx.stroke();
+  // 수조 가장자리 타일
+  ctx.fillStyle='#7fb7c6'; ctx.fillRect(0,wl-8,CW,8);
+  ctx.fillStyle='rgba(255,255,255,.35)'; for(let x=0;x<CW;x+=24) ctx.fillRect(x,wl-8,1,8);
+};
+AFTERWATER.indoor = (wl)=>{
+  // 레인 로프 부표
+  const y = wl + Math.max(10, CH*0.025);
+  for(let x=CW*0.3; x<CW; x+=11){ ctx.fillStyle = Math.floor(x/11)%2 ? '#ff6a4a' : '#f4f2ec'; ctx.beginPath(); ctx.ellipse(x, y + Math.sin(G.time*2 + x*0.05), 4.5, 3, 0, 0, Math.PI*2); ctx.fill(); }
+};
+
+/* ---- 하천 ---- */
+BG.stream = (wl)=>{
+  drawSun(CW*0.18, wl*0.24, Math.max(12, Math.min(CW,CH)*0.035));
+  drawClouds(wl, 3, 0.85, 4);
+  hills(wl, '#a6c98a', 0.3, 2.1);
+  // 먼 마을 지붕
+  for(let i=0;i<5;i++){ const x = CW*(0.55+i*0.08), y = wl - CH*0.06 - (i%2)*4, w = CW*0.045;
+    ctx.fillStyle='#efe6d4'; ctx.fillRect(x-w/2, y, w, CH*0.035); ctx.fillStyle = ['#c9573e','#3f6f9a','#5a8a5a'][i%3]; ctx.beginPath(); ctx.moveTo(x-w*0.65,y+2); ctx.lineTo(x,y-CH*0.025); ctx.lineTo(x+w*0.65,y+2); ctx.fill(); }
+  hills(wl, '#84b36a', 0.16, 0.4);
+  // 버드나무
+  [[0.36,0.9],[0.93,1.1]].forEach(([k,sz])=>{
+    const x = CW*k, base = wl, h = CH*0.22*sz;
+    ctx.fillStyle='#5a4632'; ctx.fillRect(x-3, base-h*0.55, 6, h*0.55);
+    treeBlob(x, base-h*0.62, h*0.24, '#8cbf5c', '#6a9a46');
+    ctx.strokeStyle='#7aae4e'; ctx.lineWidth=1.5;
+    for(let j=0;j<9;j++){ const sx = x - h*0.24 + j*h*0.06, sw = Math.sin(G.time*1.2 + j)*3; ctx.beginPath(); ctx.moveTo(sx, base-h*0.6); ctx.quadraticCurveTo(sx+sw, base-h*0.35, sx+sw*1.5, base-h*0.18 - (j%3)*6); ctx.stroke(); }
+  });
+};
+WATERFX.stream = (wl)=>{
+  // 맑은 물 아래 자갈
+  for(let i=0;i<40;i++){ const x = (i*97.3) % CW, y = wl + 20 + ((i*53.7) % (CH-wl-24)), r = 2 + (i%4);
+    ctx.fillStyle = `rgba(${[ '120,110,90','150,140,120','95,100,90'][i%3]},.35)`; ctx.beginPath(); ctx.ellipse(x, y, r*1.4, r, 0, 0, Math.PI*2); ctx.fill(); }
+  // 징검다리
+  for(let i=0;i<9;i++){ const x = CW*(0.4 + i*0.075), y = wl + 3;
+    ctx.fillStyle='#8f8a7e'; ctx.beginPath(); ctx.ellipse(x, y, CW*0.018, 4, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle='#b5b0a3'; ctx.beginPath(); ctx.ellipse(x, y-1.5, CW*0.016, 2.5, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle=`rgba(255,255,255,${0.3+Math.sin(G.time*3+i)*0.2})`; ctx.fillRect(x-CW*0.02, y+3, CW*0.012, 1.5); }
+  drawGlints(CW*0.18, wl, '255,252,230', 14);
+};
+PLAT.stream = (g, T)=>{
+  const { wl, platY, charX, s } = g, w = charX + Math.max(60, CW*0.08);
+  ctx.fillStyle='#6a5a40'; ctx.beginPath(); ctx.moveTo(0,platY); ctx.lineTo(w,platY); ctx.quadraticCurveTo(w+26,wl+8,w+8,wl+26); ctx.lineTo(0,wl+26); ctx.fill();
+  ctx.fillStyle=T.deck; ctx.beginPath(); ctx.moveTo(0,platY-5); ctx.lineTo(w+4,platY-5); ctx.quadraticCurveTo(w+12,platY,w+2,platY+5); ctx.lineTo(0,platY+5); ctx.fill();
+  // 강자갈
+  [[0.15,1],[0.45,0.7],[0.8,1.2],[1.05,0.9]].forEach(([k,z])=>{ const x = w*k + 6, y = wl + 14; ctx.fillStyle='#9d978a'; ctx.beginPath(); ctx.ellipse(x,y,9*z*s,5*z*s,0,0,Math.PI*2); ctx.fill(); ctx.fillStyle='#bdb7aa'; ctx.beginPath(); ctx.ellipse(x-1,y-1.5,6*z*s,3*z*s,0,0,Math.PI*2); ctx.fill(); });
+  // 들꽃
+  for(let i=0;i<5;i++){ const x = 8 + i*(w/5), y = platY-5; ctx.fillStyle='#5f8f3f'; ctx.fillRect(x, y-7, 1.2, 7); ctx.fillStyle = i%2 ? '#f4e46a' : '#f2f2f2'; ctx.beginPath(); ctx.arc(x, y-8, 2.4, 0, Math.PI*2); ctx.fill(); }
+  // 잠자리
+  const dx = w + 30 + Math.sin(G.time*0.9)*30, dy = wl - CH*0.12 + Math.sin(G.time*2.3)*10;
+  ctx.fillStyle='#c94a36'; ctx.fillRect(dx-6, dy-1, 12, 2); ctx.fillStyle=`rgba(220,235,245,${0.6+Math.sin(G.time*40)*0.3})`;
+  ctx.beginPath(); ctx.ellipse(dx-1, dy-4, 6, 2, -0.3, 0, Math.PI*2); ctx.ellipse(dx-1, dy+4, 6, 2, 0.3, 0, Math.PI*2); ctx.fill();
+};
+
+/* ---- 강 ---- */
+BG.river = (wl)=>{
+  drawSun(CW*0.72, wl*0.26, Math.max(12, Math.min(CW,CH)*0.038));
+  drawClouds(wl, 3, 0.8, 4);
+  hills(wl, '#8bb57a', 0.35, 0.6);
+  for(let i=0;i<7;i++){ const x = CW*(0.08 + i*0.14), y = wl - CH*(0.12 + ((i*7)%3)*0.03); treeBlob(x, y, CH*0.03, '#5f8f4f', '#4a7a3e'); }
+  // 먼 다리
+  const b0 = CW*0.5, b1 = CW*0.98, by = wl - CH*0.035;
+  ctx.fillStyle='#b9b5aa'; ctx.fillRect(b0, by, b1-b0, 4);
+  ctx.strokeStyle='#a5a196'; ctx.lineWidth=2;
+  for(let x=b0; x<b1; x+=CW*0.08){ ctx.beginPath(); ctx.arc(x+CW*0.04, by+CH*0.035, CW*0.036, Math.PI, 0); ctx.stroke(); }
+  hills(wl, '#6c9a60', 0.22, 1.3);
+  drawBirds(wl, 2, '#4a5a50', 0.25);
+};
+WATERFX.river = (wl)=>{ drawGlints(CW*0.72, wl, '255,250,225', 16); };
+
+/* ---- 독도 ---- */
+BG.dokdo = (wl)=>{
+  drawSun(CW*0.22, wl*0.28, Math.max(12, Math.min(CW,CH)*0.04));
+  drawClouds(wl, 3, 0.75, 6);
+  const isl = (cx, base, w, h, peaks, rock, green)=>{
+    ctx.fillStyle = rock; ctx.beginPath(); ctx.moveTo(cx-w/2, base);
+    peaks.forEach(([px,py])=>ctx.lineTo(cx + px*w/2, base - py*h)); ctx.lineTo(cx+w/2, base); ctx.closePath(); ctx.fill();
+    ctx.save(); ctx.clip();
+    ctx.fillStyle = 'rgba(0,0,0,.18)'; for(let i=0;i<6;i++){ ctx.fillRect(cx - w/2 + i*w/6 + w*0.04, base - h, 2, h); }   // 바위 결
+    ctx.fillStyle = green; ctx.beginPath(); peaks.forEach(([px,py],i)=>{ const x = cx + px*w/2, y = base - py*h; i ? ctx.lineTo(x,y) : ctx.moveTo(x,y); });
+    [...peaks].reverse().forEach(([px,py])=>ctx.lineTo(cx + px*w/2, base - py*h + h*0.12)); ctx.fill();
+    ctx.restore();
+    ctx.fillStyle='rgba(255,255,255,.75)'; for(let i=0;i<5;i++){ const x = cx - w/2 + w*(0.1+i*0.2), a = 0.4+Math.sin(G.time*2+i+cx)*0.3; ctx.globalAlpha = a; ctx.beginPath(); ctx.ellipse(x, base, w*0.08, 2.5, 0, 0, Math.PI*2); ctx.fill(); ctx.globalAlpha = 1; }
+  };
+  const h = CH*0.22;
+  // 서도 (높고 뾰족)
+  isl(CW*0.55, wl, CW*0.22, h, [[-1,0.1],[-0.6,0.55],[-0.25,0.85],[0,1],[0.2,0.8],[0.5,0.6],[0.8,0.3],[1,0.05]], '#6a5e52', '#6f8f4a');
+  // 동도 (낮고 평평, 시설·태극기)
+  const ex = CW*0.8, ew = CW*0.2;
+  isl(ex, wl, ew, h*0.7, [[-1,0.05],[-0.7,0.5],[-0.4,0.8],[-0.1,0.9],[0.3,0.88],[0.6,0.7],[0.85,0.35],[1,0.05]], '#75685a', '#7f9a52');
+  const topY = wl - h*0.7*0.9;
+  ctx.fillStyle='#e8e6e0'; ctx.fillRect(ex - ew*0.12, topY - 10, ew*0.14, 10); ctx.fillStyle='#3f6f9a'; ctx.fillRect(ex - ew*0.12, topY - 12, ew*0.14, 3);
+  ctx.fillStyle='#f4f2ec'; ctx.fillRect(ex + ew*0.12, topY - 18, 5, 18); ctx.fillStyle='#ffd04a'; ctx.fillRect(ex + ew*0.12, topY - 21, 5, 4);   // 등대
+  const fx = ex - ew*0.28, fy = topY - 4;   // 태극기
+  ctx.strokeStyle='#e8e6e0'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(fx, fy); ctx.lineTo(fx, fy-30); ctx.stroke();
+  const wave = Math.sin(G.time*4)*1.5, fw = 22, fh = 15, fl = fx+1, ft = fy-30;
+  ctx.fillStyle='#fbfbf8'; ctx.beginPath(); ctx.moveTo(fl, ft); ctx.quadraticCurveTo(fl+fw/2, ft+wave, fl+fw, ft); ctx.lineTo(fl+fw, ft+fh); ctx.quadraticCurveTo(fl+fw/2, ft+fh+wave, fl, ft+fh); ctx.fill();
+  const tx = fl+fw/2, ty = ft+fh/2+wave*0.5, tr = fh*0.24;
+  ctx.fillStyle='#cd2e3a'; ctx.beginPath(); ctx.arc(tx, ty, tr, Math.PI, 0); ctx.fill();
+  ctx.fillStyle='#0047a0'; ctx.beginPath(); ctx.arc(tx, ty, tr, 0, Math.PI); ctx.fill();
+  ctx.fillStyle='#cd2e3a'; ctx.beginPath(); ctx.arc(tx-tr/2, ty, tr/2, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle='#0047a0'; ctx.beginPath(); ctx.arc(tx+tr/2, ty, tr/2, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle='#222'; [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([sx,sy])=>ctx.fillRect(tx + sx*fw*0.32 - 2, ty + sy*fh*0.3 - 1.5, 4, 3));
+  drawBirds(wl, 5, '#3a4a52', 0.28);
+};
+WATERFX.dokdo = (wl)=>{ drawGlints(CW*0.22, wl, '255,252,235', 22); };
+PLAT.dokdo = (g)=>{
+  const { wl, platY, charX, s } = g, w = charX + Math.max(60, CW*0.08);
+  // 갯바위
+  ctx.fillStyle='#3e3834'; ctx.beginPath(); ctx.moveTo(0,platY+2); ctx.lineTo(w*0.3,platY-3); ctx.lineTo(w*0.7,platY); ctx.lineTo(w,platY+4); ctx.lineTo(w+18,wl+6); ctx.lineTo(w+30,wl+CH*0.06); ctx.lineTo(w+6,CH); ctx.lineTo(0,CH); ctx.fill();
+  ctx.fillStyle='#57504a'; ctx.beginPath(); ctx.moveTo(0,platY+2); ctx.lineTo(w*0.3,platY-3); ctx.lineTo(w*0.7,platY); ctx.lineTo(w,platY+4); ctx.lineTo(w*0.9,platY+12); ctx.lineTo(0,platY+14); ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,.12)'; ctx.fillRect(0, platY-1, w*0.7, 2);
+  // 따개비
+  ctx.fillStyle='#d8d2c4'; for(let i=0;i<14;i++){ const x = (i*37)%(w+20), y = wl + 2 + (i*13)%(CH*0.08); ctx.beginPath(); ctx.arc(x, y, 1.6, 0, Math.PI*2); ctx.fill(); }
+  ctx.fillStyle='#2f4a3a'; ctx.fillRect(0, wl-1, w+20, 4);   // 해초 띠
+  // 부서지는 파도
+  for(let i=0;i<7;i++){ const surge = Math.sin(G.time*1.7 + i); const x = w + 6 + i*6, y = wl + 6 + i*3;
+    ctx.fillStyle=`rgba(255,255,255,${clamp(0.25+surge*0.5,0,0.9)})`; ctx.beginPath(); ctx.ellipse(x, y + surge*2, 8, 2.5, 0.4, 0, Math.PI*2); ctx.fill();
+    if(surge>0.9){ ctx.beginPath(); ctx.arc(x+4, y-8-surge*5, 2, 0, Math.PI*2); ctx.fill(); } }
+};
+
+/* ---- 배낚시 ---- */
+BG.boat = (wl)=>{
+  drawSun(CW*0.66, wl*0.24, Math.max(12, Math.min(CW,CH)*0.038));
+  drawClouds(wl, 4, 0.75, 7);
+  ctx.fillStyle = '#9fb6c0';
+  for(let i=0;i<3;i++){ const x=CW*(0.45+i*0.2), w=CW*0.12; ctx.beginPath(); ctx.moveTo(x-w,wl); ctx.quadraticCurveTo(x,wl-CH*(0.06+i*0.02),x+w,wl); ctx.fill(); }
+  // 다른 낚싯배
+  [[0.58,1],[0.86,0.7]].forEach(([k,z],i)=>{ const x = CW*k + Math.sin(G.time*0.3+i)*6, y = wl - 1 + Math.sin(G.time*1.5+i)*1.5, sc = z*Math.max(1, CW/700);
+    ctx.fillStyle='#f2f2ee'; ctx.beginPath(); ctx.moveTo(x-16*sc,y-5*sc); ctx.lineTo(x+18*sc,y-5*sc); ctx.lineTo(x+12*sc,y); ctx.lineTo(x-14*sc,y); ctx.fill();
+    ctx.fillStyle='#1f5a8a'; ctx.fillRect(x-14*sc, y-2*sc, 26*sc, 2*sc); ctx.fillStyle='#e8ecee'; ctx.fillRect(x-8*sc, y-12*sc, 10*sc, 7*sc); ctx.fillStyle='#3a4a52'; ctx.fillRect(x-6*sc, y-10*sc, 6*sc, 2.5*sc);
+    ctx.strokeStyle='#3a4a52'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(x+8*sc,y-5*sc); ctx.lineTo(x+20*sc,y-16*sc); ctx.stroke(); });
+  drawBirds(wl, 3, '#3f4f57', 0.3);
+};
+WATERFX.boat = (wl)=>{
+  drawGlints(CW*0.66, wl, '255,250,225', 20);
+  ctx.fillStyle='rgba(255,255,255,.25)';   // 너울 물마루
+  for(let i=0;i<6;i++){ const y = wl + (CH-wl)*(0.15+i*0.14), x = ((G.time*25 + i*130) % (CW+80)) - 40; ctx.beginPath(); ctx.ellipse(x, y, 22+i*4, 2.2, 0, 0, Math.PI*2); ctx.fill(); }
+};
+
+/* ---- 아마존 ---- */
+BG.amazon = (wl)=>{
+  drawSun(CW*0.7, wl*0.22, Math.max(14, Math.min(CW,CH)*0.045), '#fff3c8', '255,240,190');
+  // 정글 지붕 세 겹
+  const canopy = (base, amp, r, c1, c2, seed)=>{ for(let x=-r; x<CW+r; x+=r*1.2){ const y = base - amp*(0.5+0.5*Math.sin(x*0.013 + seed)); treeBlob(x, y, r, c1, c2); } ctx.fillStyle = c2; ctx.fillRect(0, base, CW, wl-base); };
+  canopy(wl - CH*0.16, CH*0.05, CH*0.05, '#8fa86a', '#7a9458', 1);
+  ctx.fillStyle='rgba(240,240,220,.35)'; ctx.fillRect(0, wl - CH*0.17, CW, CH*0.05);   // 안개
+  canopy(wl - CH*0.08, CH*0.04, CH*0.045, '#5f8a3e', '#4a7232', 3);
+  canopy(wl - CH*0.01, CH*0.03, CH*0.04, '#3f6e2c', '#335a24', 5);
+  // 앵무새
+  for(let i=0;i<2;i++){ const span = CW+100, x = ((G.time*(30+i*10) + i*300) % span) - 50, y = wl*(0.35+i*0.12) + Math.sin(G.time*2+i)*6, f = Math.sin(G.time*12+i)*4;
+    ctx.fillStyle = i ? '#2f6fc9' : '#d8432e'; ctx.beginPath(); ctx.ellipse(x, y, 7, 3.5, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(x-2,y); ctx.lineTo(x-6,y-6-f); ctx.lineTo(x+3,y-1); ctx.fill(); ctx.fillStyle='#f2c83a'; ctx.beginPath(); ctx.moveTo(x-7,y); ctx.lineTo(x-16,y+3); ctx.lineTo(x-7,y+2); ctx.fill(); }
+};
+WATERFX.amazon = (wl)=>{
+  ctx.fillStyle='rgba(60,90,40,.25)'; ctx.fillRect(0, wl, CW, 6);   // 수면에 비친 숲
+  // 빅토리아 연꽃잎
+  [[0.5,0.04,1],[0.63,0.08,0.8],[0.82,0.03,1.2],[0.95,0.1,0.9]].forEach(([k,dy,z],i)=>{ const x = CW*k, y = wl + CH*dy + Math.sin(G.time+i)*1, r = CW*0.03*z;
+    ctx.fillStyle='#3f7a2e'; ctx.beginPath(); ctx.ellipse(x, y, r, r*0.28, 0, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle='#8a5a3a'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.ellipse(x, y-1, r, r*0.28, 0, Math.PI, 0); ctx.stroke();
+    if(i%2===0){ ctx.fillStyle='#f4d4e0'; ctx.beginPath(); ctx.ellipse(x+r*0.3, y-3, 4, 3, 0, 0, Math.PI*2); ctx.fill(); ctx.fillStyle='#e87aa0'; ctx.beginPath(); ctx.arc(x+r*0.3, y-4, 1.8, 0, Math.PI*2); ctx.fill(); } });
+  drawGlints(CW*0.7, wl, '255,236,180', 14);
+};
+AFTERWATER.amazon = ()=>{
+  // 위에서 늘어진 덩굴
+  ctx.strokeStyle='#3f6e2c'; ctx.lineWidth=2.5;
+  for(let i=0;i<9;i++){ const x = CW*(0.05+i*0.115), len = CH*(0.08 + (i%4)*0.05), sw = Math.sin(G.time*0.8+i)*4;
+    ctx.beginPath(); ctx.moveTo(x,0); ctx.quadraticCurveTo(x+sw, len*0.5, x+sw*1.5, len); ctx.stroke();
+    ctx.fillStyle='#5f8a3e'; for(let j=1;j<4;j++){ ctx.beginPath(); ctx.ellipse(x+sw*j/3+3, len*j/3.5, 4, 2, 0.6, 0, Math.PI*2); ctx.fill(); } }
+};
+PLAT.amazon = (g)=>{
+  const { wl, platY, charX } = g, w = charX + Math.max(60, CW*0.08);
+  // 수상 가옥식 나무 데크 (기둥이 물에 박힘)
+  ctx.fillStyle='#5a4028'; for(let x=8; x<w+4; x+=Math.max(26,w/4)){ ctx.fillRect(x, platY+6, 7, CH-platY); ctx.fillStyle='rgba(0,0,0,.25)'; ctx.fillRect(x, wl+4, 7, CH); ctx.fillStyle='#5a4028'; }
+  ctx.fillStyle='#8a6440'; ctx.fillRect(0, platY, w+6, 9);
+  ctx.fillStyle='rgba(0,0,0,.22)'; for(let x=0;x<w;x+=14) ctx.fillRect(x, platY, 1.5, 9);
+  ctx.fillStyle='#6a4a2c'; ctx.fillRect(0, platY+8, w+6, 3);
+  // 밧줄 난간
+  ctx.strokeStyle='#c9a66b'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(0, platY-22); ctx.quadraticCurveTo(charX*0.5, platY-16, Math.max(8,charX-22), platY-22); ctx.stroke();
+  ctx.fillStyle='#5a4028'; ctx.fillRect(0, platY-24, 4, 24); ctx.fillRect(Math.max(8,charX-22)-2, platY-24, 4, 24);
+};
+
+/* ---- 알래스카 ---- */
+BG.alaska = (wl)=>{
+  drawSun(CW*0.2, wl*0.3, Math.max(10, Math.min(CW,CH)*0.03), '#fdfcf4', '235,245,255');
+  const range = (base, h, c, snow, seed, step)=>{ ctx.fillStyle = c; ctx.beginPath(); ctx.moveTo(0, base); const pts = [];
+    for(let x=0, i=0; x<=CW+step; x+=step, i++){ const y = base - h*(0.45 + 0.55*Math.abs(Math.sin(i*1.7 + seed))); pts.push([x,y]); ctx.lineTo(x, y); }
+    ctx.lineTo(CW, base); ctx.fill();
+    ctx.fillStyle = snow; pts.forEach(([x,y],i)=>{ if(i===0||i===pts.length-1) return; const [px,py]=pts[i-1], [nx,ny]=pts[i+1]; if(y<py && y<ny){ const d = (base-y)*0.28; ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x + (px-x)*0.35, y + d); ctx.lineTo(x + (nx-x)*0.35, y + d); ctx.fill(); } });
+    return pts; };
+  range(wl, CH*0.28, '#8ea4b8', '#f2f6fa', 1.1, CW*0.09);
+  range(wl, CH*0.17, '#6f8aa0', '#e8f0f6', 2.6, CW*0.07);
+  // 빙하 (오른쪽)
+  const gx = CW*0.72;
+  ctx.fillStyle='#cfe8f2'; ctx.beginPath(); ctx.moveTo(gx, wl); ctx.lineTo(gx+CW*0.04, wl-CH*0.08); ctx.lineTo(CW, wl-CH*0.12); ctx.lineTo(CW, wl); ctx.fill();
+  ctx.fillStyle='#a8d4e6'; for(let x=gx+CW*0.03; x<CW; x+=CW*0.025) ctx.fillRect(x, wl-CH*0.09, 2, CH*0.09);
+  ctx.fillStyle='rgba(255,255,255,.7)'; ctx.fillRect(gx+CW*0.04, wl-CH*0.085, CW, 3);
+  // 침엽수 숲
+  for(let i=0;i<12;i++){ const x = CW*(0.02 + i*0.06), h = CH*(0.07 + (i%3)*0.02); if(x > gx - 10) break; pineTree(x, wl, h, '#2f4a3e', true); }
+};
+WATERFX.alaska = (wl)=>{ drawGlints(CW*0.2, wl, '240,248,255', 12); };
+AFTERWATER.alaska = (wl)=>{
+  // 떠다니는 유빙
+  [[0.4,0.05,1],[0.62,0.1,0.7],[0.9,0.03,1.3],[0.78,0.16,0.9]].forEach(([k,dy,z],i)=>{ const x = (CW*k + G.time*3*(i%2?1:-1)) % (CW+40), y = wl + CH*dy + Math.sin(G.time*1.2+i)*1.5, r = CW*0.03*z;
+    ctx.fillStyle='rgba(200,230,240,.5)'; ctx.beginPath(); ctx.ellipse(x, y+4, r*1.1, r*0.25, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle='#f4fafc'; ctx.beginPath(); ctx.moveTo(x-r, y+2); ctx.lineTo(x-r*0.6, y-r*0.35); ctx.lineTo(x+r*0.4, y-r*0.4); ctx.lineTo(x+r, y+2); ctx.fill();
+    ctx.fillStyle='#cfe6ef'; ctx.fillRect(x-r, y+1, r*2, 2); });
+  // 내리는 눈
+  ctx.fillStyle='rgba(255,255,255,.85)';
+  for(let i=0;i<60;i++){ const x = ((i*73.1) + Math.sin(G.time*0.7+i)*14 + G.time*8) % CW, y = ((i*41.7) + G.time*(22+(i%5)*6)) % CH, r = 1 + (i%3)*0.6; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.fill(); }
+};
+PLAT.alaska = (g)=>{
+  const { wl, platY, charX } = g, w = charX + Math.max(60, CW*0.08);
+  ctx.fillStyle='#4a4a50'; ctx.beginPath(); ctx.moveTo(0,platY+2); ctx.lineTo(w*0.6,platY); ctx.lineTo(w,platY+3); ctx.lineTo(w+16,wl+8); ctx.lineTo(w+4,CH); ctx.lineTo(0,CH); ctx.fill();
+  ctx.fillStyle='#5f5f66'; ctx.beginPath(); ctx.moveTo(0,platY+2); ctx.lineTo(w*0.6,platY); ctx.lineTo(w,platY+3); ctx.lineTo(w*0.9,platY+12); ctx.lineTo(0,platY+12); ctx.fill();
+  // 눈 덮인 윗면
+  ctx.fillStyle='#f4f8fb'; ctx.beginPath(); ctx.moveTo(0,platY-3); ctx.quadraticCurveTo(w*0.3,platY-7,w*0.6,platY-2); ctx.quadraticCurveTo(w*0.85,platY-4,w+2,platY+3); ctx.lineTo(w*0.9,platY+4); ctx.lineTo(0,platY+5); ctx.fill();
+  ctx.fillStyle='#dbe8f0'; ctx.fillRect(0, platY+2, w*0.9, 2);
+  ctx.fillStyle='rgba(255,255,255,.35)'; ctx.fillRect(0, wl+2, w+12, 3);   // 살얼음
+};
+
+/* ---- 부산 ---- */
+BG.busan = (wl)=>{
+  ctx.fillStyle='rgba(255,255,255,.7)'; for(let i=0;i<20;i++){ ctx.fillRect((i*137)%CW,(i*53)%(wl*0.4),1.5,1.5); }
+  drawSun(CW*0.14, wl*0.2, Math.max(10, Math.min(CW,CH)*0.03), '#fdf6dc', '255,240,200');   // 달
+  ctx.fillStyle='#1f2547';
+  for(let i=0;i<22;i++){ const bw=CW/22, bh=CH*(0.06+((i*7)%5)*0.025); ctx.fillRect(i*bw, wl-bh, bw-2, bh); }
+  ctx.fillStyle='rgba(255,214,120,.8)';
+  for(let i=0;i<22;i++){ const bw=CW/22, bh=CH*(0.06+((i*7)%5)*0.025); for(let k=6;k<bh-4;k+=9) if((i+k)%3) ctx.fillRect(i*bw+bw*0.3, wl-bh+k, 2, 3); }
+  const t1=CW*0.42, t2=CW*0.78, top=wl-CH*0.2, deck=wl-CH*0.06;
+  ctx.strokeStyle='#c9cbe8'; ctx.lineWidth=3;
+  [t1,t2].forEach(x=>{ ctx.beginPath(); ctx.moveTo(x,wl); ctx.lineTo(x,top); ctx.stroke(); });
+  ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(CW*0.22,deck); ctx.quadraticCurveTo((CW*0.22+t1)/2,deck-10,t1,top); ctx.quadraticCurveTo((t1+t2)/2,deck+20,t2,top); ctx.quadraticCurveTo((t2+CW)/2,deck-10,CW,deck); ctx.stroke();
+  ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(CW*0.22,deck); ctx.lineTo(CW,deck); ctx.stroke();
+  for(let x=CW*0.24;x<CW;x+=14){ const hue = (x/CW*360 + G.time*60)%360; ctx.fillStyle=`hsl(${hue},90%,70%)`; ctx.fillRect(x,deck-3,3,3); }
+};
+WATERFX.busan = (wl)=>{
+  // 다리 조명이 물에 비친 빛기둥
+  for(let x=CW*0.24; x<CW; x+=28){ const hue = (x/CW*360 + G.time*60)%360;
+    for(let k=0;k<6;k++){ const y = wl + 6 + k*9, a = 0.35 - k*0.05 + Math.sin(G.time*3 + x*0.1 + k)*0.08; ctx.fillStyle=`hsla(${hue},90%,70%,${Math.max(0,a)})`; ctx.fillRect(x + Math.sin(G.time*2+k)*2, y, 3, 4); } }
+  for(let k=0;k<8;k++){ const y = wl + 5 + k*7; ctx.fillStyle=`rgba(253,246,220,${0.35 - k*0.04})`; ctx.fillRect(CW*0.14 - 8 + Math.sin(G.time*2+k)*3, y, 16, 2); }
+};
+BG.pier = (wl)=>drawPierSky(wl);
+WATERFX.pier = (wl)=>drawPierWater(wl);
 function drawPierSky(wl){
   // 해와 빛 번짐
   const sx = CW*0.8, sy = wl*0.3, sr = Math.max(14, Math.min(CW,CH)*0.045);
@@ -1113,12 +1626,21 @@ function hills(wl, color, h, ph){
   ctx.lineTo(CW,wl); ctx.fill();
 }
 function drawPlatform(th, T, g){
+  if(PLAT[th]) return PLAT[th](g, T);
   const { wl, platY, charX } = g;
   if(th==='boat'){
     const w = Math.max(150, CW*0.3);
     ctx.fillStyle='#1f5a8a'; ctx.beginPath(); ctx.moveTo(-10,platY); ctx.lineTo(w,platY); ctx.lineTo(w-28,platY+34); ctx.lineTo(-10,platY+34); ctx.fill();
     ctx.fillStyle='#f2f2ee'; ctx.fillRect(-10,platY-6,w+4,8);
     ctx.fillStyle='#d8422e'; ctx.fillRect(-10,platY+12,w-12,4);
+    // 난간과 낚싯대 거치대
+    ctx.strokeStyle='#c8ccd0'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(-10, platY-24); ctx.lineTo(w-6, platY-24); ctx.stroke();
+    for(let x=4; x<w; x+=Math.max(28, w/5)){ ctx.beginPath(); ctx.moveTo(x, platY-6); ctx.lineTo(x, platY-24); ctx.stroke(); }
+    const hx = w - 18; ctx.fillStyle='#3a4a52'; ctx.fillRect(hx, platY-14, 5, 10);
+    ctx.strokeStyle='#2c4a5a'; ctx.lineWidth=1.6; ctx.beginPath(); ctx.moveTo(hx+2, platY-12); ctx.lineTo(hx+20, platY-60); ctx.stroke();
+    ctx.strokeStyle='rgba(255,255,255,.5)'; ctx.lineWidth=0.8; ctx.beginPath(); ctx.moveTo(hx+20, platY-60); ctx.quadraticCurveTo(hx+40, platY-20, hx+46, g.wl+6); ctx.stroke();
+    // 뱃전 물보라
+    const sp = Math.sin(G.time*1.4); ctx.fillStyle=`rgba(255,255,255,${0.3+sp*0.25})`; ctx.beginPath(); ctx.ellipse(w-20, platY+34, 18, 3, 0, 0, Math.PI*2); ctx.fill();
     return;
   }
   const w = charX + Math.max(60, CW*0.08);
@@ -1127,6 +1649,10 @@ function drawPlatform(th, T, g){
     ctx.fillStyle=T.deck; ctx.fillRect(0,platY-4,w+6,8);
     ctx.strokeStyle='#5c7f3c'; ctx.lineWidth=2;
     for(let i=0;i<7;i++){ const x=w+10+i*7, sw=Math.sin(G.time*1.5+i)*3; ctx.beginPath(); ctx.moveTo(x,wl+6); ctx.quadraticCurveTo(x+sw,wl-20,x+sw*2,wl-38-i%3*8); ctx.stroke(); }
+    ctx.fillStyle='#7a5a3a'; for(let i=0;i<3;i++){ const x=w+14+i*14, sw=Math.sin(G.time*1.5+i)*3; ctx.beginPath(); ctx.ellipse(x+sw*2, wl-40-i*4, 2.2, 6, 0, 0, Math.PI*2); ctx.fill(); }   // 부들
+    const dx = w + 40 + Math.sin(G.time*0.8)*26, dy = wl - CH*0.13 + Math.sin(G.time*2.1)*9;
+    ctx.fillStyle='#3a6ab0'; ctx.fillRect(dx-6, dy-1, 12, 2); ctx.fillStyle=`rgba(220,235,245,${0.6+Math.sin(G.time*40)*0.3})`;
+    ctx.beginPath(); ctx.ellipse(dx-1, dy-4, 6, 2, -0.3, 0, Math.PI*2); ctx.ellipse(dx-1, dy+4, 6, 2, 0.3, 0, Math.PI*2); ctx.fill();
   } else if(th==='pier' || th==='busan'){
     drawPierPlatform(g, th==='busan');
   } else {
@@ -1145,8 +1671,14 @@ function drawAngler(g){
   ctx.fillStyle='#6f7d40'; ctx.fillRect(-9,-50,7,6); ctx.fillRect(2,-50,7,6);       // 주머니
   ctx.fillStyle='#e8e2d2'; ctx.save(); ctx.translate(8,-54); ctx.rotate(-0.3); roundRect(0,-3,16,7,3); ctx.fill(); ctx.restore(); // 팔
   ctx.fillStyle='#f0c8a0'; ctx.beginPath(); ctx.arc(0,-70,10,0,Math.PI*2); ctx.fill(); // 머리
-  ctx.fillStyle='#d8b84a'; ctx.beginPath(); ctx.ellipse(0,-77,15,4,0,0,Math.PI*2); ctx.fill(); // 벙거지
-  ctx.beginPath(); ctx.arc(0,-78,9,Math.PI,0); ctx.fill();
+  if(curStage().theme==='alaska'){
+    ctx.fillStyle='#c9423a'; ctx.fillRect(-9,-62,18,5);                                   // 목도리
+    ctx.fillStyle='#2f5a8a'; ctx.beginPath(); ctx.arc(0,-74,10,Math.PI,0); ctx.fill(); ctx.fillRect(-10,-75,20,3);   // 털모자
+    ctx.fillStyle='#f4f2ec'; ctx.beginPath(); ctx.arc(0,-85,3.5,0,Math.PI*2); ctx.fill();
+  } else {
+    ctx.fillStyle='#d8b84a'; ctx.beginPath(); ctx.ellipse(0,-77,15,4,0,0,Math.PI*2); ctx.fill(); // 벙거지
+    ctx.beginPath(); ctx.arc(0,-78,9,Math.PI,0); ctx.fill();
+  }
   ctx.fillStyle='#2b3a40'; ctx.beginPath(); ctx.arc(4,-70,1.5,0,Math.PI*2); ctx.fill();
   ctx.restore();
 }
@@ -1327,6 +1859,7 @@ function drawCenterText(txt, color){
 }
 function hintText(){
   const p = G.phase, f = S.method==='float';
+  if(p==='travel') return '';
   if(p==='aiming') return '한 번 더 눌러 던지세요';
   if(p==='idle') return S.net.length>=netSize() ? '살림망이 가득! 상점에서 판매하세요' : (f?'찌를 던지세요':'채비를 던지세요') + ` · 살림망 ${S.net.length}/${netSize()}`;
   if(p==='waiting') return f ? '찌가 쑥 잠길 때 챔질! 톡톡은 속임수' : '입질을 기다리는 중…';
@@ -1355,7 +1888,7 @@ function drawFish(c, x, y, L, id, o={}){
   if(ready(sp)){ c.save(); c.translate(x,y); c.scale(o.facing||1,1); const h = L*sp.naturalHeight/sp.naturalWidth; c.drawImage(sp,-L/2,-h/2,L,h); c.restore(); return; }
   if(id==='bukangi') return drawBukangi(c, x, y, L*0.5, o.silhouette);
   const d = CONFIG.fish[id], shape = d.shape||'normal';
-  const h = L*(shape==='long'?0.14 : shape==='flat'?0.5 : shape==='tuna'?0.34 : 0.4);
+  const h = L*(shape==='long'?0.14 : shape==='flat'?0.5 : shape==='tuna'?0.34 : shape==='slim'?0.27 : 0.4);
   const body = o.silhouette ? '#0d2530' : d.color;
   c.save(); c.translate(x,y); c.scale(o.facing||1,1); if(o.wiggle) c.rotate(o.wiggle);
   c.fillStyle = body;
@@ -1369,6 +1902,7 @@ function drawFish(c, x, y, L, id, o={}){
     if(d.pattern==='stripes'){ c.fillStyle=d.accent; for(let i=-2;i<=2;i++){ c.fillRect(i*L*0.12-L*0.02,-h,L*0.035,h*1.1); } }
     if(d.pattern==='spots'){ c.fillStyle=d.accent; for(let i=0;i<9;i++){ c.beginPath(); c.arc(-L*0.3+((i*37)%60)/60*L*0.6, -h*0.35+((i*23)%10)/10*h*0.45, Math.max(1,L*0.018),0,Math.PI*2); c.fill(); } }
     if(d.pattern==='band'){ c.fillStyle=d.accent; c.fillRect(-L*0.45,-h*0.06,L*0.9,h*0.12); }
+    if(d.pattern==='belly'){ c.fillStyle=d.accent; c.fillRect(-L*0.45,h*0.12,L*0.9,h*0.5); }
     c.restore();
     c.fillStyle='#fff'; c.beginPath(); c.arc(L*0.32,-h*0.08,Math.max(1.5,h*0.12),0,Math.PI*2); c.fill();
     c.fillStyle='#111'; c.beginPath(); c.arc(L*0.33,-h*0.08,Math.max(0.8,h*0.06),0,Math.PI*2); c.fill();
@@ -1419,7 +1953,7 @@ function syncControls(){
   $('mFloat').setAttribute('aria-pressed', String(!isReel));
   $('mReel').setAttribute('aria-pressed', String(isReel));
   $('mFloat').disabled = $('mReel').disabled = p!=='idle';
-  const labels = { aiming:'던지기!', landing:'…', idle:'던지기', casting:'…', waiting: isReel?'입질 대기':'챔질!', bite:'입질!', hookGauge:'챔질!', reeling:'감기 (누르고 있기)', lost:'…', result:'…' };
+  const labels = { travel:'건너뛰기', aiming:'던지기!', landing:'…', idle:'던지기', casting:'…', waiting: isReel?'입질 대기':'챔질!', bite:'입질!', hookGauge:'챔질!', reeling:'감기 (누르고 있기)', lost:'…', result:'…' };
   a.textContent = labels[p];
   a.disabled = ['casting','bite','lost','result'].includes(p);
   if(p==='landing'){ a.disabled = false; a.textContent = '넘기기'; }
@@ -1524,7 +2058,8 @@ function openStage(){
 function goStage(id){
   if(G.phase!=='idle' && G.phase!=='result'){ toast('낚시 중에는 이동할 수 없어요'); return; }
   if(S.stage==='busan') S.busanLeft = 0;
-  S.stage = id; save(); setPhase('idle'); closeModal(); toast(stageById(id).name + '에 도착했어요');
+  const from = S.stage;
+  S.stage = id; save(); closeModal(); startTravel(from, id);
 }
 function unlock(id){
   const st = stageById(id); if(S.money<st.cost) return;
@@ -1676,10 +2211,11 @@ function update(dt){
     case 'bite': G.t += dt; if(G.t>=0.5) beginGauge(); break;
     case 'hookGauge': updateGauge(dt); break;
     case 'reeling': updateReel(dt); break;
+    case 'travel': G.travel.t += dt; if(G.travel.t >= G.travel.dur) finishTravel(); break;
     case 'landing': updateLanding(dt); break;
     case 'lost': G.t += dt; if(G.t>=1.6) toIdle(); break;
   }
-  if(S.stage==='busan' && S.busanLeft>0){
+  if(S.stage==='busan' && S.busanLeft>0 && G.phase!=='travel'){
     S.busanLeft -= dt;
     if(S.busanLeft<=0 && ['idle','aiming','waiting','casting'].includes(G.phase)) leaveBusan();
   }
@@ -1694,6 +2230,7 @@ function frame(now){
   G.particles = G.particles.filter(p=>p.life>0);
   G.ripples.forEach(r=>{ r.r += 30*dt; r.life -= dt*0.9; });
   G.ripples = G.ripples.filter(r=>r.life>0);
+  if(G.arrive) G.arrive = Math.max(0, G.arrive - dt*1.6);
   G.sparkles.forEach(p=>{ p.life -= dt*1.4; p.y -= 12*dt; });
   G.sparkles = G.sparkles.filter(p=>p.life>0);
   if(S.stage==='busan' && (saveTick+=dt)>3){ saveTick = 0; save(); }
