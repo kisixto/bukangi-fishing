@@ -2366,9 +2366,11 @@ function drawAtmosphere(){
     ctx.fillStyle='rgba(255,255,255,.9)'; for(let i=0;i<120;i++){ const x = ((i*71.1) + Math.sin(t*1.5+i)*20 + t*60) % CW, y = ((i*37.7) + t*(60+(i%5)*15)) % CH; ctx.beginPath(); ctx.arc(x, y, 1.2+(i%3)*0.8, 0, Math.PI*2); ctx.fill(); }
   }
   if(e.weather==='fog'){
-    const g = ctx.createLinearGradient(0,0,0,CH); g.addColorStop(0,'rgba(230,236,240,.25)'); g.addColorStop(wl/CH,'rgba(235,240,244,.62)'); g.addColorStop(1,'rgba(225,232,238,.3)');
-    ctx.fillStyle=g; ctx.fillRect(0,0,CW,CH);
-    for(let i=0;i<4;i++){ const x = ((t*12*(1+i*0.3) + i*CW*0.33) % (CW*1.6)) - CW*0.3, y = wl - CH*0.05 + i*CH*0.06; ctx.fillStyle='rgba(245,248,250,.25)'; ctx.beginPath(); ctx.ellipse(x, y, CW*0.25, CH*0.03, 0, 0, Math.PI*2); ctx.fill(); }
+    // 흐린 정도: 화면 전체를 살짝 회색으로 낮추고, 수평선 근처만 옅게 뿌옇게
+    ctx.fillStyle='rgba(120,130,140,.12)'; ctx.fillRect(0,0,CW,CH);
+    const g = ctx.createLinearGradient(0, wl-CH*0.12, 0, wl+CH*0.1); g.addColorStop(0,'rgba(225,230,235,0)'); g.addColorStop(0.5,'rgba(225,230,235,.22)'); g.addColorStop(1,'rgba(225,230,235,0)');
+    ctx.fillStyle=g; ctx.fillRect(0, wl-CH*0.12, CW, CH*0.22);
+    for(let i=0;i<3;i++){ const x = ((t*10*(1+i*0.3) + i*CW*0.4) % (CW*1.6)) - CW*0.3, y = wl - CH*0.03 + i*CH*0.025; ctx.fillStyle='rgba(240,244,248,.07)'; ctx.beginPath(); ctx.ellipse(x, y, CW*0.22, CH*0.018, 0, 0, Math.PI*2); ctx.fill(); }
   }
 }
 function drawBang(tip){
