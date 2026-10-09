@@ -45,6 +45,10 @@ button:focus-visible{outline:2px solid var(--float);outline-offset:2px}
 .chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;background:var(--ink-2);border:1px solid var(--ink-3);font-size:12px;white-space:nowrap}
 .chip i{font-style:normal;color:var(--muted)}
 .ticket{background:#3a2140;border-color:#6a3a72;color:#ffc6e2}
+.envchip{background:#22405a;border-color:#3a6a8e}
+.env-night{background:#1c2244;border-color:#3a4a8e}
+.env-dusk{background:#4a3040;border-color:#8e5a6a}
+.buffchip{background:#4a3a14;border-color:#b08a1e;color:#ffd04a}
 .netchip{cursor:pointer;font:inherit;font-size:12px;color:var(--paper);background:#1d4a3a;border-color:#2f7a5c}
 .netchip:hover{border-color:var(--ok)}
 .netchip.full{background:#4a3a14;border-color:var(--float);color:var(--float)}
@@ -81,6 +85,7 @@ button:focus-visible{outline:2px solid var(--float);outline-offset:2px}
 .hud-btns{display:flex;gap:6px;margin-left:auto}
 .hbtn{padding:7px 12px;border-radius:10px;background:var(--ink-2);border:1px solid var(--ink-3);font-weight:600;font-size:14px}
 .hbtn:hover{border-color:var(--muted)}
+.hbtn .badge{display:inline-block;min-width:16px;height:16px;margin-left:4px;padding:0 4px;border-radius:8px;background:var(--bobber);color:#fff;font-size:11px;line-height:16px;text-align:center}
 .hbtn[disabled]{opacity:.4;cursor:not-allowed}
 
 /* 장면 */
@@ -89,7 +94,7 @@ button:focus-visible{outline:2px solid var(--float);outline-offset:2px}
 .tut{position:absolute;left:16px;top:12px;max-width:min(440px,calc(100% - 32px));background:rgba(15,43,51,.92);border:1px solid var(--float);border-radius:12px;padding:10px 14px;font-size:14px;line-height:1.55;box-shadow:0 6px 20px rgba(0,0,0,.25)}
 .tut .who{font-family:var(--f-display);color:var(--float);font-size:15px;display:block;margin-bottom:2px}
 .tut button{background:none;border:0;color:var(--muted);text-decoration:underline;font-size:12px;padding:0;margin-top:4px}
-.toast{position:absolute;left:50%;top:16px;transform:translateX(-50%);background:var(--paper);color:var(--ink);padding:8px 16px;border-radius:999px;font-weight:700;font-size:14px;pointer-events:none;transition:opacity .25s;white-space:nowrap;max-width:calc(100% - 32px);overflow:hidden;text-overflow:ellipsis}
+.toast{position:absolute;left:50%;bottom:52px;transform:translateX(-50%);z-index:2;background:var(--paper);color:var(--ink);padding:8px 16px;border-radius:999px;font-weight:700;font-size:14px;pointer-events:none;transition:opacity .25s;white-space:nowrap;max-width:calc(100% - 32px);overflow:hidden;text-overflow:ellipsis}
 
 /* 조작 바 */
 .controls{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--ink);border-top:1px solid var(--ink-3);padding-bottom:calc(10px + env(safe-area-inset-bottom,0px))}
@@ -102,7 +107,18 @@ button:focus-visible{outline:2px solid var(--float);outline-offset:2px}
 .lift{padding:14px 18px;border-radius:14px;border:0;background:var(--float);color:var(--ink);font-family:var(--f-display);font-size:20px;user-select:none;touch-action:none;box-shadow:0 4px 0 #b08a1e}
 .lift:active,.lift.held{transform:translateY(3px);box-shadow:0 1px 0 #b08a1e}
 .keys{font-size:11px;color:var(--muted);line-height:1.4;max-width:170px}
-@media (max-width:560px){.keys{display:none}.act{font-size:19px}.hud{gap:6px 10px}.money{font-size:20px}}
+.aquacv{width:100%;height:clamp(160px,32vh,260px);display:block;border-radius:12px;border:3px solid #8a9aa0}
+.trophies{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.trophy{background:linear-gradient(160deg,#4a3a14,var(--ink));border:1px solid #b08a1e;border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:2px;font-size:12px}
+.trophy canvas{width:100%;height:56px}
+.trophy .s{color:var(--muted)}
+.qrow{padding:10px 0;border-bottom:1px solid var(--ink-3);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;align-items:center}
+.qrow .t{font-weight:700}
+.qbar{grid-column:1/-1;height:8px;border-radius:4px;background:var(--ink-3);overflow:hidden}
+.qbar i{display:block;height:100%;background:var(--ok)}
+.qrow.claimed{opacity:.5}
+@media (max-width:560px){.hud-btns{flex-wrap:wrap;gap:4px}.hbtn{padding:6px 9px;font-size:13px}
+.keys{display:none}.act{font-size:19px}.hud{gap:6px 10px}.money{font-size:20px}}
 
 /* 모달 */
 .modal{position:fixed;inset:0;background:rgba(5,18,22,.6);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
@@ -142,6 +158,7 @@ button:focus-visible{outline:2px solid var(--float);outline-offset:2px}
 .dex canvas{width:100%;height:56px}
 .dex b{font-size:13px}
 .dex .s{color:var(--muted)}
+.dexchips{display:flex;gap:3px;flex-wrap:wrap}
 .dexh{font-family:var(--f-display);font-size:16px;margin:4px 0 8px;color:var(--muted);display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
 .perk{font-family:var(--f-body);font-size:12px;padding:2px 8px;border-radius:999px;border:1px dashed var(--ink-3);color:var(--muted)}
 .perk.on{border:1px solid var(--ok);color:var(--ok)}
@@ -179,6 +196,8 @@ button:focus-visible{outline:2px solid var(--float);outline-offset:2px}
     <div class="hud-btns">
       <button class="hbtn" id="btnShop">상점</button>
       <button class="hbtn" id="btnStage">낚시터</button>
+      <button class="hbtn" id="btnQuest">의뢰</button>
+      <button class="hbtn" id="btnAqua">수족관</button>
       <button class="hbtn" id="btnDex">도감</button>
       <button class="hbtn" id="btnSound" aria-pressed="true" title="효과음·진동">소리 켬</button>
     </div>
@@ -281,6 +300,44 @@ const CONFIG = {
       { name:'황금 그물',     cost:400000, interval:30, cap:12, quality:1.6,  luck:0.5 },
     ],
   },
+  // 희귀 변종: 황금(×5) / 알비노(×3). 미끼 행운·안개가 확률을 올림
+  variants: { baseChance:0.01, luckBonus:0.01, gold:{ name:'황금', mul:5, share:0.4 }, albino:{ name:'알비노', mul:3, share:0.6 } },
+  // 크기 메달: 몸길이 범위의 몇 % 지점 이상이면 메달. 처음 받을 때 기준가 × 배수만큼 보상
+  medals: [ { name:'동메달', at:0.70, reward:2, color:'#d89a63' }, { name:'은메달', at:0.85, reward:5, color:'#c9d1d6' }, { name:'금메달', at:0.95, reward:15, color:'#ffcf4a' } ],
+  // 시간대·날씨: 실제 시각으로 진행 (하루 12분, 날씨는 3분마다 바뀔 수 있음)
+  world: {
+    dayMinutes:12, weatherMinutes:3,
+    weatherOdds:{ clear:0.6, rain:0.25, fog:0.15 },
+    nightFish:['galchi','jangeo','megi','bollak','noraemi','redtail','lingcod','eungalchi'], nightMul:1.3, nightBias:0.3, nightPrice:1.5,   // nightPrice: 밤에 잡은 야행성 물고기 가격 배수
+    rainBias:0.25, rainWait:0.8, fogBukangi:2, fogVariant:2,
+  },
+  // 맵별 보스: 그 맵에서 need마리 잡으면 다음 입질이 보스. 3단계 장력 싸움. diff: 난이도(뒤 맵일수록 높음, 단계별 추가 당김에도 곱해짐)
+  bosses: {
+    stream: { id:'boss_stream', base:'kkeokji',  name:'여울 대장 꺽지',   len:[45,60],   price:1500,   need:30, diff:0.74 },
+    river:  { id:'boss_river',  base:'megi',     name:'왕메기',          len:[180,240], price:4000,   need:30, diff:0.8 },
+    pier:   { id:'boss_pier',   base:'doldom',   name:'방파제 돌돔왕',    len:[90,120],  price:9000,   need:30, diff:0.86 },
+    dokdo:  { id:'boss_dokdo',  base:'hokdom',   name:'독도 혹돔왕',      len:[120,160], price:20000,  need:30, diff:0.9 },
+    boat:   { id:'boss_boat',   base:'chamchi',  name:'바다의 폭군 참다랑어', len:[300,380], price:60000, need:30, diff:0.94 },
+    amazon: { id:'boss_amazon', base:'arapaima', name:'괴물 피라루쿠',     len:[350,450], price:100000, need:30, diff:0.98 },
+    alaska: { id:'boss_alaska', base:'halibut',  name:'전설의 핼리벗',     len:[300,380], price:160000, need:30, diff:1.0 },
+  },
+  bossFight: { reelMul:0.7, loseKeep:0.6, phaseForce:[0.0, 0.08, 0.14], diveEvery:[0, 4.5, 3.2], diveForce:0.28, diveTime:1.6, warn:0.7, burstMul:[1, 1.2, 1.6] },
+  // 오늘의 의뢰: 하루 3개, 보상은 열린 맵 중 가장 좋은 곳의 1마리 기대가 × 배수
+  quests: { perDay:3, rewardMul:[10, 16], allDoneTicket:1 },
+  // 수족관: 전시한 물고기 가격 합 × hourly 만큼 시간당 관람 수입 (꺼 둔 동안 최대 24시간)
+  aquarium: { hourly:0.1, maxOfflineHours:24, levels:[
+    { name:'수조 없음', cost:0, cap:0 }, { name:'작은 어항', cost:20000, cap:3 }, { name:'거실 수조', cost:60000, cap:5 },
+    { name:'대형 수조', cost:150000, cap:8 }, { name:'해양 수족관', cost:400000, cap:12 }, { name:'부캉이 아쿠아리움', cost:1000000, cap:16 } ] },
+  // 특수 미끼(소모품): 산 만큼 던질 때마다 1회씩 소모
+  baits: {
+    big:   { name:'대물 미끼',   cost:3000,  uses:10, desc:'좋은 물고기가 더 잘 와요 (멀리 던진 것보다 더)', bias:0.6 },
+    buk:   { name:'부캉이 미끼', cost:8000,  uses:10, desc:'부캉이가 나올 확률 5배', mul:5 },
+    boss:  { name:'보스 유인 미끼', cost:15000, uses:1, desc:'지금 낚시터 보스 기척 +10', meter:10 },
+  },
+  // 낚시 대회: 3분 동안 직접 잡은 물고기 총 무게. 참가비 = 그 맵 1마리 기대가 × feeMul
+  tournament: { seconds:180, feeMul:10, prize:[6, 3, 1.5, 0], rivals:[['낚시왕 박',1.25],['강태공 김',1.0],['초보 이',0.7]] },
+  // 환생: 알래스카를 연 뒤 가능. 돈·장비·해금·그물이 초기화되고, 레벨마다 판매가 +10%·보스 기척 +10%
+  prestige: { priceBonus:0.10, bossBonus:0.10, startMoney:150 },
   // 낚시터 도감을 모두 채우면 받는 작은 편의 효과 (중복 없이 1회)
   dexRewards: {
     indoor: { perk:'net',   value:2,   text:'살림망 +2칸' },
@@ -300,25 +357,45 @@ const CONFIG = {
       { name:'카본 낚싯대',  cost:200,   zone:0.28, absorb:0.38 },
       { name:'강화 카본대',  cost:1200,  zone:0.32, absorb:0.45 },
       { name:'마스터 로드',  cost:6000,  zone:0.36, absorb:0.52 },
-      { name:'전설의 장대',  cost:25000, zone:0.41, absorb:0.60 }]},
+      { name:'전설의 장대',  cost:25000, zone:0.41, absorb:0.60 },
+      { name:'전설의 장대 +1', cost:60000,   zone:0.43, absorb:0.62 },
+      { name:'전설의 장대 +2', cost:130000,  zone:0.45, absorb:0.64 },
+      { name:'전설의 장대 +3', cost:280000,  zone:0.47, absorb:0.66 },
+      { name:'전설의 장대 +4', cost:600000,  zone:0.49, absorb:0.68 },
+      { name:'전설의 장대 +5', cost:1300000, zone:0.51, absorb:0.70 }]},
     reel: { label:'릴', short:'릴', levels:[
       { name:'기본 스피닝릴', cost:0,     speed:0.16 },
       { name:'정밀 스피닝릴', cost:250,   speed:0.21 },
       { name:'하이기어 릴',   cost:1500,  speed:0.27 },
       { name:'전동 릴',       cost:7000,  speed:0.34 },
-      { name:'명인의 릴',     cost:30000, speed:0.42 }]},
+      { name:'명인의 릴',     cost:30000, speed:0.42 },
+      { name:'명인의 릴 +1',  cost:70000,   speed:0.45 },
+      { name:'명인의 릴 +2',  cost:150000,  speed:0.48 },
+      { name:'명인의 릴 +3',  cost:320000,  speed:0.51 },
+      { name:'명인의 릴 +4',  cost:700000,  speed:0.54 },
+      { name:'명인의 릴 +5',  cost:1500000, speed:0.57 }]},
     line: { label:'낚싯줄', short:'줄', levels:[
       { name:'나일론 2호', cost:0,     hp:1.2 },
       { name:'나일론 4호', cost:150,   hp:1.7 },
       { name:'카본 5호',   cost:1000,  hp:2.4 },
       { name:'PE 3호',     cost:5000,  hp:3.3 },
-      { name:'초강력 PE',  cost:22000, hp:4.5 }]},
+      { name:'초강력 PE',  cost:22000, hp:4.5 },
+      { name:'초강력 PE +1', cost:50000,   hp:5.0 },
+      { name:'초강력 PE +2', cost:110000,  hp:5.5 },
+      { name:'초강력 PE +3', cost:240000,  hp:6.0 },
+      { name:'초강력 PE +4', cost:520000,  hp:6.5 },
+      { name:'초강력 PE +5', cost:1100000, hp:7.0 }]},
     bait: { label:'미끼', short:'미끼', levels:[
       { name:'떡밥',      cost:0,     luck:0 },
       { name:'지렁이',    cost:100,   luck:0.15 },
       { name:'크릴',      cost:800,   luck:0.30 },
       { name:'생미끼',    cost:4500,  luck:0.50 },
-      { name:'황금 미끼', cost:20000, luck:0.80 }]},
+      { name:'황금 미끼', cost:20000, luck:0.80 },
+      { name:'황금 미끼 +1', cost:55000,   luck:0.90 },
+      { name:'황금 미끼 +2', cost:120000,  luck:1.00 },
+      { name:'황금 미끼 +3', cost:260000,  luck:1.10 },
+      { name:'황금 미끼 +4', cost:560000,  luck:1.20 },
+      { name:'황금 미끼 +5', cost:1200000, luck:1.30 }]},
   },
 
   // method: 선호 방식 / len: 길이(cm) 범위 / price: 평균 길이일 때 가격 / power: 저항(0~1)
@@ -410,14 +487,19 @@ const CONFIG = {
   ],
 };
 
+// 보스를 물고기 목록에 등록 (모습은 base 종을 따르고 crown 표시)
+Object.entries(CONFIG.bosses).forEach(([sid,b])=>{ CONFIG.fish[b.id] = Object.assign({}, CONFIG.fish[b.base], { name:b.name, len:b.len, price:b.price, power:1, boss:true, stage:sid }); });
+
 /* ===================== 2. SAVE ===================== */
 const SAVE_KEY = 'bukangi-fishing-v1';
 function defaultSave(){
   return { money:0, gear:{rod:0,reel:0,line:0,bait:0}, unlocked:{indoor:true}, stage:'indoor', prevStage:'indoor',
-           tickets:0, busanLeft:0, net:[], dex:{}, dexDone:{}, tutorial:{done:false, step:0}, method:'float', sound:true, autoNet:{ lv:0, prog:0, fish:[], last:0 }, stats:defaultStats() };
+           tickets:0, busanLeft:0, net:[], dex:{}, dexDone:{}, tutorial:{done:false, step:0}, method:'float', sound:true, autoNet:{ lv:0, prog:0, fish:[], last:0 }, stats:defaultStats(),
+           boss:{ meter:{}, beaten:{} }, quests:{ day:'', list:[], streak:0, bonus:false }, buffs:{ big:0, buk:0 },
+           aquarium:{ lv:0, fish:[], bank:0, last:0 }, prestige:0, tourBest:{} };
 }
 function defaultStats(){
-  return { casts:0, bites:0, hooks:0, perfect:0, catches:0, netCatches:0, bukangi:0, earned:0, playSec:0,
+  return { variants:0, medals:[0,0,0], bossWins:0, tourWins:0, questsDone:0, casts:0, bites:0, hooks:0, perfect:0, catches:0, netCatches:0, bukangi:0, earned:0, playSec:0,
            grades:[0,0,0,0,0], lost:{ early:0, late:0, miss:0, snap:0, slack:0, escape:0 },
            bestLen:null, bestPrice:null };   // best*: { id, len, price, grade, stage, at }
 }
@@ -435,9 +517,12 @@ function backfillStats(s){
   });
   st.backfilled = st.catches > 0;
 }
-function normalizeSave(d){ const s = Object.assign(defaultSave(), d); s.gear = Object.assign(defaultSave().gear, d.gear||{}); s.autoNet = Object.assign(defaultSave().autoNet, d.autoNet||{});
+function normalizeSave(d){ const s = Object.assign(defaultSave(), d); s.gear = Object.assign(defaultSave().gear, d.gear||{});  const D = defaultSave();
+  s.autoNet = Object.assign(D.autoNet, d.autoNet||{});
+  s.boss = Object.assign(D.boss, d.boss||{}); s.quests = Object.assign(D.quests, d.quests||{}); s.buffs = Object.assign(D.buffs, d.buffs||{});
+  s.aquarium = Object.assign(D.aquarium, d.aquarium||{}); s.tourBest = Object.assign({}, d.tourBest||{});
   if(!d.stats){ s.stats = defaultStats(); backfillStats(s); }
-  else { s.stats = Object.assign(defaultStats(), d.stats); s.stats.lost = Object.assign(defaultStats().lost, d.stats.lost||{}); }
+  else { s.stats = Object.assign(defaultStats(), d.stats); if(!Array.isArray(s.stats.medals)) s.stats.medals = [0,0,0]; s.stats.lost = Object.assign(defaultStats().lost, d.stats.lost||{}); }
   return s; }
 function loadSave(){
   try{ const raw = localStorage.getItem(SAVE_KEY); if(raw) return normalizeSave(JSON.parse(raw)); }catch(e){}
@@ -484,16 +569,43 @@ function checkDexRewards(){
   return got;
 }
 
+// 실제 시각 기반 시간대·날씨. 같은 시각이면 누구에게나 같은 날씨
+function hash01(n){ let x = Math.sin(n*127.1 + 311.7)*43758.5453; return x - Math.floor(x); }
+function getEnv(stage){
+  stage = stage || curStage();
+  if(stage.theme==='indoor') return { tod:'day', weather:'clear', indoor:true };
+  const W = CONFIG.world, now = Date.now();
+  const f = (now / (W.dayMinutes*60000)) % 1;
+  let tod = f < 0.15 ? 'dawn' : f < 0.55 ? 'day' : f < 0.7 ? 'dusk' : 'night';
+  if(stage.theme==='busan') tod = 'night';
+  const h = hash01(Math.floor(now / (W.weatherMinutes*60000)));
+  let weather = h < W.weatherOdds.clear ? 'clear' : h < W.weatherOdds.clear + W.weatherOdds.rain ? 'rain' : 'fog';
+  if(weather==='rain' && stage.theme==='alaska') weather = 'snow';
+  return { tod, weather, indoor:false, dayF:f };
+}
+const TOD_NAME = { dawn:'새벽', day:'낮', dusk:'저녁', night:'밤' }, WEATHER_NAME = { clear:'맑음', rain:'비', fog:'안개', snow:'눈보라' };
+function envTip(e){
+  const t = [];
+  if(e.tod==='night') t.push('밤: 갈치·장어·메기·볼락 같은 야행성 물고기가 조금 더 자주 나오고 값은 1.5배, 좋은 물고기 증가');
+  if(e.weather==='rain' || e.weather==='snow') t.push('비·눈보라: 입질이 빨라지고 좋은 물고기 증가');
+  if(e.weather==='fog') t.push('안개: 부캉이와 희귀 변종 확률 2배');
+  return t.join(' / ') || '특별한 효과 없음';
+}
 function rollCatch(stage, method, power=0.5, opt={}){
+  const env = getEnv(stage), W = CONFIG.world;
+  const wet = env.weather==='rain' || env.weather==='snow', foggy = env.weather==='fog', night = env.tod==='night';
   const luck = opt.luck ?? gearLv('bait').luck;
-  const castF = opt.quality ?? (clamp(power,0,1)-0.5)*2;   // -1 가까이 ~ +1 멀리 (그물은 1을 넘을 수 있음)
-  if(!opt.noBukangi && stage.bukangi && Math.random() < CONFIG.bukangi.baseChance*(1+luck*CONFIG.bukangi.luckMul)){
+  let castF = opt.quality ?? (clamp(power,0,1)-0.5)*2;   // -1 가까이 ~ +1 멀리 (그물은 1을 넘을 수 있음)
+  castF += (night ? W.nightBias : 0) + (wet ? W.rainBias : 0) + (opt.big ? CONFIG.baits.big.bias : 0);
+  const bukMul = (foggy ? W.fogBukangi : 1) * (opt.buk ? CONFIG.baits.buk.mul : 1);
+  if(!opt.noBukangi && stage.bukangi && Math.random() < CONFIG.bukangi.baseChance*(1+luck*CONFIG.bukangi.luckMul)*bukMul){
     return { kind:'bukangi', id:'bukangi', name:'부캉이', diff:CONFIG.bukangi.diff, method, len:0, price:0 };
   }
   const entries = stage.fish.map(([id,w])=>{
     const f = CONFIG.fish[id]; let wt = w;
     wt *= 1 + luck*gradeIndex(f.price)*0.35;           // 미끼 행운: 비싼 종 가중치↑
     if(f.method===method) wt *= CONFIG.methodSpawnBonus;
+    if(night && W.nightFish.includes(id)) wt *= W.nightMul;
     wt *= Math.pow(1+CONFIG.cast.gradeBias, castF*gradeIndex(f.price));   // 멀리 던질수록 비싼 종↑, 가까이면↓
     return {id, wt};
   });
@@ -504,12 +616,23 @@ function rollCatch(stage, method, power=0.5, opt={}){
   const t = Math.pow(Math.random(), Math.max(0.9, 1.8 - luck*0.6));   // 작은 개체가 흔함
   const len = Math.round((f.len[0] + (f.len[1]-f.len[0])*t)*10)/10;
   const avg = (f.len[0]+f.len[1])/2;
-  const price = Math.max(1, Math.round(f.price*Math.pow(len/avg,2)));
-  const grade = gradeIndex(price);
-  const weight = Math.round(0.012*Math.pow(len,3)*(f.shape==='long'?0.35:f.shape==='tuna'?1.3:1));
-  const diff = clamp(f.power*0.7 + grade*0.05 + t*0.12, 0, 1);
-  return { kind:'fish', id, name:f.name, len, weight, price, grade, diff, method:f.method };
+  return makeFish(id, len, t, { luck, foggy, nightFresh: night && W.nightFish.includes(id) });
 }
+// 길이로 가격·등급·무게·난이도를 정하고, 희귀 변종과 환생 보너스를 적용
+function makeFish(id, len, t, o={}){
+  const f = CONFIG.fish[id], V = CONFIG.variants, avg = (f.len[0]+f.len[1])/2;
+  let price = Math.max(1, Math.round(f.price*Math.pow(len/avg,2))), variant = null;
+  const vc = (V.baseChance + (o.luck||0)*V.luckBonus) * (o.foggy ? CONFIG.world.fogVariant : 1);
+  if(o.nightFresh) price = Math.round(price * CONFIG.world.nightPrice);
+  if(!f.boss && !o.noVariant && Math.random() < vc){ variant = Math.random() < V.gold.share ? 'gold' : 'albino'; price *= V[variant].mul; }
+  const grade = gradeIndex(price);
+  price = Math.round(price * (1 + S.prestige*CONFIG.prestige.priceBonus));
+  const weight = Math.round(0.012*Math.pow(len,3)*(f.shape==='long'?0.35:f.shape==='tuna'?1.3:f.shape==='flat'?0.8:1));
+  const diff = f.boss ? 1 : clamp(f.power*0.7 + grade*0.05 + t*0.12, 0, 1);
+  const name = (variant ? V[variant].name+' ' : '') + f.name;
+  return { kind:'fish', id, name, len, weight, price, grade, diff, method:f.method, variant, boss:!!f.boss };
+}
+function fishItem(c){ return { id:c.id, name:c.name, len:c.len, weight:c.weight, price:c.price, grade:c.grade, variant:c.variant||null, boss:!!c.boss }; }
 function fmtWeight(g){ return g>=1000 ? (g/1000).toFixed(g>=10000?0:1)+'kg' : g+'g'; }
 
 /* ===================== 4a. SOUND ===================== */
@@ -619,7 +742,10 @@ function releaseCast(){
   G.castPower = pw;
   G.castX = lerp(c.nearX, c.farX, pw);
   G.castM = Math.round(lerp(c.nearM, c.farM, pw));
-  G.catch = rollCatch(curStage(), S.method, pw);
+  const useBig = S.buffs.big>0, useBuk = S.buffs.buk>0;
+  if(useBig) S.buffs.big--; if(useBuk) S.buffs.buk--;
+  G.catch = bossReady(S.stage) ? makeBoss(S.stage) : rollCatch(curStage(), S.method, pw, { big:useBig, buk:useBuk });
+  if(G.catch.boss) toast('물속에서 거대한 그림자가 움직여요…');
   setPhase('casting');
   SFX.cast();
   if(pw >= c.perfectFrom){ toast(`최대 캐스팅! ${G.castM}m`); buzz([20,30,20]); }
@@ -628,7 +754,8 @@ function releaseCast(){
 }
 function beginWait(){
   const st = curStage(), aff = st.affinity===S.method ? CONFIG.stageAffinityWait.match : CONFIG.stageAffinityWait.mismatch;
-  const at = rand(CONFIG.bite.waitMin, CONFIG.bite.waitMax)*aff*(1-perk('wait'));
+  const env = getEnv(st), wet = env.weather==='rain' || env.weather==='snow';
+  const at = rand(CONFIG.bite.waitMin, CONFIG.bite.waitMax)*aff*(1-perk('wait'))*(wet ? CONFIG.world.rainWait : 1);
   const nibbles = [];
   if(S.method==='float'){
     const n = Math.floor(Math.random()*(CONFIG.bite.nibbleMax+1));
@@ -695,7 +822,7 @@ function action(){
   }
 }
 function hookSuccess(perfect){
-  S.stats.hooks++; if(perfect) S.stats.perfect++;
+  S.stats.hooks++; if(perfect){ S.stats.perfect++; questEvent('perfect'); }
   emit('hook');
   G.hookFx = 1;
   SFX.hook(perfect); buzz(perfect ? [30,30,30] : 35);
@@ -716,6 +843,7 @@ function startReel(perfect){
     reelSpeed: gearLv('reel').speed/(0.75 + d*0.9),
     absorb: gearLv('rod').absorb, match: f.method===S.method, force:0,
   };
+  if(f.boss){ G.R.reelSpeed *= CONFIG.bossFight.reelMul; G.R.boss = { phase:1, diveT: 3, warn:0, dive:0, k: d*d*1.5 }; }
   setPhase('reeling');
 }
 function updateReel(dt){
@@ -730,13 +858,23 @@ function updateReel(dt){
   R.burstT -= dt;
   if(R.burstT<=0 && R.burstLeft<=0){
     R.burstLeft = rand(0.35, 0.85);
-    const s = c.burstStrength*(0.35+d)*rand(0.6,1.2);
+    const s = c.burstStrength*(0.35+d)*rand(0.6,1.2)*(R.boss ? CONFIG.bossFight.burstMul[R.boss.phase-1] : 1);
     R.burstStr = Math.random()<c.burstSlackChance ? -s*0.7 : s;
     R.burstT = lerp(c.burstEveryEasy, c.burstEveryHard, d)*rand(0.6,1.4);
     if(R.burstStr>0){ const fp = fishPos(); splash(fp.x, fp.surf, 5); SFX.thrash(); }
   }
   let force = R.baseForce + Math.sin(R.time*R.wobF)*R.wobA + Math.sin(R.time*R.wobF*2.7)*R.wobA*0.5;
   if(R.burstLeft>0){ R.burstLeft -= dt; force += R.burstStr*(isReel ? 1 - R.absorb*R.angle : 1); }
+  if(R.boss){   // 보스: 거리에 따라 3단계, 2단계부터 경고 후 잠수(강한 당김)
+    const B = R.boss, BF = CONFIG.bossFight, ph = R.dist > 0.66 ? 1 : R.dist > 0.33 ? 2 : 3;
+    if(ph !== B.phase){ B.phase = ph; toast(ph===2 ? '2단계! 보스가 잠수를 시작해요' : ph===3 ? '마지막 단계! 몸부림이 거세져요' : '보스가 힘을 되찾았어요'); SFX.alert(); buzz([40,40,40]); }
+    force += BF.phaseForce[ph-1]*B.k;
+    if(BF.diveEvery[ph-1] > 0){
+      if(B.dive > 0){ B.dive -= dt; force += BF.diveForce*B.k; if(Math.random()<0.3){ const fp = fishPos(); splash(fp.x, fp.surf, 2); } }
+      else if(B.warn > 0){ B.warn -= dt; if(B.warn <= 0){ B.dive = BF.diveTime; SFX.thrash(); buzz(120); } }
+      else { B.diveT -= dt; if(B.diveT <= 0){ B.warn = BF.warn; B.diveT = BF.diveEvery[ph-1]*rand(0.8,1.2); SFX.warn(); } }
+    }
+  }
   force = Math.max(0.02, force*R.forceMul);
   R.force = force;
 
@@ -770,7 +908,9 @@ function updateReel(dt){
 function lose(msg, kind){
   G.lostMsg = msg; G.lostKind = kind||'';
   const L = S.stats.lost, why = kind==='snap' ? 'snap' : msg.includes('일찍') ? 'early' : msg.includes('털') ? 'slack' : msg.includes('도망') ? 'escape' : msg.includes('챔질 실패') ? 'miss' : 'late';
-  L[why] = (L[why]||0) + 1; save();
+  L[why] = (L[why]||0) + 1; questEvent('lose');
+  if(G.catch && G.catch.boss){ const b = bossOf(G.catch.bossStage); S.boss.meter[G.catch.bossStage] = Math.floor(b.need*CONFIG.bossFight.loseKeep); G.lostMsg = `${josa(b.name,'을','를')} 놓쳤어요. 기척은 남아 있어요`; }
+  save();
   if(kind==='snap'){ SFX.snap(); buzz([80,40,80]); } else SFX.fail();
   setPhase('lost');
   emit('lost');
@@ -785,18 +925,20 @@ function landCatch(){
   let record = false;
   G.newBest = null;
   if(c.kind==='bukangi'){
-    S.tickets++; S.stats.bukangi++;
+    S.tickets++; S.stats.bukangi++; questEvent('catch', c);
     const e = S.dex.bukangi || (S.dex.bukangi = {count:0, maxLen:0, best:-1});
     e.count++;
   } else {
-    G.lastNet = { id:c.id, name:c.name, len:c.len, weight:c.weight, price:c.price, grade:c.grade };
+    G.lastNet = fishItem(c);
     S.net.push(G.lastNet);
     record = registerDex(c);
+    if(c.boss){ const sid = c.bossStage, first = !S.boss.beaten[c.id]; S.boss.beaten[c.id] = (S.boss.beaten[c.id]||0) + 1; S.boss.meter[sid] = 0; S.stats.bossWins++; G.bossFirst = first; }
     G.newBest = recordCatch(c, false);
   }
+  if(G.tour && !G.tour.over && S.stage===G.tour.stage && c.kind==='fish'){ G.tour.total += (c.weight||0)/1000; G.tour.count++; }
   const rewards = checkDexRewards();
   save();
-  const gIdx = c.kind==='bukangi' ? 4 : c.grade;
+  const gIdx = c.kind==='bukangi' || c.boss ? 4 : c.grade;
   G.land = { t:0, x0:fp.x, y0:fp.surf, record, rewards, gIdx, sung:false,
              dur: REDUCED ? CONFIG.landing.reduced : CONFIG.landing.base + gIdx*CONFIG.landing.perGrade };
   SFX.splash(); buzz(40);
@@ -819,6 +961,211 @@ function finishLanding(){
   emit('catch');
 }
 
+/* 낚시 대회: 3분 동안 직접 잡은 물고기 총 무게로 라이벌 3명과 겨룸 */
+const tourFee = st => Math.max(100, Math.round(stageExpected(st)*CONFIG.tournament.feeMul/10)*10);
+const tourOK = st => st && !st.ticket && st.id!=='indoor';
+function startTour(){
+  const st = curStage(), T = CONFIG.tournament, fee = tourFee(st);
+  if(!tourOK(st) || G.tour || G.phase!=='idle' || S.money < fee) return;
+  let kg = 0; for(let i=0;i<300;i++){ const c = rollCatch(st, S.method, 0.5, { noBukangi:true }); kg += (c.weight||0)/1000; } kg /= 300;
+  S.money -= fee; save(); refreshHud(); closeModal();
+  G.tour = { stage:st.id, left:T.seconds, total:0, count:0, fee, over:false,
+    rivals: T.rivals.map(([name,str])=>({ name, rate: kg*(2.6/60)*str*rand(0.85,1.15), score:0 })) };
+  SFX.reward(); toast(`낚시 대회 시작! ${T.seconds/60}분 동안 무게를 겨뤄요`);
+}
+function tourTick(dt){
+  const T = G.tour; if(!T) return;
+  if(!T.over){ T.left -= dt; T.rivals.forEach(r=>{ r.score += r.rate*dt*(0.4 + Math.random()*1.2); }); if(T.left <= 0){ T.left = 0; T.over = true; toast('대회 종료! 지금 낚는 물고기는 기록에 안 들어가요'); } }
+  else if(['idle','aiming','waiting','casting','lost'].includes(G.phase)) finishTour();
+}
+function finishTour(){
+  const T = G.tour; if(!T) return; G.tour = null;
+  if(G.phase!=='idle') setPhase('idle');
+  const board = [{ name:'나', score:T.total, me:true }, ...T.rivals.map(r=>({ name:r.name, score:r.score }))].sort((a,b)=>b.score-a.score);
+  const rank = board.findIndex(b=>b.me), prize = Math.round(T.fee*CONFIG.tournament.prize[rank]);
+  S.money += prize; if(rank===0) S.stats.tourWins++;
+  S.tourBest[T.stage] = Math.max(S.tourBest[T.stage]||0, Math.round(T.total*10)/10);
+  save(); refreshHud(); SFX[rank===0 ? 'reward' : 'coin']();
+  openPanel('대회 결과', `<div class="catch"><h3>${rank+1}위${rank===0?'! 우승':''}</h3><p>${stageById(T.stage).name} 대회 · ${T.count}마리 · ${T.total.toFixed(1)}kg</p></div>
+    ${board.map((b,i)=>`<div class="rrow ${b.me?'me':''}"><span class="rno">${i+1}</span><span></span><span class="rname">${b.name}</span><span class="rfish"></span><span class="rval">${b.score.toFixed(1)}kg</span></div>`).join('')}
+    <p class="rnote">참가비 ${won(T.fee)}원 · 상금 <span class="price">${won(prize)}원</span>${S.tourBest[T.stage] ? ` · 이 낚시터 최고 기록 ${S.tourBest[T.stage]}kg` : ''}</p>
+    <div class="foot"><button class="btn hot" data-act="close">확인</button></div>`);
+}
+function drawTour(){
+  const T = G.tour; if(!T) return;
+  const w = Math.min(170, CW*0.42), x = 10, y = G.phase==='reeling' ? 84 : 64;
+  const board = [{ name:'나', score:T.total, me:true }, ...T.rivals.map(r=>({ name:r.name, score:r.score }))].sort((a,b)=>b.score-a.score);
+  panelBox(x, y, w, 30 + board.length*17);
+  ctx.textBaseline='middle'; ctx.font=`15px ${FD}`; ctx.fillStyle = T.over ? '#ff8a7a' : '#ffd04a'; ctx.textAlign='left';
+  const s = Math.ceil(T.left); ctx.fillText(T.over ? '대회 종료' : `대회 ${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`, x+10, y+14);
+  ctx.font=`600 12px ${FB}`;
+  board.forEach((b,i)=>{ const yy = y + 32 + i*17; ctx.fillStyle = b.me ? '#ffd04a' : '#f4ecd9'; ctx.textAlign='left'; ctx.fillText(`${i+1}. ${b.name}`, x+10, yy, w*0.55); ctx.textAlign='right'; ctx.fillText(`${b.score.toFixed(1)}kg`, x+w-10, yy); });
+  ctx.textAlign='left';
+}
+
+/* 환생: 돈·장비·해금·그물을 처음으로 돌리고 영구 보너스를 받음 */
+let prestigeArm = false;
+function canPrestige(){ return !!S.unlocked.alaska; }
+function doPrestige(btn){
+  if(!canPrestige() || G.tour) return;
+  if(!prestigeArm){ prestigeArm = true; btn.textContent = '정말요? 한 번 더 누르면 처음부터 다시 시작해요'; btn.classList.add('hot'); return; }
+  prestigeArm = false; const P = CONFIG.prestige;
+  S.prestige++; S.money = P.startMoney; S.gear = { rod:0, reel:0, line:0, bait:0 }; S.unlocked = { indoor:true };
+  S.stage = 'indoor'; S.prevStage = 'indoor'; S.busanLeft = 0; S.net = []; S.autoNet = { lv:0, prog:0, fish:[], last:0 }; S.buffs = { big:0, buk:0 }; S.boss.meter = {};
+  save(); G.R = null; setPhase('idle'); closeModal(); refreshHud(); SFX.reward();
+  toast(`환생 ${S.prestige}! 판매가 +${Math.round(S.prestige*P.priceBonus*100)}% · 보스 기척 +${Math.round(S.prestige*P.bossBonus*100)}%`);
+}
+
+/* 특수 미끼 */
+function buyBait(k){
+  const b = CONFIG.baits[k]; if(!b || S.money < b.cost) return;
+  if(k==='boss'){ if(!bossOf(S.stage) || bossReady(S.stage)) return; S.money -= b.cost; addBossMeter(S.stage, b.meter); }
+  else { S.money -= b.cost; S.buffs[k] += b.uses; }
+  save(); refreshHud(); SFX.coin(); toast(`${b.name} 구입`); openShop('bait');
+}
+
+/* 수족관: 전시한 물고기 가격 합에 비례해 관람 수입이 쌓임 */
+const aqLv = ()=>CONFIG.aquarium.levels[S.aquarium.lv];
+const aqCap = ()=>aqLv().cap;
+const aqRate = ()=>S.aquarium.fish.reduce((a,f)=>a+f.price,0)*CONFIG.aquarium.hourly;   // 시간당
+function aquaAdvance(){
+  const A = S.aquarium, now = Date.now();
+  if(!A.last){ A.last = now; return; }
+  let el = (now - A.last)/3600000; A.last = now;
+  if(el<=0 || !A.fish.length) return;
+  el = Math.min(el, CONFIG.aquarium.maxOfflineHours);
+  A.bank += aqRate()*el;
+}
+function toAquarium(i){
+  const A = S.aquarium; if(A.lv<=0 || A.fish.length >= aqCap()) return;
+  aquaAdvance(); const f = S.net.splice(i,1)[0]; if(!f) return;
+  A.fish.push(f); save(); refreshHud(); toast(`${josa(f.name,'을','를')} 수족관에 전시했어요`); openShop('sell');
+}
+function aquaCollect(){ aquaAdvance(); const A = S.aquarium, v = Math.floor(A.bank); if(v<=0) return; S.money += v; A.bank -= v; save(); refreshHud(); SFX.coin(); toast(`관람 수입 +${won(v)}원`); openAquarium(); }
+function aquaUpgrade(){ const nx = CONFIG.aquarium.levels[S.aquarium.lv+1]; if(!nx || S.money < nx.cost) return; aquaAdvance(); S.money -= nx.cost; S.aquarium.lv++; if(!S.aquarium.last) S.aquarium.last = Date.now(); save(); refreshHud(); SFX.upgrade(); toast(`${nx.name} 완성!`); openAquarium(); }
+function aquaRelease(i){ aquaAdvance(); const f = S.aquarium.fish.splice(i,1)[0]; if(!f) return; save(); toast(`${josa(f.name,'을','를')} 바다로 돌려보냈어요`); openAquarium(); }
+function openAquarium(){
+  aquaAdvance();
+  const A = S.aquarium, L = aqLv(), nx = CONFIG.aquarium.levels[A.lv+1];
+  const trophies = Object.entries(CONFIG.bosses).filter(([,b])=>S.boss.beaten[b.id]).map(([sid,b])=>`<div class="trophy"><canvas data-fish="${b.id}"></canvas><b>${b.name}</b><span class="s">${stageById(sid).name} · ${S.boss.beaten[b.id]}번 · 최대 ${S.dex[b.id] ? S.dex[b.id].maxLen : '-'}cm</span></div>`).join('');
+  const fishRows = A.fish.map((f,i)=>`<div class="row"><canvas class="minicv" data-fish="${f.id}" data-var="${f.variant||''}"></canvas><div class="main"><div class="t">${f.name} ${gradeChip(CONFIG.grades[f.grade])}</div><div class="s">${f.len}cm · 시간당 ${won(Math.round(f.price*CONFIG.aquarium.hourly))}원</div></div><button class="btn" data-act="aquaRelease" data-v="${i}">풀어주기</button></div>`).join('');
+  const tank = A.lv>0 ? `<canvas id="aquaCv" class="aquacv"></canvas>` : `<div class="empty">아직 수조가 없어요. 수조를 들이면 잡은 물고기를 전시하고 관람 수입을 받을 수 있어요.</div>`;
+  openPanel('수족관', `<div data-aquapanel></div>${tank}
+    <div class="bar-top" style="margin-top:10px"><span><b>${L.name}</b>${A.lv>0 ? ` · 전시 ${A.fish.length}/${L.cap} · 시간당 <span class="price">${won(Math.round(aqRate()))}원</span>` : ''}</span>
+      ${A.lv>0 ? `<button class="btn hot" data-act="aquaCollect" ${A.bank>=1?'':'disabled'}>관람 수입 받기 +<span id="aquaBank">${won(Math.floor(A.bank))}</span>원</button>` : ''}</div>
+    ${nx ? `<div class="row"><div class="main"><div class="t">${A.lv>0?'수조 키우기':'수조 들이기'} · ${nx.name}</div><div class="s">전시 ${nx.cap}칸</div></div><span class="price">${won(nx.cost)}원</span><button class="btn hot" data-act="aquaUpgrade" ${S.money>=nx.cost?'':'disabled'}>${A.lv>0?'키우기':'들이기'}</button></div>` : '<p class="rnote">가장 큰 수족관이에요.</p>'}
+    ${A.lv>0 ? `<div class="dexh" style="margin-top:12px">전시 중인 물고기</div>${fishRows || '<div class="empty">상점의 판매 탭에서 물고기 옆 "전시"를 누르면 여기로 와요.</div>'}` : ''}
+    <div class="dexh" style="margin-top:12px">보스 트로피 ${Object.values(CONFIG.bosses).filter(b=>S.boss.beaten[b.id]).length}/${Object.keys(CONFIG.bosses).length}</div>
+    ${trophies ? `<div class="trophies">${trophies}</div>` : '<div class="empty">보스를 처음 잡으면 트로피가 걸려요.</div>'}
+    <p class="rnote">관람 수입은 게임을 꺼 둔 동안에도 최대 ${CONFIG.aquarium.maxOfflineHours}시간까지 쌓여요. 풀어준 물고기는 돌아오지 않아요.</p>`);
+  G.aquaFish = A.fish.map((f,i)=>({ f, x: Math.random(), y: 0.2+Math.random()*0.6, dir: Math.random()<0.5?-1:1, sp: 0.03+Math.random()*0.04, ph: Math.random()*6 }));
+}
+function drawAquarium(dt){
+  const cv = document.getElementById('aquaCv'); if(!cv) return;
+  const r = cv.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio||1);
+  if(cv.width !== Math.round(r.width*dpr)){ cv.width = Math.round(r.width*dpr); cv.height = Math.round(r.height*dpr); }
+  const c = cv.getContext('2d'), w = r.width, h = r.height, lv = S.aquarium.lv; c.setTransform(dpr,0,0,dpr,0,0);
+  const g = c.createLinearGradient(0,0,0,h); g.addColorStop(0, lv>=4 ? '#2a7fa8' : '#3f9ab8'); g.addColorStop(1, lv>=4 ? '#0f3e5e' : '#1d6a88'); c.fillStyle = g; c.fillRect(0,0,w,h);
+  c.fillStyle='rgba(255,255,255,.08)'; for(let i=0;i<4;i++){ c.beginPath(); c.moveTo(w*(0.1+i*0.25),0); c.lineTo(w*(0.18+i*0.25),0); c.lineTo(w*(0.05+i*0.25)+30,h); c.lineTo(w*(0.0+i*0.25)+30,h); c.fill(); }   // 빛줄기
+  c.fillStyle='#d8c9a0'; c.beginPath(); c.moveTo(0,h); for(let x=0;x<=w;x+=20) c.lineTo(x, h-14-Math.sin(x*0.03)*4); c.lineTo(w,h); c.fill();   // 모래
+  const t = G.time;
+  if(lv>=2) for(let i=0;i<5;i++){ const x = w*(0.08+i*0.21); c.strokeStyle = i%2 ? '#3f8a3e' : '#5aa04a'; c.lineWidth = 3; for(let k=0;k<3;k++){ c.beginPath(); c.moveTo(x+k*5, h-12); c.quadraticCurveTo(x+k*5+Math.sin(t*1.5+i+k)*8, h-40, x+k*5+Math.sin(t*1.2+k)*10, h-60-k*10); c.stroke(); } }
+  if(lv>=3){ [[0.3,'#e86a6a'],[0.7,'#f2a65a'],[0.88,'#d86ab0']].forEach(([k,col])=>{ const x = w*k; c.fillStyle = col; for(let j=0;j<4;j++){ c.beginPath(); c.ellipse(x + (j-1.5)*6, h-22-j%2*8, 4, 10, (j-1.5)*0.3, 0, Math.PI*2); c.fill(); } }); }
+  if(lv>=4){ const x = w*0.55; c.fillStyle='#7a5a2e'; c.fillRect(x-18,h-30,36,18); c.fillStyle='#a87a3a'; c.beginPath(); c.ellipse(x,h-30,18,7,0,Math.PI,0); c.fill(); c.fillStyle='#ffd04a'; c.fillRect(x-4,h-26,8,6); }
+  if(lv>=5){ c.strokeStyle='#8a8478'; c.lineWidth=10; c.beginPath(); c.arc(w*0.2, h-12, 30, Math.PI, 0); c.stroke(); }
+  (G.aquaFish||[]).forEach(a=>{
+    a.x += a.dir*a.sp*dt; if(a.x > 1.05){ a.dir = -1; } if(a.x < -0.05){ a.dir = 1; }
+    const len = clamp(a.f.len/150, 0.25, 1)*Math.min(w*0.22, 120) + 22;
+    drawFish(c, a.x*w, a.y*(h-50) + 14 + Math.sin(t*1.3+a.ph)*6, len, a.f.id, { facing:a.dir, variant:a.f.variant, wiggle:Math.sin(t*6+a.ph)*0.05 });
+  });
+  c.fillStyle='rgba(255,255,255,.55)'; for(let i=0;i<14;i++){ const k = (t*0.25 + i*0.071) % 1; c.beginPath(); c.arc(w*(0.15+0.05*i) + Math.sin(t*2+i)*4, h - k*h, 1.5+(i%3), 0, Math.PI*2); c.fill(); }   // 거품
+  const bank = document.getElementById('aquaBank'); if(bank){ aquaAdvance(); const v = won(Math.floor(S.aquarium.bank)); if(bank.textContent !== v) bank.textContent = v; }
+}
+
+/* 오늘의 의뢰 */
+function dayKey(d=new Date()){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function seededRng(str){ let h = 1779033703 ^ str.length; for(let i=0;i<str.length;i++){ h = Math.imul(h ^ str.charCodeAt(i), 3432918353); h = h<<13 | h>>>19; }
+  return ()=>{ h = Math.imul(h ^ h>>>16, 2246822507); h = Math.imul(h ^ h>>>13, 3266489909); h ^= h>>>16; return (h>>>0)/4294967296; }; }
+function stageExpected(st){ const tw = st.fish.reduce((a,[,w])=>a+w,0); return st.fish.reduce((a,[id,w])=>a + w*CONFIG.fish[id].price*0.87, 0)/tw; }
+function questStages(){ const l = CONFIG.stages.filter(st=>!st.ticket && st.id!=='indoor' && S.unlocked[st.id]); return l.length ? l : [stageById('indoor')]; }
+function genQuests(day){
+  const rnd = seededRng(day + '|' + S.prestige), pick = a => a[Math.floor(rnd()*a.length)], ri = (a,b)=> a + Math.floor(rnd()*(b-a+1));
+  const stages = questStages(), best = stages[stages.length-1], bestExp = stageExpected(best);
+  const types = ['species','grade','method','streak','perfect','earn'].sort(()=>rnd()-0.5).slice(0, CONFIG.quests.perDay);
+  return types.map(type=>{
+    const q = { type, prog:0, done:false, claimed:false, reward: Math.max(100, Math.round(bestExp*(CONFIG.quests.rewardMul[0] + rnd()*(CONFIG.quests.rewardMul[1]-CONFIG.quests.rewardMul[0]))/10)*10) };
+    if(type==='species'){ const st = pick(stages), tw = st.fish.reduce((a,[,w])=>a+w,0), pool = st.fish.filter(([,w])=>w/tw>=0.1); q.stage = st.id; q.fish = pick(pool.length?pool:st.fish)[0]; q.n = ri(3,5); }
+    if(type==='grade'){ const st = pick(stages), idx = CONFIG.stages.indexOf(st); q.stage = st.id; q.grade = idx>=5 ? 3 : idx>=3 ? 2 : 1; q.n = 2; }
+    if(type==='method'){ q.method = rnd()<0.5 ? 'float' : 'reel'; let pool = stages.flatMap(st=>st.fish.map(([id])=>id)).filter(id=>CONFIG.fish[id].method===q.method);
+      if(!pool.length){ q.method = q.method==='float' ? 'reel' : 'float'; pool = stages.flatMap(st=>st.fish.map(([id])=>id)).filter(id=>CONFIG.fish[id].method===q.method); }
+      q.fish = pick(pool); const f = CONFIG.fish[q.fish]; q.len = Math.round(f.len[0] + (f.len[1]-f.len[0])*0.55); q.n = 1; }
+    if(type==='streak') q.n = ri(4,6);
+    if(type==='perfect') q.n = ri(3,5);
+    if(type==='earn') q.n = Math.round(bestExp*25/10)*10;
+    return q;
+  });
+}
+function questText(q){
+  const f = q.fish && CONFIG.fish[q.fish], st = q.stage && stageById(q.stage);
+  return q.type==='species' ? `${st.name}에서 ${f.name} ${q.n}마리 낚기`
+    : q.type==='grade' ? `${st.name}에서 ${CONFIG.grades[q.grade].name} 등급 이상 ${q.n}마리 낚기`
+    : q.type==='method' ? `${CONFIG.methods[q.method]}로 ${f.name} ${q.len}cm 이상 낚기`
+    : q.type==='streak' ? `놓치지 않고 연속으로 ${q.n}마리 낚기`
+    : q.type==='perfect' ? `완벽한 챔질 ${q.n}번`
+    : `물고기를 팔아 ${won(q.n)}원 벌기`;
+}
+function ensureQuests(){ const d = dayKey(); if(S.quests.day !== d){ S.quests = { day:d, list:genQuests(d), streak:0, bonus:false }; save(); refreshHud(); } }
+function questEvent(kind, data){
+  if(!S.tutorial.done) return;
+  ensureQuests();
+  const Q = S.quests;
+  if(kind==='catch') Q.streak++;
+  if(kind==='lose') Q.streak = 0;
+  let changed = false;
+  Q.list.forEach(q=>{
+    if(q.done) return; const before = q.prog;
+    if(kind==='catch' && data.kind==='fish'){
+      if(q.type==='species' && data.id===q.fish && S.stage===q.stage) q.prog++;
+      if(q.type==='grade' && S.stage===q.stage && data.grade>=q.grade) q.prog++;
+      if(q.type==='method' && S.method===q.method && data.id===q.fish && data.len>=q.len) q.prog++;
+    }
+    if(kind==='catch' && q.type==='streak') q.prog = Math.max(q.prog, Q.streak);
+    if(kind==='perfect' && q.type==='perfect') q.prog++;
+    if(kind==='earn' && q.type==='earn') q.prog += data;
+    if(q.prog !== before) changed = true;
+    if(q.prog >= q.n && !q.done){ q.done = true; q.prog = q.n; toast(`의뢰 완료! ${questText(q)}`); SFX.reward(); }
+  });
+  if(changed){ save(); refreshHud(); if(!modal.hidden && panel.querySelector('[data-questpanel]')) openQuests(); }
+}
+function claimQuest(i){
+  const q = S.quests.list[i]; if(!q || !q.done || q.claimed) return;
+  q.claimed = true; S.money += q.reward; S.stats.questsDone++; SFX.coin();
+  let msg = `의뢰 보상 +${won(q.reward)}원`;
+  if(!S.quests.bonus && S.quests.list.every(x=>x.claimed)){ S.quests.bonus = true; S.tickets += CONFIG.quests.allDoneTicket; msg += ` · 오늘 의뢰 모두 완료! 부산 이용권 +${CONFIG.quests.allDoneTicket}`; SFX.reward(); }
+  save(); refreshHud(); toast(msg); openQuests();
+}
+function openQuests(){
+  ensureQuests();
+  const Q = S.quests, now = new Date(), mid = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1), left = Math.max(0, mid-now);
+  const h = Math.floor(left/3600000), m = Math.floor(left%3600000/60000);
+  const rows = Q.list.map((q,i)=>`<div class="qrow ${q.claimed?'claimed':''}"><div><div class="t">${questText(q)}</div><div class="s" style="color:var(--muted);font-size:12px">${q.type==='earn' ? `${won(Math.min(q.prog,q.n))} / ${won(q.n)}원` : `${Math.min(q.prog,q.n)} / ${q.n}`} · 보상 <span class="price">${won(q.reward)}원</span></div></div>
+      ${q.claimed ? '<span class="s" style="color:var(--muted)">받음</span>' : `<button class="btn ${q.done?'hot':''}" data-act="claimQuest" data-v="${i}" ${q.done?'':'disabled'}>${q.done?'받기':'진행 중'}</button>`}
+      <div class="qbar"><i style="width:${Math.min(100, q.prog/q.n*100)}%"></i></div></div>`).join('');
+  openPanel('오늘의 의뢰', `<div data-questpanel></div>${rows}<p class="rnote">세 의뢰를 모두 받으면 부산 이용권 ${CONFIG.quests.allDoneTicket}장을 더 줘요${Q.bonus?' (오늘은 받음)':''}. 새 의뢰까지 ${h}시간 ${m}분. 그물로 잡은 물고기는 의뢰에 들어가지 않아요.</p>`);
+}
+
+/* 보스 대물 */
+const bossOf = sid => CONFIG.bosses[sid] || null;
+function bossMeter(sid){ return S.boss.meter[sid] || 0; }
+function bossReady(sid){ const b = bossOf(sid); return !!b && bossMeter(sid) >= b.need; }
+function addBossMeter(sid, n){ const b = bossOf(sid); if(!b) return; const was = bossReady(sid);
+  S.boss.meter[sid] = Math.min(b.need, bossMeter(sid) + n);
+  if(!was && bossReady(sid)) toast(`${b.name}의 기척이 느껴져요! 다음 입질을 노리세요`); }
+function makeBoss(sid){
+  const b = bossOf(sid), t = Math.pow(Math.random(), 1.2), len = Math.round((b.len[0] + (b.len[1]-b.len[0])*t)*10)/10;
+  const c = makeFish(b.id, len, t, { noVariant:true }); c.bossStage = sid; c.diff = b.diff; return c;
+}
+
 /* 그물 (자동 낚시) */
 const netLv = ()=>CONFIG.autoNet.levels[S.autoNet.lv];
 const netStage = ()=>stageById(S.stage==='busan' ? (S.prevStage && S.prevStage!=='busan' ? S.prevStage : 'river') : S.stage);
@@ -826,6 +1173,8 @@ const netStage = ()=>stageById(S.stage==='busan' ? (S.prevStage && S.prevStage!=
 function recordCatch(c, byNet){
   const st = S.stats, out = [];
   if(byNet) st.netCatches++; else st.catches++;
+  if(!byNet) questEvent('catch', c);
+  if(!byNet && !c.boss && S.stage!=='busan') addBossMeter(S.stage, 1 + S.prestige*CONFIG.prestige.bossBonus);
   st.grades[c.grade] = (st.grades[c.grade]||0) + 1;
   const stage = netStage && byNet ? netStage().id : S.stage;
   const rec = { id:c.id, len:c.len, price:c.price, grade:c.grade, stage, at:Date.now() };
@@ -834,8 +1183,19 @@ function recordCatch(c, byNet){
   queueRankSync();
   return out.length ? out : null;
 }
+function medalFor(id, len){
+  const f = CONFIG.fish[id]; if(!f || f.boss) return 0;
+  let m = 0; CONFIG.medals.forEach((md,i)=>{ if(len >= f.len[0] + (f.len[1]-f.len[0])*md.at) m = i+1; });
+  return m;
+}
 function registerDex(c){
   const e = S.dex[c.id] || (S.dex[c.id] = {count:0, maxLen:0, best:-1});
+  // 메달: 처음 받는 단계마다 보상 (동→금을 한 번에 넘으면 모두 받음)
+  const m = medalFor(c.id, c.len), had = e.medal||0;
+  G.medalNew = null;
+  if(m > had){ let reward = 0; for(let k=had; k<m; k++){ reward += CONFIG.fish[c.id].price * CONFIG.medals[k].reward; S.stats.medals[k]++; }
+    e.medal = m; S.money += reward; G.medalNew = { tier:m, reward }; }
+  if(c.variant){ e.variants = e.variants || {}; if(!e.variants[c.variant]){ e.variants[c.variant] = true; } S.stats.variants++; }
   const record = e.count>0 && c.len>e.maxLen;
   e.count++; e.maxLen = Math.max(e.maxLen, c.len); e.best = Math.max(e.best, c.grade);
   return record;
@@ -853,7 +1213,7 @@ function netAdvance(){
   while(A.prog >= L.interval && A.fish.length < L.cap){
     A.prog -= L.interval;
     const c = rollCatch(netStage(), null, 0.5, { quality:L.quality, luck:L.luck, noBukangi:true });
-    A.fish.push({ id:c.id, name:c.name, len:c.len, weight:c.weight, price:c.price, grade:c.grade });
+    A.fish.push(fishItem(c));
     registerDex(c); recordCatch(c, true); caught++;
   }
   if(A.fish.length >= L.cap) A.prog = 0;
@@ -867,11 +1227,11 @@ function netTick(){
   SFX.nibble(); setTimeout(()=>SFX.nibble(), 120);
   if(rw.length){ toast(rw[0]); SFX.reward(); }
   else if(S.autoNet.fish.length >= netLv().cap) toast('그물이 가득 찼어요. 그물을 걷으세요');
-  else if(caught===1 && before===0) toast(`그물에 ${S.autoNet.fish[S.autoNet.fish.length-1].name}이(가) 걸렸어요`);
+  else if(caught===1 && before===0) toast(`그물에 ${josa(S.autoNet.fish[S.autoNet.fish.length-1].name,'이','가')} 걸렸어요`);
 }
 function netSellAll(){
   const A = S.autoNet, total = A.fish.reduce((a,f)=>a+f.price,0); if(!total) return;
-  S.money += total; S.stats.earned += total; A.fish = []; save(); refreshHud(); SFX.coin(); toast(`그물 물고기 판매 +${won(total)}원`); openNetPanel();
+  S.money += total; S.stats.earned += total; questEvent('earn', total); A.fish = []; save(); refreshHud(); SFX.coin(); toast(`그물 물고기 판매 +${won(total)}원`); openNetPanel();
 }
 function netToKeep(){
   const A = S.autoNet, room = netSize() - S.net.length;
@@ -884,7 +1244,7 @@ function openNetPanel(){
   if(A.lv<=0){ openShop('gear'); return; }
   const total = A.fish.reduce((a,f)=>a+f.price,0), full = A.fish.length>=L.cap;
   const left = full ? 0 : Math.max(0, Math.ceil(L.interval - A.prog));
-  const rows = A.fish.length ? A.fish.map(f=>`<div class="row"><canvas class="minicv" data-fish="${f.id}"></canvas><div class="main"><div class="t">${f.name} ${gradeChip(CONFIG.grades[f.grade])}</div><div class="s">${f.len}cm · ${fmtWeight(f.weight)}</div></div><span class="price">${won(f.price)}원</span></div>`).join('')
+  const rows = A.fish.length ? A.fish.map(f=>`<div class="row"><canvas class="minicv" data-fish="${f.id}" data-var="${f.variant||''}"></canvas><div class="main"><div class="t">${f.name} ${gradeChip(CONFIG.grades[f.grade])}</div><div class="s">${f.len}cm · ${fmtWeight(f.weight)}</div></div><span class="price">${won(f.price)}원</span></div>`).join('')
     : `<div class="empty">아직 걸린 물고기가 없어요. ${L.interval}초마다 1마리씩 걸려요.</div>`;
   G.netPanelCount = A.fish.length;
   openPanel('그물', `<div class="bar-top" data-netpanel><span><b>${L.name}</b> · ${netStage().name}에 쳐 둠 · ${A.fish.length}/${L.cap}칸 · ${full ? '<span style="color:var(--float)">가득 참</span>' : `다음 물고기까지 <span id="netLeft">${left}</span>초`}</span></div>
@@ -948,6 +1308,8 @@ function travelKind(from, to){
   const a = (stageById(from)||{}).travel || 'car', b = (stageById(to)||{}).travel || 'car';
   return TRAVEL_RANK[a] > TRAVEL_RANK[b] ? a : b;
 }
+// 받침에 맞는 조사: josa('왕메기','을','를') → '왕메기를'
+function josa(word, withJong, noJong){ const c = String(word).charCodeAt(String(word).length-1) - 0xAC00; const has = c>=0 && c<=11171 && c%28!==0; return word + (has ? withJong : noJong); }
 function josaRo(word){ const c = word.charCodeAt(word.length-1) - 0xAC00; if(c<0 || c>11171) return '로'; const jong = c % 28; return (jong===0 || jong===8) ? '로' : '으로'; }
 function startTravel(from, to){
   if(from===to){ setPhase('idle'); return; }
@@ -1135,7 +1497,10 @@ function render(){
   // 파티클
   ctx.fillStyle='rgba(255,255,255,.85)';
   G.particles.forEach(p=>{ ctx.beginPath(); ctx.arc(p.x,p.y,2.2,0,Math.PI*2); ctx.fill(); });
+  drawAtmosphere();
   // UI 레이어
+  if(['idle','aiming','waiting','casting'].includes(G.phase)) drawBossMeter();
+  drawTour();
   if(G.phase==='aiming') drawAim(g);
   if(G.phase==='landing') drawLanding();
   if(G.phase==='bite') drawBang(tip);
@@ -1319,6 +1684,7 @@ function drawBackground(th, T, g){
 }
 /* ---- 공용 배경 조각 ---- */
 function drawSun(x, y, r, core='#fff8dc', glow='255,248,214'){
+  if(curStage().theme!=='busan' && getEnv().tod==='night') return;   // 밤에는 해 대신 달(drawAtmosphere)
   const sg = ctx.createRadialGradient(x,y,0,x,y,r*5); sg.addColorStop(0,`rgba(${glow},.8)`); sg.addColorStop(1,`rgba(${glow},0)`);
   ctx.fillStyle = sg; ctx.fillRect(x-r*5, y-r*5, r*10, r*10);
   ctx.fillStyle = core; ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
@@ -1623,11 +1989,13 @@ WATERFX.busan = (wl)=>{
 BG.pier = (wl)=>drawPierSky(wl);
 WATERFX.pier = (wl)=>drawPierWater(wl);
 function drawPierSky(wl){
-  // 해와 빛 번짐
+  // 해와 빛 번짐 (밤에는 생략)
+  if(getEnv().tod!=='night'){
   const sx = CW*0.8, sy = wl*0.3, sr = Math.max(14, Math.min(CW,CH)*0.045);
   const sg = ctx.createRadialGradient(sx,sy,0,sx,sy,sr*5); sg.addColorStop(0,'rgba(255,248,214,.85)'); sg.addColorStop(1,'rgba(255,248,214,0)');
   ctx.fillStyle = sg; ctx.fillRect(sx-sr*5, sy-sr*5, sr*10, sr*10);
   ctx.fillStyle = '#fff8dc'; ctx.beginPath(); ctx.arc(sx,sy,sr,0,Math.PI*2); ctx.fill();
+  }
   // 구름
   for(let i=0;i<4;i++){
     const span = CW+260, x = ((i*0.29*span + G.time*(5+i*2)) % span) - 130, y = wl*(0.14 + (i%3)*0.13), k = 0.7 + (i%2)*0.45;
@@ -1943,23 +2311,66 @@ function drawLanding(){
   ctx.save(); ctx.translate(p.x,p.y);
   ctx.rotate(p.k<1 ? lerp(-0.9, 0, p.k) : Math.sin(G.time*14)*0.08*Math.max(0,1-p.hold*0.8));
   if(c.kind==='bukangi') drawBukangi(ctx, 0, 0, p.size*0.42, false, -1);
-  else drawFish(ctx, 0, 0, p.size, c.id, { facing:-1 });
+  else drawFish(ctx, 0, 0, p.size, c.id, { facing:-1, variant:c.variant });
   ctx.restore();
   // 등급 이름
   if(p.hold>0.05){
     const ta = clamp((p.hold-0.05)/0.2, 0, 1), lift = (1-ta)*10;
-    const label = c.kind==='bukangi' ? '부캉이!' : (L.gIdx>=1 ? gi.name+'!' : c.name);
+    const label = c.boss ? '보스 격파!' : c.kind==='bukangi' ? '부캉이!' : (L.gIdx>=1 ? gi.name+'!' : c.name);
     ctx.textAlign='center'; ctx.textBaseline='middle';
     ctx.font = `${Math.round(26+L.gIdx*5)}px ${FD}`;
     const ty = p.y + p.size*0.42 + 30 + lift;
     ctx.lineWidth = 6; ctx.strokeStyle = `rgba(15,43,51,${0.85*ta})`; ctx.strokeText(label, p.x, ty);
     ctx.fillStyle = hexA(L.gIdx>=1 || c.kind==='bukangi' ? gi.color : '#f4ecd9', ta); ctx.fillText(label, p.x, ty);
     const ny = ty + (26+L.gIdx*5)*0.62 + 14;
-    if(L.gIdx>=1 && c.kind!=='bukangi'){ ctx.font = `17px ${FD}`; ctx.lineWidth=4; ctx.strokeText(c.name, p.x, ny); ctx.fillStyle = `rgba(244,236,217,${ta})`; ctx.fillText(c.name, p.x, ny); }
+    if((L.gIdx>=1 || c.boss) && c.kind!=='bukangi'){ ctx.font = `17px ${FD}`; ctx.lineWidth=4; ctx.strokeText(c.name, p.x, ny); ctx.fillStyle = `rgba(244,236,217,${ta})`; ctx.fillText(c.name, p.x, ny); }
     ctx.textAlign='left';
   }
 }
 function hexA(hex, a){ const h = hex.replace('#',''); const n = parseInt(h.length===3 ? h.split('').map(x=>x+x).join('') : h, 16); return `rgba(${n>>16&255},${n>>8&255},${n&255},${clamp(a,0,1)})`; }
+function drawBossMeter(){
+  const b = bossOf(S.stage); if(!b || !S.tutorial.done) return;
+  const m = bossMeter(S.stage), ready = m >= b.need, x = 16, y = 16, w = Math.min(190, CW*0.42);
+  panelBox(x-6, y-6, w+12, 40);
+  ctx.font=`600 12px ${FB}`; ctx.textBaseline='middle'; ctx.textAlign='left';
+  ctx.fillStyle = ready ? (Math.sin(G.time*6)>0 ? '#ffcf4a' : '#ff8a7a') : '#f4ecd9';
+  ctx.fillText(ready ? `${b.name} 출현! 던지세요` : `${b.name}의 기척`, x, y+6, ready ? w : w-46);
+  ctx.fillStyle='#22525e'; ctx.fillRect(x, y+18, w, 6);
+  ctx.fillStyle = ready ? '#ff5a3c' : '#ffd04a'; ctx.fillRect(x, y+18, w*Math.min(1, m/b.need), 6);
+  if(!ready){ ctx.fillStyle='#9fbcc0'; ctx.textAlign='right'; ctx.fillText(`${Math.floor(m)}/${b.need}`, x+w, y+6); ctx.textAlign='left'; }
+}
+function drawAtmosphere(){
+  const e = getEnv(); if(e.indoor) return;
+  const wl = waterY(), t = G.time, th = curStage().theme;
+  if(th!=='busan'){
+    if(e.tod==='dawn'){ ctx.fillStyle='rgba(255,170,120,.12)'; ctx.fillRect(0,0,CW,CH); }
+    if(e.tod==='dusk'){ const g = ctx.createLinearGradient(0,0,0,CH); g.addColorStop(0,'rgba(255,110,80,.28)'); g.addColorStop(0.5,'rgba(255,150,90,.16)'); g.addColorStop(1,'rgba(80,40,90,.18)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,CH); }
+    if(e.tod==='night'){
+      ctx.fillStyle='rgba(10,18,52,.52)'; ctx.fillRect(0,0,CW,CH);
+      for(let i=0;i<40;i++){ const x=(i*137.7)%CW, y=(i*61.3)%(wl*0.7), a=0.4+Math.sin(t*2+i)*0.3; ctx.fillStyle=`rgba(255,255,240,${a})`; ctx.fillRect(x,y,1.6,1.6); }
+      const mx = CW*0.72, my = wl*0.22, mr = Math.max(9, Math.min(CW,CH)*0.03);
+      const mg = ctx.createRadialGradient(mx,my,0,mx,my,mr*4); mg.addColorStop(0,'rgba(240,240,210,.35)'); mg.addColorStop(1,'rgba(240,240,210,0)'); ctx.fillStyle=mg; ctx.fillRect(mx-mr*4,my-mr*4,mr*8,mr*8);
+      ctx.fillStyle='#f4f0d8'; ctx.beginPath(); ctx.arc(mx,my,mr,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='rgba(10,18,52,.9)'; ctx.beginPath(); ctx.arc(mx+mr*0.45,my-mr*0.2,mr*0.9,0,Math.PI*2); ctx.fill();
+      for(let k=0;k<6;k++){ ctx.fillStyle=`rgba(244,240,216,${0.25-k*0.035})`; ctx.fillRect(mx-6+Math.sin(t*2+k)*3, wl+6+k*8, 12, 2); }   // 달빛 물길
+    }
+  }
+  if(e.weather==='rain'){
+    ctx.fillStyle='rgba(60,75,95,.2)'; ctx.fillRect(0,0,CW,CH);
+    ctx.strokeStyle='rgba(210,225,240,.45)'; ctx.lineWidth=1;
+    ctx.beginPath(); for(let i=0;i<90;i++){ const x = ((i*53.3 + t*90) % (CW+60)) - 30, y = ((i*97.1 + t*620) % (CH+40)) - 20; ctx.moveTo(x,y); ctx.lineTo(x-4,y+14); } ctx.stroke();
+    ctx.strokeStyle='rgba(220,235,245,.35)'; for(let i=0;i<14;i++){ const k = (t*1.3 + i*0.37) % 1, x = (i*83.7) % CW, y = wl + 10 + ((i*47.3) % (CH-wl-20)); ctx.beginPath(); ctx.ellipse(x, y, 2+k*8, (2+k*8)*0.3, 0, 0, Math.PI*2); ctx.globalAlpha = 1-k; ctx.stroke(); ctx.globalAlpha = 1; }
+  }
+  if(e.weather==='snow'){
+    ctx.fillStyle='rgba(225,235,245,.18)'; ctx.fillRect(0,0,CW,CH);
+    ctx.fillStyle='rgba(255,255,255,.9)'; for(let i=0;i<120;i++){ const x = ((i*71.1) + Math.sin(t*1.5+i)*20 + t*60) % CW, y = ((i*37.7) + t*(60+(i%5)*15)) % CH; ctx.beginPath(); ctx.arc(x, y, 1.2+(i%3)*0.8, 0, Math.PI*2); ctx.fill(); }
+  }
+  if(e.weather==='fog'){
+    const g = ctx.createLinearGradient(0,0,0,CH); g.addColorStop(0,'rgba(230,236,240,.25)'); g.addColorStop(wl/CH,'rgba(235,240,244,.62)'); g.addColorStop(1,'rgba(225,232,238,.3)');
+    ctx.fillStyle=g; ctx.fillRect(0,0,CW,CH);
+    for(let i=0;i<4;i++){ const x = ((t*12*(1+i*0.3) + i*CW*0.33) % (CW*1.6)) - CW*0.3, y = wl - CH*0.05 + i*CH*0.06; ctx.fillStyle='rgba(245,248,250,.25)'; ctx.beginPath(); ctx.ellipse(x, y, CW*0.25, CH*0.03, 0, 0, Math.PI*2); ctx.fill(); }
+  }
+}
 function drawBang(tip){
   ctx.font=`40px ${FD}`; ctx.textAlign='center'; ctx.textBaseline='middle';
   ctx.fillStyle='#ffd04a'; ctx.strokeStyle='#0f2b33'; ctx.lineWidth=5;
@@ -1991,6 +2402,14 @@ function drawReelUI(){
   ctx.fillText(`거리 ${(Math.max(0,R.dist)*(G.castM||CONFIG.maxMeters)).toFixed(1)}m`, bx, by+6);
   ctx.textAlign='right'; ctx.fillStyle = R.match ? '#9ef0b4' : '#ffb3a6';
   ctx.fillText(R.match ? '유리한 방식' : '불리한 방식', bx+bw, by+6); ctx.textAlign='left';
+  if(R.boss){
+    const B = R.boss; panelBox(bx-10, by+38, bw+20, 30);
+    ctx.fillStyle='#ffcf4a'; ctx.font=`16px ${FD}`; ctx.fillText(G.catch.name, bx, by+53, bw*0.6);
+    for(let i=0;i<3;i++){ ctx.fillStyle = i < B.phase ? '#ff5a3c' : '#22525e'; ctx.fillRect(bx+bw-58+i*20, by+48, 16, 10); }
+    if(B.warn > 0 || B.dive > 0){ const txt = B.warn > 0 ? '잠수 준비! 감기를 멈추세요' : '잠수 중! 버티세요';
+      ctx.font=`22px ${FD}`; ctx.textAlign='center'; const w = Math.min(CW-32, ctx.measureText(txt).width+40);
+      panelBox(CW/2-w/2, CH*0.32-22, w, 44); ctx.fillStyle = B.warn > 0 ? '#ffd04a' : '#ff8a7a'; ctx.fillText(txt, CW/2, CH*0.32, CW-48); ctx.textAlign='left'; }
+  }
   // 장력 게이지
   const gh = Math.min(CH*0.56, 280), gx = CW - 58, gy = (CH-gh)/2 + 10, gw = 20;
   panelBox(gx-14, gy-30, gw+28, gh+76);
@@ -2058,7 +2477,8 @@ function drawFish(c, x, y, L, id, o={}){
   if(id==='bukangi') return drawBukangi(c, x, y, L*0.5, o.silhouette);
   const d = CONFIG.fish[id], shape = d.shape||'normal';
   const h = L*(shape==='long'?0.14 : shape==='flat'?0.5 : shape==='tuna'?0.34 : shape==='slim'?0.27 : 0.4);
-  const body = o.silhouette ? '#0d2530' : d.color;
+  const vgold = o.variant==='gold', valb = o.variant==='albino';
+  const body = o.silhouette ? '#0d2530' : vgold ? '#e2b53c' : valb ? '#f1ebe2' : d.color;
   c.save(); c.translate(x,y); c.scale(o.facing||1,1); if(o.wiggle) c.rotate(o.wiggle);
   c.fillStyle = body;
   const tw = shape==='long' ? 0.3 : 0.55;
@@ -2068,13 +2488,19 @@ function drawFish(c, x, y, L, id, o={}){
   if(!o.silhouette){
     c.save(); c.beginPath(); c.ellipse(L*0.03,0,L*0.42,h/2,0,0,Math.PI*2); c.clip();
     c.fillStyle='rgba(255,255,255,.28)'; c.fillRect(-L*0.5,h*0.08,L,h);
-    if(d.pattern==='stripes'){ c.fillStyle=d.accent; for(let i=-2;i<=2;i++){ c.fillRect(i*L*0.12-L*0.02,-h,L*0.035,h*1.1); } }
-    if(d.pattern==='spots'){ c.fillStyle=d.accent; for(let i=0;i<9;i++){ c.beginPath(); c.arc(-L*0.3+((i*37)%60)/60*L*0.6, -h*0.35+((i*23)%10)/10*h*0.45, Math.max(1,L*0.018),0,Math.PI*2); c.fill(); } }
-    if(d.pattern==='band'){ c.fillStyle=d.accent; c.fillRect(-L*0.45,-h*0.06,L*0.9,h*0.12); }
-    if(d.pattern==='belly'){ c.fillStyle=d.accent; c.fillRect(-L*0.45,h*0.12,L*0.9,h*0.5); }
+    const acc = vgold ? '#b0851e' : valb ? 'rgba(220,180,180,.6)' : d.accent;
+    if(d.pattern==='stripes'){ c.fillStyle=acc; for(let i=-2;i<=2;i++){ c.fillRect(i*L*0.12-L*0.02,-h,L*0.035,h*1.1); } }
+    if(d.pattern==='spots'){ c.fillStyle=acc; for(let i=0;i<9;i++){ c.beginPath(); c.arc(-L*0.3+((i*37)%60)/60*L*0.6, -h*0.35+((i*23)%10)/10*h*0.45, Math.max(1,L*0.018),0,Math.PI*2); c.fill(); } }
+    if(d.pattern==='band'){ c.fillStyle=acc; c.fillRect(-L*0.45,-h*0.06,L*0.9,h*0.12); }
+    if(d.pattern==='belly'){ c.fillStyle=acc; c.fillRect(-L*0.45,h*0.12,L*0.9,h*0.5); }
     c.restore();
     c.fillStyle='#fff'; c.beginPath(); c.arc(L*0.32,-h*0.08,Math.max(1.5,h*0.12),0,Math.PI*2); c.fill();
-    c.fillStyle='#111'; c.beginPath(); c.arc(L*0.33,-h*0.08,Math.max(0.8,h*0.06),0,Math.PI*2); c.fill();
+    c.fillStyle = valb ? '#e0465a' : '#111'; c.beginPath(); c.arc(L*0.33,-h*0.08,Math.max(0.8,h*0.06),0,Math.PI*2); c.fill();
+    if(vgold){ c.save(); c.beginPath(); c.ellipse(L*0.03,0,L*0.42,h/2,0,0,Math.PI*2); c.clip();
+      const sx = ((G.time*0.6) % 1.6 - 0.3)*L; c.fillStyle='rgba(255,250,220,.55)'; c.beginPath(); c.moveTo(sx-L*0.5,-h); c.lineTo(sx-L*0.4,-h); c.lineTo(sx-L*0.6,h); c.lineTo(sx-L*0.7,h); c.fill(); c.restore(); }
+    if(d.boss){ const cx = L*0.08, cy = -h*0.82, cw = Math.max(8, L*0.14), ch = cw*0.6;   // 보스 왕관
+      c.fillStyle='#ffcf4a'; c.beginPath(); c.moveTo(cx-cw/2, cy); c.lineTo(cx-cw/2, cy-ch); c.lineTo(cx-cw/4, cy-ch*0.45); c.lineTo(cx, cy-ch*1.1); c.lineTo(cx+cw/4, cy-ch*0.45); c.lineTo(cx+cw/2, cy-ch); c.lineTo(cx+cw/2, cy); c.closePath(); c.fill();
+      c.fillStyle='#d8432e'; c.beginPath(); c.arc(cx, cy-ch*0.3, Math.max(1,cw*0.08), 0, Math.PI*2); c.fill(); }
   }
   c.restore();
 }
@@ -2120,12 +2546,12 @@ function drawBukangi(c, x, y, r, sil, facing=1){
   c.restore();
 }
 function roundRectC(c,x,y,w,h,r){ c.beginPath(); c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r); c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath(); }
-function paintMini(canvas, id, silhouette){
+function paintMini(canvas, id, silhouette, variant){
   const r = canvas.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio||1);
   canvas.width = Math.round(r.width*dpr); canvas.height = Math.round(r.height*dpr);
   const c = canvas.getContext('2d'); c.setTransform(dpr,0,0,dpr,0,0);
   if(id==='bukangi') drawBukangi(c, r.width/2, r.height/2+2, Math.min(r.width*0.22, r.height*0.55), silhouette);
-  else drawFish(c, r.width/2, r.height/2, Math.min(r.width*0.9, r.height*2.2), id, { silhouette });
+  else drawFish(c, r.width/2, r.height/2, Math.min(r.width*0.9, r.height*2.2), id, { silhouette, variant });
 }
 
 /* ===================== 7. UI ===================== */
@@ -2135,10 +2561,17 @@ let toastTimer = 0;
 function toast(msg){ const t = $('toast'); t.textContent = msg; t.style.opacity = 1; clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.style.opacity=0, 1800); }
 function refreshHud(){
   $('hudMoney').innerHTML = `${won(S.money)}<small>원</small>`;
+  const qReady = (S.quests.list||[]).filter(q=>q.done && !q.claimed).length;
+  $('btnQuest').innerHTML = '의뢰' + (qReady ? `<span class="badge">${qReady}</span>` : '');
+  $('btnQuest').disabled = !S.tutorial.done;
   $('hudStage').textContent = curStage().name;
   $('hudGear').innerHTML = Object.keys(CONFIG.gear).map(k=>`<span class="chip" title="${gearLv(k).name}"><i>${CONFIG.gear[k].short}</i>Lv${S.gear[k]+1}</span>`).join('')
     + (S.autoNet.lv>0 ? `<button class="chip netchip ${S.autoNet.fish.length>=netLv().cap?'full':''}" data-act="openNet" title="그물 열기"><i>그물</i>${S.autoNet.fish.length}/${netLv().cap}</button>` : '')
-    + (S.tickets>0 ? `<span class="chip ticket" title="부산 이용권">부산 이용권 ×${S.tickets}</span>` : '');
+    + (S.tickets>0 ? `<span class="chip ticket" title="부산 이용권">부산 이용권 ×${S.tickets}</span>` : '')
+    + (()=>{ const e = getEnv(); return e.indoor ? '' : `<span class="chip envchip env-${e.tod}" title="${envTip(e)}">${TOD_NAME[e.tod]} · ${WEATHER_NAME[e.weather]}</span>`; })()
+    + (S.prestige>0 ? `<span class="chip buffchip" title="판매가 +${Math.round(S.prestige*CONFIG.prestige.priceBonus*100)}%">환생 ${S.prestige}</span>` : '')
+    + (S.buffs.big>0 ? `<span class="chip buffchip" title="${CONFIG.baits.big.desc}">대물 미끼 ${S.buffs.big}</span>` : '')
+    + (S.buffs.buk>0 ? `<span class="chip buffchip" title="${CONFIG.baits.buk.desc}">부캉이 미끼 ${S.buffs.buk}</span>` : '');
   $('btnStage').disabled = !S.tutorial.done;
 }
 function syncControls(){
@@ -2162,7 +2595,7 @@ function setMethod(m){
 function openPanel(title, body, tabs){
   panel.innerHTML = `<header><h2>${title}</h2><button class="x" data-act="close" aria-label="닫기">×</button></header>${tabs||''}<div class="body">${body}</div>`;
   modal.hidden = false; input.reel = input.lift = false;
-  panel.querySelectorAll('canvas[data-fish]').forEach(cnv=>paintMini(cnv, cnv.dataset.fish, cnv.dataset.sil==='1'));
+  panel.querySelectorAll('canvas[data-fish]').forEach(cnv=>paintMini(cnv, cnv.dataset.fish, cnv.dataset.sil==='1', cnv.dataset.var||null));
 }
 function closeModal(){ modal.hidden = true; if(G.phase==='result') setPhase('idle'); refreshHud(); }
 const gradeChip = g => `<span class="grade" style="background:${g.color}">${g.name}</span>`;
@@ -2174,23 +2607,33 @@ function showCatch(c, record, rewards){
     ? `<div class="catch"><canvas data-fish="bukangi"></canvas><div>${gradeChip(gi)}</div><h3>부캉이!</h3>
        <p>부산 북항에 산다는 흑상어, 부캉이를 낚았어요.<br><b>부산 이용권</b> 1장을 받았어요. (보유 ${S.tickets}장)</p>${rw}
        <div class="foot" style="justify-content:center"><button class="btn hot" data-act="openStage">부산으로</button><button class="btn" data-act="close">계속 낚시 <kbd>Space</kbd></button></div></div>`
-    : `<div class="catch"><canvas data-fish="${c.id}"></canvas><div>${gradeChip(gi)}</div><h3>${c.name}</h3>
+    : `<div class="catch"><canvas data-fish="${c.id}" data-var="${c.variant||''}"></canvas><div>${gradeChip(gi)}</div><h3>${c.name}</h3>
        ${G.newBest ? `<div class="record">개인 최고 기록! ${G.newBest.includes('len') ? '가장 큰 물고기' : ''}${G.newBest.length>1 ? ' · ' : ''}${G.newBest.includes('price') ? '가장 비싼 물고기' : ''}</div>` : record ? '<div class="record">최대 크기 갱신!</div>' : (S.dex[c.id].count===1 ? '<div class="record">도감 등록!</div>' : '')}
        <div class="stats"><div>크기<b>${c.len}cm</b></div><div>무게<b>${fmtWeight(c.weight)}</b></div><div>가격<b class="price">${won(c.price)}원</b></div></div>
+       ${c.boss ? `<div class="record">${G.bossFirst ? '첫 격파! 수족관 트로피 벽에 트로피가 걸려요' : `${S.boss.beaten[c.id]}번째 격파`}</div>` : ''}${c.variant ? `<div class="record" style="color:#ffcf4a">${CONFIG.variants[c.variant].name} 변종! 가격 ×${CONFIG.variants[c.variant].mul}</div>` : ''}${G.medalNew ? `<div class="record" style="color:${CONFIG.medals[G.medalNew.tier-1].color}">${CONFIG.medals[G.medalNew.tier-1].name} 획득! 보상 +${won(G.medalNew.reward)}원</div>` : ''}
        <p class="s" style="color:var(--muted);font-size:12px">살림망 ${S.net.length}/${netSize()}</p>${rw}
        <div class="foot" style="justify-content:center"><button class="btn" data-act="quickSell">바로 팔기 +${won(c.price)}원 <kbd>S</kbd></button><button class="btn hot" data-act="close">계속 낚시 <kbd>Space</kbd></button></div></div>`;
-  openPanel(c.kind==='bukangi' ? '특별한 손맛' : '포획 성공', body);
+  openPanel(c.kind==='bukangi' ? '특별한 손맛' : c.boss ? '보스 격파!' : '포획 성공', body);
 }
 
 let shopTab = 'sell';
 function openShop(tab){
   if(tab) shopTab = tab;
-  const tabs = `<div class="tabs" role="tablist"><button role="tab" aria-selected="${shopTab==='sell'}" data-act="shopTab" data-v="sell">판매</button><button role="tab" aria-selected="${shopTab==='gear'}" data-act="shopTab" data-v="gear">장비 강화</button></div>`;
+  const tabs = `<div class="tabs" role="tablist"><button role="tab" aria-selected="${shopTab==='sell'}" data-act="shopTab" data-v="sell">판매</button><button role="tab" aria-selected="${shopTab==='gear'}" data-act="shopTab" data-v="gear">장비 강화</button><button role="tab" aria-selected="${shopTab==='bait'}" data-act="shopTab" data-v="bait">특수 미끼</button></div>`;
   let body = '';
-  if(shopTab==='sell'){
+  if(shopTab==='bait'){
+    const has = { big:S.buffs.big, buk:S.buffs.buk, boss:null };
+    body = Object.entries(CONFIG.baits).map(([k,b])=>{
+      const disabled = S.money < b.cost || (k==='boss' && (!bossOf(S.stage) || bossReady(S.stage)));
+      const note = k==='boss' ? (bossOf(S.stage) ? `지금 ${curStage().name}: ${bossOf(S.stage).name} 기척 ${Math.floor(bossMeter(S.stage))}/${bossOf(S.stage).need}` : '이 낚시터에는 보스가 없어요') : `남은 횟수 ${has[k]}번 · ${b.uses}번 던지는 동안 효과`;
+      return `<div class="row"><div class="main"><div class="t">${b.name}</div><div class="s">${b.desc} · ${note}</div></div><span class="price">${won(b.cost)}원</span><button class="btn hot" data-act="buyBait" data-v="${k}" ${disabled?'disabled':''}>사기</button></div>`;
+    }).join('') + `<p class="rnote">미끼는 던질 때마다 1회씩 줄어요. 대물 미끼와 부캉이 미끼는 함께 쓸 수 있어요.</p>`;
+  }
+  else if(shopTab==='sell'){
     const total = S.net.reduce((a,f)=>a+f.price,0);
+    const aq = S.aquarium, aqRoom = aqCap() - aq.fish.length;
     body = `<div class="bar-top"><span>살림망 ${S.net.length}/${netSize()} · 합계 <span class="price">${won(total)}원</span></span><button class="btn hot" data-act="sellAll" ${S.net.length?'':'disabled'}>모두 판매</button></div>`
-      + (S.net.length ? S.net.map((f,i)=>`<div class="row"><canvas class="minicv" data-fish="${f.id}"></canvas><div class="main"><div class="t">${f.name} ${gradeChip(CONFIG.grades[f.grade])}</div><div class="s">${f.len}cm · ${fmtWeight(f.weight)}</div></div><span class="price">${won(f.price)}원</span><button class="btn" data-act="sell" data-v="${i}">판매</button></div>`).join('')
+      + (S.net.length ? S.net.map((f,i)=>`<div class="row"><canvas class="minicv" data-fish="${f.id}" data-var="${f.variant||''}"></canvas><div class="main"><div class="t">${f.name} ${gradeChip(CONFIG.grades[f.grade])}</div><div class="s">${f.len}cm · ${fmtWeight(f.weight)}</div></div><span class="price">${won(f.price)}원</span>${aq.lv>0 ? `<button class="btn" data-act="toAqua" data-v="${i}" ${aqRoom>0?'':'disabled'} title="수족관에 전시">전시</button>` : ''}<button class="btn" data-act="sell" data-v="${i}">판매</button></div>`).join('')
         : `<div class="empty">살림망이 비어 있어요. 물고기를 낚아오세요.</div>`);
   } else {
     const statTxt = (k,l) => k==='rod' ? `장력 구간 ${Math.round(l.zone*100)}% · 흡수 ${Math.round(l.absorb*100)}%` : k==='reel' ? `감기 속도 ${l.speed.toFixed(2)}` : k==='line' ? `과부하 버팀 ${l.hp}초` : `희귀 행운 +${Math.round(l.luck*100)}%`;
@@ -2209,25 +2652,25 @@ function openShop(tab){
 }
 function sellAt(i){
   const f = S.net.splice(i,1)[0]; if(!f) return;
-  S.money += f.price; S.stats.earned += f.price; save(); refreshHud(); SFX.coin(); toast(`${f.name} 판매 +${won(f.price)}원`); if(!modal.hidden) openShop(); emit('sell');
+  S.money += f.price; S.stats.earned += f.price; questEvent('earn', f.price); save(); refreshHud(); SFX.coin(); toast(`${f.name} 판매 +${won(f.price)}원`); if(!modal.hidden) openShop(); emit('sell');
 }
 function quickSell(){
   const i = S.net.indexOf(G.lastNet); G.lastNet = null;
   if(i<0){ closeModal(); return; }
   const f = S.net.splice(i,1)[0];
-  S.money += f.price; S.stats.earned += f.price; save(); refreshHud(); SFX.coin(); toast(`${f.name} 판매 +${won(f.price)}원`);
+  S.money += f.price; S.stats.earned += f.price; questEvent('earn', f.price); save(); refreshHud(); SFX.coin(); toast(`${f.name} 판매 +${won(f.price)}원`);
   closeModal(); emit('sell');
 }
 function sellAll(){
   const total = S.net.reduce((a,f)=>a+f.price,0); if(!total) return;
-  S.money += total; S.stats.earned += total; S.net = []; save(); refreshHud(); SFX.coin(); toast(`모두 판매 +${won(total)}원`); if(!modal.hidden) openShop(); emit('sell');
+  S.money += total; S.stats.earned += total; questEvent('earn', total); S.net = []; save(); refreshHud(); SFX.coin(); toast(`모두 판매 +${won(total)}원`); if(!modal.hidden) openShop(); emit('sell');
 }
 function netUpgrade(){
   const nx = CONFIG.autoNet.levels[S.autoNet.lv+1]; if(!nx || S.money<nx.cost) return;
   netAdvance();
   S.money -= nx.cost; S.autoNet.lv++; if(!S.autoNet.last) S.autoNet.last = Date.now();
   save(); refreshHud(); SFX.upgrade(); buzz(30);
-  toast(S.autoNet.lv===1 ? `${nx.name}을(를) ${netStage().name}에 쳤어요` : `${nx.name}으로 바꿨어요`); openShop();
+  toast(S.autoNet.lv===1 ? `${josa(nx.name,'을','를')} ${netStage().name}에 쳤어요` : `${josa(nx.name,'으로','로')} 바꿨어요`); openShop();
 }
 function upgrade(k){
   const nx = CONFIG.gear[k].levels[S.gear[k]+1]; if(!nx || S.money<nx.cost) return;
@@ -2236,7 +2679,9 @@ function upgrade(k){
 function openStage(){
   if(!S.tutorial.done){ toast('튜토리얼을 먼저 끝내세요'); return; }
   const methodTag = m => `<span class="chip" style="align-self:flex-start">${CONFIG.methods[m]} 유리</span>`;
-  const body = `<div class="stages">` + CONFIG.stages.map(st=>{
+  const cst = curStage(), fee = tourOK(cst) ? tourFee(cst) : 0;
+  const tourBox = tourOK(cst) ? `<div class="row" style="margin-bottom:10px"><div class="main"><div class="t">낚시 대회 · ${cst.name}</div><div class="s">${CONFIG.tournament.seconds/60}분 동안 직접 잡은 물고기 총 무게로 라이벌 3명과 겨뤄요. 1위 상금 참가비의 ${CONFIG.tournament.prize[0]}배, 2위 ${CONFIG.tournament.prize[1]}배, 3위 ${CONFIG.tournament.prize[2]}배${S.tourBest[cst.id] ? ` · 내 최고 ${S.tourBest[cst.id]}kg` : ''}</div></div><span class="price">${won(fee)}원</span><button class="btn hot" data-act="startTour" ${G.tour || G.phase!=='idle' || S.money<fee ? 'disabled' : ''}>${G.tour ? '진행 중' : '참가'}</button></div>` : '';
+  const body = tourBox + `<div class="stages">` + CONFIG.stages.map(st=>{
     const cur = S.stage===st.id, un = !!S.unlocked[st.id];
     const ids = stageDexIds(st), known = ids.filter(id=>S.dex[id]).length, rw = CONFIG.dexRewards[st.id];
     let btn;
@@ -2250,6 +2695,7 @@ function openStage(){
 }
 function goStage(id){
   if(G.phase!=='idle' && G.phase!=='result'){ toast('낚시 중에는 이동할 수 없어요'); return; }
+  if(G.tour){ G.tour = null; toast('낚시터를 옮겨서 대회를 포기했어요'); }
   if(S.stage==='busan') S.busanLeft = 0;
   const from = S.stage;
   S.stage = id; save(); closeModal(); startTravel(from, id);
@@ -2324,6 +2770,8 @@ function statsHtml(){
     ['던진 횟수', won(st.casts)+'번'], ['잡은 물고기', won(tot)+'마리', st.netCatches ? `직접 ${won(st.catches)} · 그물 ${won(st.netCatches)}` : ''],
     ['챔질 성공률', pct(st.hooks, st.bites), `입질 ${won(st.bites)} · 완벽 ${won(st.perfect)}`], ['끌어올리기 성공률', pct(st.catches, st.hooks), `놓침 ${won(lostTot)}`],
     ['판매로 번 돈', won(st.earned)+'원'], ['플레이 시간', fmtTime(st.playSec)],
+    ['크기 메달', `${st.medals[2]}금 ${st.medals[1]}은 ${st.medals[0]}동`], ['희귀 변종', won(st.variants)+'마리'],
+    ['보스 격파', won(st.bossWins)+'번'], ['대회 우승', won(st.tourWins)+'번'], ['의뢰 완료', won(st.questsDone)+'개'],
   ].map(([l,v,s])=>`<div class="stile"><span class="lbl">${l}</span><b>${v}</b>${s?`<span class="s">${s}</span>`:''}</div>`).join('');
   const gmax = Math.max(1, ...st.grades);
   const gbars = CONFIG.grades.map((g,i)=>`<div class="sbar"><span>${g.name}</span><i style="--w:${(st.grades[i]||0)/gmax*100}%;--c:${g.color}"></i><em>${won(st.grades[i]||0)}</em></div>`).join('')
@@ -2334,6 +2782,10 @@ function statsHtml(){
   return `<div class="stiles">${tiles}</div>
     <div class="bests">${bestCard('가장 큰 물고기', st.bestLen, st.bestLen ? st.bestLen.len+'cm' : '')}${bestCard('가장 비싼 물고기', st.bestPrice, st.bestPrice ? won(st.bestPrice.price)+'원' : '')}</div>
     <div class="scols"><div><div class="dexh">등급별 마릿수</div>${gbars}</div><div><div class="dexh">놓친 이유</div>${lbars}</div></div>
+    <div class="dexh" style="margin-top:14px">환생 ${S.prestige ? `· ${S.prestige}회` : ''}</div>
+    <div class="row"><div class="main"><div class="t">${S.prestige ? `지금 보너스: 판매가 +${Math.round(S.prestige*CONFIG.prestige.priceBonus*100)}% · 보스 기척 +${Math.round(S.prestige*CONFIG.prestige.bossBonus*100)}%` : '처음부터 다시 시작하는 대신 영구 보너스를 받아요'}</div>
+      <div class="s">한 번 할 때마다 판매가 +${Math.round(CONFIG.prestige.priceBonus*100)}%, 보스 기척 +${Math.round(CONFIG.prestige.bossBonus*100)}%. 돈·장비·낚시터 해금·그물은 처음으로 돌아가고, 도감·메달·통계·수족관·트로피·부산 이용권은 남아요.${canPrestige() ? '' : ' 알래스카를 열면 할 수 있어요.'}</div></div>
+      <button class="btn" data-act="prestige" ${canPrestige() && !G.tour ? '' : 'disabled'}>환생하기</button></div>
     ${st.backfilled ? '<p class="rnote">통계 기능이 생기기 전에 잡은 물고기는 잡은 마릿수와 가장 큰·비싼 물고기에만 들어가 있어요. 던진 횟수, 성공률, 등급별 마릿수, 놓친 이유, 번 돈은 지금부터 쌓여요.</p>' : ''}`;
 }
 function rankHtml(){
@@ -2361,7 +2813,7 @@ async function resolveRankNames(ids){
 }
 function openDex(tab){
   if(tab) dexTab = tab;
-  if(dexTab==='stats'){ resetArm = false; return openPanel('기록', statsHtml(), dexTabs()); }
+  if(dexTab==='stats'){ resetArm = false; prestigeArm = false; return openPanel('기록', statsHtml(), dexTabs()); }
   if(dexTab==='rank'){ return openPanel('랭킹', rankHtml(), dexTabs()); }
   const all = new Set();
   const html = CONFIG.stages.map(st=>{
@@ -2369,13 +2821,15 @@ function openDex(tab){
     const have = ids.filter(id=>S.dex[id]).length, rw = CONFIG.dexRewards[st.id], done = !!S.dexDone[st.id];
     const tiles = ids.map(id=>{
       const e = S.dex[id], f = CONFIG.fish[id];
-      return `<div class="dex"><canvas data-fish="${id}" data-sil="${e?0:1}"></canvas><b>${e ? f.name : '???'}</b><span class="s">${e ? `${e.count}마리 · 최대 ${e.maxLen}cm` : CONFIG.methods[f.method]+' 선호'}</span>${e ? gradeChip(CONFIG.grades[e.best]) : ''}</div>`;
+      return `<div class="dex"><canvas data-fish="${id}" data-sil="${e?0:1}"></canvas><b>${e ? f.name : '???'}</b><span class="s">${e ? `${e.count}마리 · 최대 ${e.maxLen}cm` : CONFIG.methods[f.method]+' 선호'}</span><span class="dexchips">${e ? gradeChip(CONFIG.grades[e.best]) : ''}${e && e.medal ? `<span class="grade" style="background:${CONFIG.medals[e.medal-1].color}">${CONFIG.medals[e.medal-1].name}</span>` : ''}${e && e.variants && e.variants.gold ? '<span class="grade" style="background:#e2b53c">황금</span>' : ''}${e && e.variants && e.variants.albino ? '<span class="grade" style="background:#f1ebe2">알비노</span>' : ''}</span>${e && !e.medal ? `<span class="s">동메달 ${Math.ceil((f.len[0]+(f.len[1]-f.len[0])*CONFIG.medals[0].at)*10)/10}cm~</span>` : e && e.medal<3 ? `<span class="s">다음 ${CONFIG.medals[e.medal].name} ${Math.ceil((f.len[0]+(f.len[1]-f.len[0])*CONFIG.medals[e.medal].at)*10)/10}cm~</span>` : ''}</div>`;
     }).join('');
     return `<div class="dexh">${stageDexName(st)} <span style="font-size:13px">${have}/${ids.length}</span>${rw ? `<span class="perk ${done?'on':''}">완성 보상 · ${rw.text}${done?' (받음)':''}</span>` : ''}</div><div class="dexg">${tiles}</div>`;
   }).join('');
   const got = [...all].filter(id=>S.dex[id]).length;
   const bk = S.dex.bukangi;
-  const special = `<div class="dexh">특별</div><div class="dexg"><div class="dex"><canvas data-fish="bukangi" data-sil="${bk?0:1}"></canvas><b>${bk?'부캉이 (흑상어)':'???'}</b><span class="s">${bk ? `${bk.count}번 만남 · 부산 이용권` : '부산 북항에 산다는 흑상어'}</span></div></div>`;
+  const bossTiles = Object.entries(CONFIG.bosses).map(([sid,b])=>{ const e = S.dex[b.id], st = stageById(sid);
+      return `<div class="dex"><canvas data-fish="${b.id}" data-sil="${e?0:1}"></canvas><b>${e ? b.name : '???'}</b><span class="s">${e ? `${S.boss.beaten[b.id]||e.count}번 격파 · 최대 ${e.maxLen}cm` : `${st.name}에서 ${b.need}마리 잡으면 등장`}</span></div>`; }).join('');
+  const special = `<div class="dexh">보스 <span style="font-size:13px">${Object.values(CONFIG.bosses).filter(b=>S.boss.beaten[b.id]).length}/${Object.keys(CONFIG.bosses).length}</span></div><div class="dexg">${bossTiles}</div><div class="dexh">특별</div><div class="dexg"><div class="dex"><canvas data-fish="bukangi" data-sil="${bk?0:1}"></canvas><b>${bk?'부캉이 (흑상어)':'???'}</b><span class="s">${bk ? `${bk.count}번 만남 · 부산 이용권` : '부산 북항에 산다는 흑상어'}</span></div></div>`;
   resetArm = false;
   openPanel(`도감 <span style="font-size:15px;color:var(--muted)">${got}/${all.size}</span>`, html + special + `<div class="foot"><button class="btn" data-act="openTransfer">기록 옮기기</button><button class="btn" data-act="reset">기록 초기화</button></div>`, dexTabs());
 }
@@ -2391,6 +2845,13 @@ document.addEventListener('click', e=>{
   switch(el.dataset.act){
     case 'close': closeModal(); break;
     case 'shopTab': openShop(v); break;
+    case 'buyBait': buyBait(v); break;
+    case 'startTour': startTour(); break;
+    case 'prestige': doPrestige(el); break;
+    case 'toAqua': toAquarium(+v); break;
+    case 'aquaCollect': aquaCollect(); break;
+    case 'aquaUpgrade': aquaUpgrade(); break;
+    case 'aquaRelease': aquaRelease(+v); break;
     case 'sell': sellAt(+v); break;
     case 'sellAll': sellAll(); break;
     case 'quickSell': quickSell(); break;
@@ -2406,6 +2867,7 @@ document.addEventListener('click', e=>{
     case 'skipTut': skipTutorial(); break;
     case 'reset': resetGame(el); break;
     case 'openTransfer': openTransfer(); break;
+    case 'claimQuest': claimQuest(+v); break;
     case 'dexTab': openDex(v); break;
     case 'rankCat': RANK.cat = v; openDex('rank'); break;
     case 'xferCopy': xferCopy(); break;
@@ -2416,6 +2878,8 @@ modal.addEventListener('click', e=>{ if(e.target===modal) closeModal(); });
 $('btnShop').onclick = ()=>openShop();
 $('btnStage').onclick = openStage;
 $('btnDex').onclick = ()=>openDex();
+$('btnQuest').onclick = openQuests;
+$('btnAqua').onclick = openAquarium;
 function refreshSound(){ const b = $('btnSound'); b.textContent = S.sound ? '소리 켬' : '소리 끔'; b.setAttribute('aria-pressed', String(!!S.sound)); }
 $('btnSound').onclick = ()=>{ S.sound = !S.sound; save(); refreshSound(); if(S.sound){ SFX.unlock(); SFX.coin(); buzz(60); } };
 $('mFloat').onclick = ()=>setMethod('float');
@@ -2473,6 +2937,7 @@ function update(dt){
     case 'landing': updateLanding(dt); break;
     case 'lost': G.t += dt; if(G.t>=1.6) toIdle(); break;
   }
+  if(G.tour && G.phase!=='travel') tourTick(dt);
   if(S.stage==='busan' && S.busanLeft>0 && G.phase!=='travel'){
     S.busanLeft -= dt;
     if(S.busanLeft<=0 && ['idle','aiming','waiting','casting'].includes(G.phase)) leaveBusan();
@@ -2484,6 +2949,13 @@ function frame(now){
   if(modal.hidden) update(dt);
   G.time += dt;
   if(!document.hidden) S.stats.playSec += dt;
+  if(!modal.hidden && document.getElementById('aquaCv')) drawAquarium(dt);
+  if(S.aquarium.lv>0 && (G.aqTick = (G.aqTick||0) + dt) > 10){ G.aqTick = 0; aquaAdvance(); save(); }
+  if((G.envTick = (G.envTick||0) + dt) > 2){ G.envTick = 0; const e = getEnv(), k = e.tod+'|'+e.weather+'|'+S.stage;
+    if(G.envKey && k !== G.envKey && G.envKey.split('|')[2]===S.stage && !e.indoor){ const [pt,pw] = G.envKey.split('|');
+      if(pw !== e.weather) toast(e.weather==='clear' ? '날씨가 개었어요' : `${WEATHER_NAME[e.weather]}${e.weather==='fog'?'가 꼈어요':'가 내리기 시작했어요'}`);
+      else if(pt !== e.tod) toast(`${TOD_NAME[e.tod]}이 되었어요`); }
+    if(k !== G.envKey){ G.envKey = k; refreshHud(); } }
   G.hookFx = Math.max(0, G.hookFx - dt*3);
   G.particles.forEach(p=>{ p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=420*dt; p.life-=dt; });
   G.particles = G.particles.filter(p=>p.life>0);
@@ -2503,6 +2975,8 @@ function start(){
   resize(); refreshHud(); syncControls(); renderTut(); refreshSound();
   if(!S.dexDone) S.dexDone = {};
   initRanking();
+  aquaAdvance();
+  if(S.tutorial.done) ensureQuests();
   const off = netAdvance(); const back = checkDexRewards();
   if(off || back.length){ save(); refreshHud(); }
   if(back.length) toast(back[0]); else if(off) toast(`그물에 ${off}마리가 걸려 있어요`);
