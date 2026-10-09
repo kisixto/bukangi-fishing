@@ -45,6 +45,10 @@ button:focus-visible{outline:2px solid var(--float);outline-offset:2px}
 .chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;background:var(--ink-2);border:1px solid var(--ink-3);font-size:12px;white-space:nowrap}
 .chip i{font-style:normal;color:var(--muted)}
 .ticket{background:#3a2140;border-color:#6a3a72;color:#ffc6e2}
+.netchip{cursor:pointer;font:inherit;font-size:12px;color:var(--paper);background:#1d4a3a;border-color:#2f7a5c}
+.netchip:hover{border-color:var(--ok)}
+.netchip.full{background:#4a3a14;border-color:var(--float);color:var(--float)}
+.shopsec{font-family:var(--f-display);font-size:16px;color:var(--muted);margin:14px 0 2px}
 .hud-btns{display:flex;gap:6px;margin-left:auto}
 .hbtn{padding:7px 12px;border-radius:10px;background:var(--ink-2);border:1px solid var(--ink-3);font-weight:600;font-size:14px}
 .hbtn:hover{border-color:var(--muted)}
@@ -235,6 +239,19 @@ const CONFIG = {
     startDistNear:0.85, startDistFar:1.15,   // 걸렸을 때 시작 거리 배수 (멀리 던질수록 끌어올 거리↑)
     perfectFrom:0.93,         // 이 이상이면 '최대 캐스팅!'
   },   // 포획 연출 시간(초): 기본 + 등급당
+  // 그물(자동 낚시): 일정 시간마다 지금 낚시터 물고기 1마리가 그물에 걸림. 게임을 꺼 둔 동안에도 쌓임(그물 칸까지)
+  // quality: 캐스팅 거리 효과와 같은 식의 등급 보정 (−1 가장 가까이 ~ +1 가장 멀리, 1 넘으면 그 이상), luck: 크기·희귀 행운
+  autoNet: {
+    maxOfflineHours: 24,
+    levels: [
+      { name:'그물 없음',     cost:0,      interval:0,  cap:0,  quality:0,    luck:0 },
+      { name:'작은 그물',     cost:5000,   interval:90, cap:4,  quality:-0.5, luck:0 },
+      { name:'자망',          cost:20000,  interval:75, cap:6,  quality:0,    luck:0.1 },
+      { name:'나일론 정치망', cost:60000,  interval:60, cap:8,  quality:0.5,  luck:0.2 },
+      { name:'대형 정치망',   cost:150000, interval:45, cap:10, quality:1.0,  luck:0.35 },
+      { name:'황금 그물',     cost:400000, interval:30, cap:12, quality:1.6,  luck:0.5 },
+    ],
+  },
   // 낚시터 도감을 모두 채우면 받는 작은 편의 효과 (중복 없이 1회)
   dexRewards: {
     indoor: { perk:'net',   value:2,   text:'살림망 +2칸' },
@@ -326,9 +343,9 @@ const CONFIG = {
 const SAVE_KEY = 'bukangi-fishing-v1';
 function defaultSave(){
   return { money:0, gear:{rod:0,reel:0,line:0,bait:0}, unlocked:{indoor:true}, stage:'indoor', prevStage:'indoor',
-           tickets:0, busanLeft:0, net:[], dex:{}, dexDone:{}, tutorial:{done:false, step:0}, method:'float', sound:true };
+           tickets:0, busanLeft:0, net:[], dex:{}, dexDone:{}, tutorial:{done:false, step:0}, method:'float', sound:true, autoNet:{ lv:0, prog:0, fish:[], last:0 } };
 }
-function normalizeSave(d){ const s = Object.assign(defaultSave(), d); s.gear = Object.assign(defaultSave().gear, d.gear||{}); return s; }
+function normalizeSave(d){ const s = Object.assign(defaultSave(), d); s.gear = Object.assign(defaultSave().gear, d.gear||{}); s.autoNet = Object.assign(defaultSave().autoNet, d.autoNet||{}); return s; }
 function loadSave(){
   try{ const raw = localStorage.getItem(SAVE_KEY); if(raw) return normalizeSave(JSON.parse(raw)); }catch(e){}
   return defaultSave();
@@ -374,10 +391,10 @@ function checkDexRewards(){
   return got;
 }
 
-function rollCatch(stage, method, power=0.5){
-  const luck = gearLv('bait').luck;
-  const castF = (clamp(power,0,1)-0.5)*2;   // -1 가까이 ~ +1 멀리
-  if(stage.bukangi && Math.random() < CONFIG.bukangi.baseChance*(1+luck*CONFIG.bukangi.luckMul)){
+function rollCatch(stage, method, power=0.5, opt={}){
+  const luck = opt.luck ?? gearLv('bait').luck;
+  const castF = opt.quality ?? (clamp(power,0,1)-0.5)*2;   // -1 가까이 ~ +1 멀리 (그물은 1을 넘을 수 있음)
+  if(!opt.noBukangi && stage.bukangi && Math.random() < CONFIG.bukangi.baseChance*(1+luck*CONFIG.bukangi.luckMul)){
     return { kind:'bukangi', id:'bukangi', name:'부캉이', diff:CONFIG.bukangi.diff, method, len:0, price:0 };
   }
   const entries = stage.fish.map(([id,w])=>{
@@ -660,9 +677,7 @@ function landCatch(){
   } else {
     G.lastNet = { id:c.id, name:c.name, len:c.len, weight:c.weight, price:c.price, grade:c.grade };
     S.net.push(G.lastNet);
-    const e = S.dex[c.id] || (S.dex[c.id] = {count:0, maxLen:0, best:-1});
-    if(e.count>0 && c.len>e.maxLen) record = true;
-    e.count++; e.maxLen = Math.max(e.maxLen, c.len); e.best = Math.max(e.best, c.grade);
+    record = registerDex(c);
   }
   const rewards = checkDexRewards();
   save();
@@ -687,6 +702,68 @@ function finishLanding(){
   showCatch(G.catch, L.record, L.rewards);
   if(L.rewards.length) SFX.reward();
   emit('catch');
+}
+
+/* 그물 (자동 낚시) */
+const netLv = ()=>CONFIG.autoNet.levels[S.autoNet.lv];
+const netStage = ()=>stageById(S.stage==='busan' ? (S.prevStage && S.prevStage!=='busan' ? S.prevStage : 'river') : S.stage);
+function registerDex(c){
+  const e = S.dex[c.id] || (S.dex[c.id] = {count:0, maxLen:0, best:-1});
+  const record = e.count>0 && c.len>e.maxLen;
+  e.count++; e.maxLen = Math.max(e.maxLen, c.len); e.best = Math.max(e.best, c.grade);
+  return record;
+}
+// 실제 시간(Date.now) 기준으로 진행 → 탭을 숨기거나 게임을 꺼 둔 시간도 반영
+function netAdvance(){
+  const A = S.autoNet, L = netLv(), now = Date.now();
+  if(!A.last){ A.last = now; return 0; }
+  let el = (now - A.last)/1000; A.last = now;
+  if(A.lv<=0 || el<=0) return 0;
+  el = Math.min(el, CONFIG.autoNet.maxOfflineHours*3600);
+  if(A.fish.length >= L.cap){ A.prog = 0; return 0; }
+  A.prog += el;
+  let caught = 0;
+  while(A.prog >= L.interval && A.fish.length < L.cap){
+    A.prog -= L.interval;
+    const c = rollCatch(netStage(), null, 0.5, { quality:L.quality, luck:L.luck, noBukangi:true });
+    A.fish.push({ id:c.id, name:c.name, len:c.len, weight:c.weight, price:c.price, grade:c.grade });
+    registerDex(c); caught++;
+  }
+  if(A.fish.length >= L.cap) A.prog = 0;
+  return caught;
+}
+function netTick(){
+  const before = S.autoNet.fish.length, caught = netAdvance();
+  if(!caught) return;
+  const rw = checkDexRewards(); save(); refreshHud();
+  const g = geo(); netBuoys(g).forEach(b=>splash(b.x, b.y, 3));
+  SFX.nibble(); setTimeout(()=>SFX.nibble(), 120);
+  if(rw.length){ toast(rw[0]); SFX.reward(); }
+  else if(S.autoNet.fish.length >= netLv().cap) toast('그물이 가득 찼어요. 그물을 걷으세요');
+  else if(caught===1 && before===0) toast(`그물에 ${S.autoNet.fish[S.autoNet.fish.length-1].name}이(가) 걸렸어요`);
+}
+function netSellAll(){
+  const A = S.autoNet, total = A.fish.reduce((a,f)=>a+f.price,0); if(!total) return;
+  S.money += total; A.fish = []; save(); refreshHud(); SFX.coin(); toast(`그물 물고기 판매 +${won(total)}원`); openNetPanel();
+}
+function netToKeep(){
+  const A = S.autoNet, room = netSize() - S.net.length;
+  if(room<=0){ toast('살림망이 가득 찼어요'); return; }
+  const moved = A.fish.splice(0, room); S.net.push(...moved);
+  save(); refreshHud(); toast(`살림망으로 ${moved.length}마리 옮겼어요`); openNetPanel();
+}
+function openNetPanel(){
+  const A = S.autoNet, L = netLv();
+  if(A.lv<=0){ openShop('gear'); return; }
+  const total = A.fish.reduce((a,f)=>a+f.price,0), full = A.fish.length>=L.cap;
+  const left = full ? 0 : Math.max(0, Math.ceil(L.interval - A.prog));
+  const rows = A.fish.length ? A.fish.map(f=>`<div class="row"><canvas class="minicv" data-fish="${f.id}"></canvas><div class="main"><div class="t">${f.name} ${gradeChip(CONFIG.grades[f.grade])}</div><div class="s">${f.len}cm · ${fmtWeight(f.weight)}</div></div><span class="price">${won(f.price)}원</span></div>`).join('')
+    : `<div class="empty">아직 걸린 물고기가 없어요. ${L.interval}초마다 1마리씩 걸려요.</div>`;
+  G.netPanelCount = A.fish.length;
+  openPanel('그물', `<div class="bar-top" data-netpanel><span><b>${L.name}</b> · ${netStage().name}에 쳐 둠 · ${A.fish.length}/${L.cap}칸 · ${full ? '<span style="color:var(--float)">가득 참</span>' : `다음 물고기까지 <span id="netLeft">${left}</span>초`}</span></div>
+    <p class="s" style="color:var(--muted);font-size:12px;margin:0 0 6px">게임을 꺼 둔 동안에도 최대 ${CONFIG.autoNet.maxOfflineHours}시간까지 쌓여요. 그물이 가득 차면 멈춰요. 부산에서는 직전 낚시터에 그물이 쳐져 있어요.</p>
+    ${rows}
+    <div class="foot"><button class="btn" data-act="netToKeep" ${A.fish.length?'':'disabled'}>살림망으로 옮기기</button><button class="btn hot" data-act="netSell" ${total?'':'disabled'}>모두 팔기 +${won(total)}원</button></div>`);
 }
 
 /* 부산 */
@@ -765,7 +842,7 @@ new ResizeObserver(resize).observe(cv);
 const THEMES = {
   indoor:{ sky:['#d4dfe2','#c3d1d5'], water:['#4fa3b8','#2a7088'], deck:'#a5794e' },
   river: { sky:['#a9d8ec','#e6f3e6'], water:['#4f8c8a','#2b5f62'], deck:'#6d9a4f' },
-  pier:  { sky:['#bfe0f0','#eef5f3'], water:['#3d7fa3','#1d567a'], deck:'#b9b6ad' },
+  pier:  { sky:['#86c3e6','#e9f4f2'], water:['#2f86ad','#134a6e'], deck:'#d6d2c8' },
   boat:  { sky:['#9fcde8','#e3f0f5'], water:['#2c6c96','#113d61'], deck:'#f2f2ee' },
   busan: { sky:['#2b2f5c','#e48a6a'], water:['#2d4170','#121f42'], deck:'#7b7a86' },
 };
@@ -804,6 +881,28 @@ function landPos(){
   const hold = Math.max(0, L.t-0.5);
   return { x: lerp(L.x0, peakX, e), y: lerp(L.y0, peakY, e) - Math.sin(k*Math.PI)*CH*0.07 + Math.sin(hold*3)*4, k, hold, size, wl:g.wl };
 }
+function netBuoys(g){
+  const y = surfY(0.78), xs = [0.52, 0.6, 0.68, 0.76];
+  return xs.map((k,i)=>({ x:CW*k, y: y + Math.sin(G.time*1.6 + i)*2 }));
+}
+function drawNet(g){
+  if(S.autoNet.lv<=0 || S.stage==='busan') return;
+  const bs = netBuoys(g), L = netLv(), fill = S.autoNet.fish.length/L.cap;
+  ctx.strokeStyle='rgba(240,240,230,.55)'; ctx.lineWidth=1.2;
+  ctx.beginPath(); bs.forEach((b,i)=> i ? ctx.lineTo(b.x,b.y) : ctx.moveTo(b.x,b.y)); ctx.stroke();
+  // 물속 그물코
+  ctx.save(); ctx.globalAlpha = 0.18; ctx.strokeStyle = '#e8f4f0'; ctx.lineWidth = 1;
+  const x0 = bs[0].x, x1 = bs[bs.length-1].x, y0 = bs[0].y+4, h = 18 + fill*10;
+  for(let x=x0; x<=x1; x+=8){ ctx.beginPath(); ctx.moveTo(x,y0); ctx.lineTo(x+6,y0+h); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x+6,y0); ctx.lineTo(x,y0+h); ctx.stroke(); }
+  ctx.restore();
+  bs.forEach((b,i)=>{
+    ctx.fillStyle = i%2 ? '#f4ecd9' : '#ff7a3c'; ctx.beginPath(); ctx.ellipse(b.x, b.y-2, 4.5, 3.5, 0, 0, Math.PI*2); ctx.fill();
+  });
+  const fb = bs[bs.length-1];   // 깃발 부표
+  ctx.strokeStyle='#2b3a40'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(fb.x, fb.y-4); ctx.lineTo(fb.x, fb.y-22); ctx.stroke();
+  ctx.fillStyle = fill>=1 ? '#ffd04a' : '#ff5a3c'; ctx.beginPath(); ctx.moveTo(fb.x, fb.y-22); ctx.lineTo(fb.x+11, fb.y-18); ctx.lineTo(fb.x, fb.y-14); ctx.fill();
+  if(fill>=1 && Math.sin(G.time*6)>0){ ctx.fillStyle='#ffd04a'; ctx.font=`14px ${FD}`; ctx.textAlign='center'; ctx.fillText('가득!', fb.x+4, fb.y-30); ctx.textAlign='left'; }
+}
 function splash(x,y,n){ for(let i=0;i<n;i++) G.particles.push({x,y,vx:rand(-60,60),vy:rand(-160,-60),life:rand(0.4,0.8)}); }
 function ripple(x,y){ G.ripples.push({x,y,r:4,life:1}); }
 
@@ -816,6 +915,8 @@ function render(){
   else drawBackground(th, T, g);
   // 물결 원
   G.ripples.forEach(r=>{ ctx.strokeStyle=`rgba(255,255,255,${r.life*0.5})`; ctx.lineWidth=1.5; ctx.beginPath(); ctx.ellipse(r.x,r.y,r.r,r.r*0.3,0,0,Math.PI*2); ctx.stroke(); });
+  // 그물 부표
+  drawNet(g);
   // 발판
   drawPlatform(th, T, g);
   // 물고기 그림자 (릴 감기 중)
@@ -860,10 +961,11 @@ function drawBackground(th, T, g){
     ctx.fillStyle='#7fb7c6'; ctx.fillRect(0,wl-8,CW,8);
   } else if(th==='river'){
     hills(wl, '#8bb57a', 0.35, 0.6); hills(wl, '#6c9a60', 0.22, 1.3);
-  } else if(th==='pier' || th==='boat'){
-    ctx.fillStyle = th==='pier' ? '#9fb7a5' : '#8fa9b5';
+  } else if(th==='pier'){
+    drawPierSky(wl);
+  } else if(th==='boat'){
+    ctx.fillStyle = '#8fa9b5';
     for(let i=0;i<3;i++){ const x=CW*(0.45+i*0.2), w=CW*0.12; ctx.beginPath(); ctx.moveTo(x-w,wl); ctx.quadraticCurveTo(x,wl-CH*(0.06+i*0.02),x+w,wl); ctx.fill(); }
-    if(th==='pier'){ const lx=CW*0.86, ly=wl; ctx.fillStyle='#e8e4dc'; ctx.fillRect(lx-12,ly-30,24,14); ctx.fillStyle='#d8422e'; ctx.fillRect(lx-8,ly-CH*0.2,16,CH*0.2-30); ctx.fillStyle='#f4ecd9'; ctx.fillRect(lx-8,ly-CH*0.2+CH*0.06,16,6); ctx.fillStyle='#ffd04a'; ctx.beginPath(); ctx.arc(lx,ly-CH*0.2-6,6,0,Math.PI*2); ctx.fill(); }
   } else if(th==='busan'){
     ctx.fillStyle='rgba(255,255,255,.7)'; for(let i=0;i<20;i++){ ctx.fillRect((i*137)%CW,(i*53)%(wl*0.4),1.5,1.5); }
     ctx.fillStyle='#1f2547';
@@ -881,7 +983,129 @@ function drawBackground(th, T, g){
   // 물
   ctx.fillStyle = grad(wl,CH,T.water[0],T.water[1]); ctx.fillRect(0,wl,CW,CH-wl);
   ctx.strokeStyle='rgba(255,255,255,.18)'; ctx.lineWidth=2;
+  if(th==='pier') drawPierWater(wl);
   for(let i=0;i<9;i++){ const y = wl + 14 + i*(CH-wl)/9, off = (G.time*18*(1+i*0.1) + i*90) % (CW+120) - 60; ctx.beginPath(); ctx.moveTo(off,y); ctx.lineTo(off+30+i*3,y); ctx.stroke(); }
+}
+function drawPierSky(wl){
+  // 해와 빛 번짐
+  const sx = CW*0.8, sy = wl*0.3, sr = Math.max(14, Math.min(CW,CH)*0.045);
+  const sg = ctx.createRadialGradient(sx,sy,0,sx,sy,sr*5); sg.addColorStop(0,'rgba(255,248,214,.85)'); sg.addColorStop(1,'rgba(255,248,214,0)');
+  ctx.fillStyle = sg; ctx.fillRect(sx-sr*5, sy-sr*5, sr*10, sr*10);
+  ctx.fillStyle = '#fff8dc'; ctx.beginPath(); ctx.arc(sx,sy,sr,0,Math.PI*2); ctx.fill();
+  // 구름
+  for(let i=0;i<4;i++){
+    const span = CW+260, x = ((i*0.29*span + G.time*(5+i*2)) % span) - 130, y = wl*(0.14 + (i%3)*0.13), k = 0.7 + (i%2)*0.45;
+    ctx.fillStyle = `rgba(255,255,255,${0.75 - i*0.08})`;
+    [[0,0,34,13],[-26,4,22,10],[24,3,26,11],[6,-9,20,11]].forEach(([dx,dy,rx,ry])=>{ ctx.beginPath(); ctx.ellipse(x+dx*k, y+dy*k, rx*k, ry*k, 0, 0, Math.PI*2); ctx.fill(); });
+  }
+  // 먼 섬 두 겹 (아지랑이)
+  const isle = (color, base, parts)=>{ ctx.fillStyle = color; parts.forEach(([c,w,h])=>{ ctx.beginPath(); ctx.moveTo(CW*(c-w), base); ctx.bezierCurveTo(CW*(c-w*0.5), base-CH*h, CW*(c+w*0.3), base-CH*h*1.1, CW*(c+w), base); ctx.fill(); }); };
+  isle('#a9c6cc', wl, [[0.22,0.16,0.07],[0.5,0.1,0.045]]);
+  isle('#8fb2b6', wl, [[0.36,0.09,0.035],[0.62,0.07,0.028]]);
+  // 지나가는 먼 배
+  const bx = ((G.time*7) % (CW*0.5)) + CW*0.3, by = wl-2;
+  ctx.fillStyle = '#4c5f6a'; ctx.beginPath(); ctx.moveTo(bx-14,by-4); ctx.lineTo(bx+14,by-4); ctx.lineTo(bx+10,by); ctx.lineTo(bx-10,by); ctx.fill();
+  ctx.fillStyle = '#e8ecee'; ctx.fillRect(bx-4,by-9,10,5); ctx.fillStyle = '#c94a36'; ctx.fillRect(bx+2,by-12,3,3);
+  // 등대가 있는 먼 방파제
+  const b0 = CW*0.56, b1 = CW*0.9, top = wl-7;
+  ctx.fillStyle = '#c9c7bf'; ctx.fillRect(b0, top, b1-b0, 7);
+  ctx.fillStyle = '#a7a59d'; ctx.fillRect(b0, wl-3, b1-b0, 3);
+  ctx.fillStyle = '#bdbab1'; for(let x=b0; x<b1; x+=7){ ctx.beginPath(); ctx.arc(x+3, top, 3.2, Math.PI, 0); ctx.fill(); }
+  drawLighthouse(b1, top, Math.max(46, CH*0.2));
+  // 갈매기
+  ctx.strokeStyle = '#3f4f57'; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
+  for(let i=0;i<3;i++){
+    const span = CW+120, x = ((G.time*(18+i*5) + i*170) % span) - 60, y = wl*(0.32+i*0.09) + Math.sin(G.time*1.3+i)*8;
+    const f = Math.sin(G.time*7 + i*2)*5, w = 7 + i;
+    ctx.beginPath(); ctx.moveTo(x-w, y-f); ctx.quadraticCurveTo(x-w*0.4, y-4-f*0.3, x, y); ctx.quadraticCurveTo(x+w*0.4, y-4-f*0.3, x+w, y-f); ctx.stroke();
+  }
+}
+function drawLighthouse(x, base, h){
+  const wB = h*0.2, wT = h*0.13, bodyTop = base - h*0.78;
+  // 몸통 (빨강 + 흰 띠)
+  ctx.fillStyle = '#d8422e'; ctx.beginPath(); ctx.moveTo(x-wB/2, base); ctx.lineTo(x+wB/2, base); ctx.lineTo(x+wT/2, bodyTop); ctx.lineTo(x-wT/2, bodyTop); ctx.closePath(); ctx.fill();
+  ctx.save(); ctx.clip(); ctx.fillStyle = '#f6f1e6'; [0.28,0.56].forEach(k=>ctx.fillRect(x-wB, base - h*0.78*k - h*0.05, wB*2, h*0.07));
+  ctx.fillStyle = 'rgba(0,0,0,.14)'; ctx.fillRect(x+wB*0.12, bodyTop, wB, h);   // 그늘
+  ctx.restore();
+  // 난간·등실·지붕
+  ctx.fillStyle = '#2f3a40'; ctx.fillRect(x-wT*0.8, bodyTop-2, wT*1.6, 3);
+  const lampH = h*0.12, glow = 0.55 + Math.sin(G.time*2.4)*0.35;
+  ctx.fillStyle = '#3a474e'; ctx.fillRect(x-wT*0.45, bodyTop-2-lampH, wT*0.9, lampH);
+  ctx.fillStyle = `rgba(255,214,90,${0.5+glow*0.5})`; ctx.fillRect(x-wT*0.3, bodyTop-lampH, wT*0.6, lampH*0.7);
+  const lg = ctx.createRadialGradient(x, bodyTop-lampH*0.6, 0, x, bodyTop-lampH*0.6, h*0.3);
+  lg.addColorStop(0, `rgba(255,224,130,${0.35*glow})`); lg.addColorStop(1, 'rgba(255,224,130,0)');
+  ctx.fillStyle = lg; ctx.fillRect(x-h*0.3, bodyTop-lampH*0.6-h*0.3, h*0.6, h*0.6);
+  ctx.fillStyle = '#d8422e'; ctx.beginPath(); ctx.moveTo(x-wT*0.6, bodyTop-2-lampH); ctx.lineTo(x+wT*0.6, bodyTop-2-lampH); ctx.lineTo(x, bodyTop-2-lampH-h*0.08); ctx.fill();
+}
+function drawPierWater(wl){
+  // 햇빛 반짝임 (해 아래 물길)
+  const sx = CW*0.8;
+  for(let i=0;i<22;i++){
+    const y = wl + 6 + (i*i*0.9) % ((CH-wl)*0.7), spread = 8 + (y-wl)*0.35;
+    const x = sx + Math.sin(i*12.9898)*spread, a = Math.max(0, Math.sin(G.time*3 + i*1.7));
+    ctx.fillStyle = `rgba(255,250,225,${a*0.8})`; ctx.fillRect(x, y, 6 + (y-wl)*0.04, 1.6);
+  }
+  // 먼 물결 띠
+  ctx.fillStyle = 'rgba(255,255,255,.12)'; ctx.fillRect(0, wl, CW, 2);
+}
+function tetrapod(x, y, r, rot, c){
+  // 네 발 테트라포드: 굵은 다리 셋 + 앞쪽 다리(원). 다리 끝은 둥글게
+  ctx.save(); ctx.translate(x,y); ctx.rotate(rot); ctx.lineCap = 'round';
+  [-Math.PI/2, Math.PI/6, Math.PI*5/6].forEach((a,i)=>{
+    const ex = Math.cos(a)*r, ey = Math.sin(a)*r;
+    ctx.strokeStyle = c.dark; ctx.lineWidth = r*0.86; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(ex+1.5, ey+1.5); ctx.stroke();
+    ctx.strokeStyle = i===0 ? c.light : c.mid; ctx.lineWidth = r*0.72; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(ex, ey); ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,.22)'; ctx.lineWidth = r*0.16;
+    ctx.beginPath(); ctx.moveTo(Math.cos(a-0.5)*r*0.2, Math.sin(a-0.5)*r*0.2); ctx.lineTo(ex*0.9 + Math.cos(a-Math.PI/2)*r*0.18, ey*0.9 + Math.sin(a-Math.PI/2)*r*0.18); ctx.stroke();
+  });
+  ctx.fillStyle = c.dark; ctx.beginPath(); ctx.arc(1.5,1.5,r*0.5,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = c.light; ctx.beginPath(); ctx.arc(0,0,r*0.44,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = c.mid; ctx.beginPath(); ctx.arc(r*0.08,r*0.08,r*0.26,0,Math.PI*2); ctx.fill();
+  ctx.restore();
+}
+function drawPierPlatform(g, night){
+  const { wl, platY, charX, s } = g;
+  const w = charX + Math.max(60, CW*0.08);
+  const C = night ? { top:'#8a8996', face:['#6c6b78','#4f4e5a'], joint:'rgba(0,0,0,.25)', moss:'#3b4a44', tp:{light:'#8b8a96', mid:'#72717e', dark:'#4a4956'} }
+                  : { top:'#dcd8ce', face:['#bdb8ac','#97928a'], joint:'rgba(70,60,40,.2)', moss:'#5d7a5a', tp:{light:'#ebe7dd', mid:'#cbc6ba', dark:'#8f8a7e'} };
+  // 콘크리트 방파제 (앞면 → 윗면)
+  const fg = ctx.createLinearGradient(0, platY, 0, CH); fg.addColorStop(0, C.face[0]); fg.addColorStop(1, C.face[1]);
+  ctx.fillStyle = fg; ctx.fillRect(0, platY+8, w, CH-platY-8);
+  ctx.fillStyle = C.joint; for(let x=36; x<w; x+=44) ctx.fillRect(x, platY+8, 2, CH);
+  for(let y=platY+8+(wl-platY)*0.5; y<CH; y+=(CH-platY)*0.22) ctx.fillRect(0, y, w, 1.5);
+  ctx.fillStyle = C.moss; ctx.fillRect(0, wl - 2, w, 7);          // 물때 낀 띠
+  ctx.fillStyle = 'rgba(255,255,255,.3)'; ctx.fillRect(0, wl + 5 + Math.sin(G.time*2)*1.5, w, 2);
+  ctx.fillStyle = C.top; ctx.fillRect(0, platY, w+4, 9);
+  ctx.fillStyle = 'rgba(255,255,255,.25)'; ctx.fillRect(0, platY, w+4, 2);
+  ctx.fillStyle = C.joint; for(let x=22; x<w; x+=44) ctx.fillRect(x, platY, 1.5, 9);
+  // 테트라포드 무더기: 방파제 발치에 반쯤 물에 잠기게 쌓음 (뒤 → 앞)
+  const tr = clamp(CW*0.03, 15, 30), spread = tr*4.2;
+  const pods = [[-0.15,0.45,0.9,0.5],[0.35,0.6,0.85,1.7],[0.8,0.9,0.8,2.9],[-0.35,1.2,1.05,2.3],[0.18,1.35,1.1,0.2],[0.65,1.55,1.0,3.6],[1.05,1.4,0.8,1.1]];
+  // 수면 위는 그대로, 수면 아래는 물빛이 비치게 반투명으로 (반쯤 잠긴 느낌)
+  const sub = wl + tr*1.25, drawPods = ()=>pods.forEach(([px,py,k,rot])=>tetrapod(w + px*spread*0.5, wl + py*tr, tr*k, rot, C.tp));
+  ctx.save(); ctx.beginPath(); ctx.rect(0, 0, CW, sub); ctx.clip(); drawPods(); ctx.restore();
+  ctx.save(); ctx.beginPath(); ctx.rect(w, sub, CW, CH); ctx.clip(); ctx.globalAlpha = 0.3; drawPods(); ctx.restore();
+  // 테트라포드 사이에 부서지는 파도
+  for(let i=0;i<10;i++){
+    const x = w - spread*0.25 + (i/9)*spread*0.85, surge = Math.sin(G.time*1.8 + i*0.9);
+    const a = clamp(0.3 + surge*0.5, 0, 0.9), y = wl + tr*1.25 + surge*3;
+    ctx.fillStyle = `rgba(255,255,255,${a})`; ctx.beginPath(); ctx.ellipse(x, y, 7 + (i%3)*3, 2.6, 0, 0, Math.PI*2); ctx.fill();
+    if(surge>0.85){ ctx.beginPath(); ctx.arc(x+3, y-6-surge*4, 2, 0, Math.PI*2); ctx.fill(); }
+  }
+  // 볼라드(계류주)와 밧줄, 아이스박스
+  const bx = w - 14*s, roomB = bx - charX > 44*s;
+  if(roomB){
+    ctx.fillStyle = night ? '#2a2a33' : '#33393d';
+    ctx.fillRect(bx-4*s, platY-9*s, 8*s, 9*s); ctx.beginPath(); ctx.ellipse(bx, platY-9*s, 7*s, 3*s, 0, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = '#c9a66b'; ctx.lineWidth = 2*s; ctx.beginPath(); ctx.ellipse(bx-14*s, platY-2*s, 7*s, 2.5*s, 0, 0, Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(bx-7*s, platY-2*s); ctx.quadraticCurveTo(bx-3*s, platY-8*s, bx, platY-6*s); ctx.stroke();
+  }
+  const cx = charX + 18*s, cw = 18*s;
+  if(cx + cw < (roomB ? bx - 24*s : w - 4)){
+    ctx.fillStyle = '#2f7fb5'; ctx.fillRect(cx, platY-12*s, cw, 12*s);
+    ctx.fillStyle = '#f4f2ec'; ctx.fillRect(cx-1*s, platY-14*s, cw+2*s, 4*s);
+    ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.fillRect(cx, platY-3*s, cw, 3*s);
+  }
 }
 function hills(wl, color, h, ph){
   ctx.fillStyle=color; ctx.beginPath(); ctx.moveTo(0,wl);
@@ -904,10 +1128,7 @@ function drawPlatform(th, T, g){
     ctx.strokeStyle='#5c7f3c'; ctx.lineWidth=2;
     for(let i=0;i<7;i++){ const x=w+10+i*7, sw=Math.sin(G.time*1.5+i)*3; ctx.beginPath(); ctx.moveTo(x,wl+6); ctx.quadraticCurveTo(x+sw,wl-20,x+sw*2,wl-38-i%3*8); ctx.stroke(); }
   } else if(th==='pier' || th==='busan'){
-    ctx.fillStyle=T.deck; ctx.fillRect(0,platY,w,CH-platY);
-    ctx.fillStyle='rgba(0,0,0,.18)'; ctx.fillRect(w-10,platY,10,CH-platY);
-    ctx.fillStyle = th==='busan' ? '#5b5b68' : '#cfcac0';
-    for(let i=0;i<3;i++){ const x=w+12+i*30, y=wl+10+(i%2)*14; ctx.beginPath(); ctx.moveTo(x,y-22); ctx.lineTo(x+18,y+10); ctx.lineTo(x-18,y+10); ctx.fill(); }
+    drawPierPlatform(g, th==='busan');
   } else {
     ctx.fillStyle=T.deck; ctx.fillRect(0,platY,w,10);
     ctx.fillStyle='rgba(0,0,0,.2)'; for(let x=0;x<w;x+=18) ctx.fillRect(x,platY,1,10);
@@ -1189,6 +1410,7 @@ function refreshHud(){
   $('hudMoney').innerHTML = `${won(S.money)}<small>원</small>`;
   $('hudStage').textContent = curStage().name;
   $('hudGear').innerHTML = Object.keys(CONFIG.gear).map(k=>`<span class="chip" title="${gearLv(k).name}"><i>${CONFIG.gear[k].short}</i>Lv${S.gear[k]+1}</span>`).join('')
+    + (S.autoNet.lv>0 ? `<button class="chip netchip ${S.autoNet.fish.length>=netLv().cap?'full':''}" data-act="openNet" title="그물 열기"><i>그물</i>${S.autoNet.fish.length}/${netLv().cap}</button>` : '')
     + (S.tickets>0 ? `<span class="chip ticket" title="부산 이용권">부산 이용권 ×${S.tickets}</span>` : '');
   $('btnStage').disabled = !S.tutorial.done;
 }
@@ -1250,6 +1472,11 @@ function openShop(tab){
       return `<div class="row"><div class="main"><div class="t">${G2.label} · ${cur.name} <span class="s">Lv${lv+1}</span></div><div class="s">${statTxt(k,cur)}${nx ? ` → <b style="color:var(--paper)">${nx.name}</b>: ${statTxt(k,nx)}` : ' · 최고 등급'}</div></div>`
         + (nx ? `<span class="price">${won(nx.cost)}원</span><button class="btn hot" data-act="upgrade" data-v="${k}" ${S.money>=nx.cost?'':'disabled'}>강화</button>` : '') + `</div>`;
     }).join('');
+    const NL = CONFIG.autoNet.levels, nl = S.autoNet.lv, ncur = NL[nl], nnx = NL[nl+1];
+    const q = v => v<0 ? '조금 낮음' : v===0 ? '보통' : v<1 ? '좋음' : v<1.5 ? '아주 좋음' : '최상';
+    const netTxt = l => `${l.interval}초마다 1마리 · ${l.cap}칸 · 물고기 질 ${q(l.quality)}`;
+    body += `<div class="shopsec">그물 · 자동 낚시</div><div class="row"><div class="main"><div class="t">그물 · ${ncur.name} ${nl>0?`<span class="s">Lv${nl}</span>`:''}</div><div class="s">${nl>0 ? netTxt(ncur) : '그물을 쳐 두면 시간이 지날 때마다 물고기가 저절로 걸려요. 게임을 꺼 둔 동안에도요.'}${nnx ? ` → <b style="color:var(--paper)">${nnx.name}</b>: ${netTxt(nnx)}` : ' · 최고 등급'}</div></div>`
+      + (nnx ? `<span class="price">${won(nnx.cost)}원</span><button class="btn hot" data-act="netUpgrade" ${S.money>=nnx.cost?'':'disabled'}>${nl>0?'강화':'구입'}</button>` : '') + `</div>`;
   }
   openPanel('상점', body, tabs);
 }
@@ -1267,6 +1494,13 @@ function quickSell(){
 function sellAll(){
   const total = S.net.reduce((a,f)=>a+f.price,0); if(!total) return;
   S.money += total; S.net = []; save(); refreshHud(); SFX.coin(); toast(`모두 판매 +${won(total)}원`); if(!modal.hidden) openShop(); emit('sell');
+}
+function netUpgrade(){
+  const nx = CONFIG.autoNet.levels[S.autoNet.lv+1]; if(!nx || S.money<nx.cost) return;
+  netAdvance();
+  S.money -= nx.cost; S.autoNet.lv++; if(!S.autoNet.last) S.autoNet.last = Date.now();
+  save(); refreshHud(); SFX.upgrade(); buzz(30);
+  toast(S.autoNet.lv===1 ? `${nx.name}을(를) ${netStage().name}에 쳤어요` : `${nx.name}으로 바꿨어요`); openShop();
 }
 function upgrade(k){
   const nx = CONFIG.gear[k].levels[S.gear[k]+1]; if(!nx || S.money<nx.cost) return;
@@ -1379,6 +1613,10 @@ document.addEventListener('click', e=>{
     case 'sell': sellAt(+v); break;
     case 'sellAll': sellAll(); break;
     case 'quickSell': quickSell(); break;
+    case 'netUpgrade': netUpgrade(); break;
+    case 'openNet': openNetPanel(); break;
+    case 'netSell': netSellAll(); break;
+    case 'netToKeep': netToKeep(); break;
     case 'upgrade': upgrade(v); break;
     case 'openStage': if(G.phase==='result') setPhase('idle'); openStage(); break;
     case 'goStage': goStage(v); break;
@@ -1446,7 +1684,7 @@ function update(dt){
     if(S.busanLeft<=0 && ['idle','aiming','waiting','casting'].includes(G.phase)) leaveBusan();
   }
 }
-let last = performance.now(), saveTick = 0;
+let last = performance.now(), saveTick = 0, netSaveTick = 0;
 function frame(now){
   const dt = Math.min(0.05, (now-last)/1000); last = now;
   if(modal.hidden) update(dt);
@@ -1459,6 +1697,8 @@ function frame(now){
   G.sparkles.forEach(p=>{ p.life -= dt*1.4; p.y -= 12*dt; });
   G.sparkles = G.sparkles.filter(p=>p.life>0);
   if(S.stage==='busan' && (saveTick+=dt)>3){ saveTick = 0; save(); }
+  if(S.autoNet.lv>0){ netTick(); if((netSaveTick+=dt)>5){ netSaveTick = 0; save(); }
+    if(!modal.hidden){ const el = document.getElementById('netLeft'); if(el){ const L = netLv(); const v = Math.max(0, Math.ceil(L.interval - S.autoNet.prog)); if(el.textContent!==String(v)) el.textContent = v; } if(document.querySelector('#panel [data-netpanel]') && S.autoNet.fish.length !== G.netPanelCount) openNetPanel(); } }
   render();
   requestAnimationFrame(frame);
 }
@@ -1466,7 +1706,9 @@ function frame(now){
 function start(){
   resize(); refreshHud(); syncControls(); renderTut(); refreshSound();
   if(!S.dexDone) S.dexDone = {};
-  const back = checkDexRewards(); if(back.length){ save(); toast(back[0]); }
+  const off = netAdvance(); const back = checkDexRewards();
+  if(off || back.length){ save(); refreshHud(); }
+  if(back.length) toast(back[0]); else if(off) toast(`그물에 ${off}마리가 걸려 있어요`);
   if(document.fonts && document.fonts.ready) document.fonts.ready.then(()=>{});
   requestAnimationFrame(frame);
 }
