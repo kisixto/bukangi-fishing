@@ -48,6 +48,8 @@ button:focus-visible{outline:2px solid var(--float);outline-offset:2px}
 .netchip{cursor:pointer;font:inherit;font-size:12px;color:var(--paper);background:#1d4a3a;border-color:#2f7a5c}
 .netchip:hover{border-color:var(--ok)}
 .netchip.full{background:#4a3a14;border-color:var(--float);color:var(--float)}
+.btn kbd{display:inline-block;margin-left:6px;padding:0 5px;border-radius:5px;border:1px solid currentColor;font:600 10px/16px var(--f-body);opacity:.65;vertical-align:1px}
+@media (hover:none){.btn kbd{display:none}}
 .shopsec{font-family:var(--f-display);font-size:16px;color:var(--muted);margin:14px 0 2px}
 .hud-btns{display:flex;gap:6px;margin-left:auto}
 .hbtn{padding:7px 12px;border-radius:10px;background:var(--ink-2);border:1px solid var(--ink-3);font-weight:600;font-size:14px}
@@ -72,7 +74,7 @@ button:focus-visible{outline:2px solid var(--float);outline-offset:2px}
 .act[disabled]{background:var(--ink-3);box-shadow:none;color:var(--muted)}
 .lift{padding:14px 18px;border-radius:14px;border:0;background:var(--float);color:var(--ink);font-family:var(--f-display);font-size:20px;user-select:none;touch-action:none;box-shadow:0 4px 0 #b08a1e}
 .lift:active,.lift.held{transform:translateY(3px);box-shadow:0 1px 0 #b08a1e}
-.keys{font-size:11px;color:var(--muted);line-height:1.4;max-width:120px}
+.keys{font-size:11px;color:var(--muted);line-height:1.4;max-width:170px}
 @media (max-width:560px){.keys{display:none}.act{font-size:19px}.hud{gap:6px 10px}.money{font-size:20px}}
 
 /* 모달 */
@@ -166,7 +168,7 @@ button:focus-visible{outline:2px solid var(--float);outline-offset:2px}
     </div>
     <button class="act" id="btnAct">던지기</button>
     <button class="lift" id="btnLift" hidden>들기</button>
-    <div class="keys">스페이스: 던지기·챔질·감기<br>↑ 또는 W: 들기</div>
+    <div class="keys">스페이스: 던지기·챔질·감기<br>↑ 또는 W: 들기 · S: 바로 팔기</div>
   </footer>
 </div>
 <div class="modal" id="modal" hidden><div class="panel" id="panel" role="dialog" aria-modal="true"></div></div>
@@ -1980,12 +1982,12 @@ function showCatch(c, record, rewards){
   const body = c.kind==='bukangi'
     ? `<div class="catch"><canvas data-fish="bukangi"></canvas><div>${gradeChip(gi)}</div><h3>부캉이!</h3>
        <p>바다의 행운, 부캉이를 낚았어요.<br><b>부산 이용권</b> 1장을 받았어요. (보유 ${S.tickets}장)</p>${rw}
-       <div class="foot" style="justify-content:center"><button class="btn hot" data-act="openStage">부산으로</button><button class="btn" data-act="close">계속 낚시</button></div></div>`
+       <div class="foot" style="justify-content:center"><button class="btn hot" data-act="openStage">부산으로</button><button class="btn" data-act="close">계속 낚시 <kbd>Space</kbd></button></div></div>`
     : `<div class="catch"><canvas data-fish="${c.id}"></canvas><div>${gradeChip(gi)}</div><h3>${c.name}</h3>
        ${record ? '<div class="record">최대 크기 갱신!</div>' : (S.dex[c.id].count===1 ? '<div class="record">도감 등록!</div>' : '')}
        <div class="stats"><div>크기<b>${c.len}cm</b></div><div>무게<b>${fmtWeight(c.weight)}</b></div><div>가격<b class="price">${won(c.price)}원</b></div></div>
        <p class="s" style="color:var(--muted);font-size:12px">살림망 ${S.net.length}/${netSize()}</p>${rw}
-       <div class="foot" style="justify-content:center"><button class="btn" data-act="quickSell">바로 팔기 +${won(c.price)}원</button><button class="btn hot" data-act="close">계속 낚시</button></div></div>`;
+       <div class="foot" style="justify-content:center"><button class="btn" data-act="quickSell">바로 팔기 +${won(c.price)}원 <kbd>S</kbd></button><button class="btn hot" data-act="close">계속 낚시 <kbd>Space</kbd></button></div></div>`;
   openPanel(c.kind==='bukangi' ? '특별한 손맛' : '포획 성공', body);
 }
 
@@ -2185,7 +2187,17 @@ holdButton($('btnLift'), 'lift');
 cv.addEventListener('pointerdown', e=>{ if(!modal.hidden) return; input.reel = true; action(); });
 ['pointerup','pointercancel','pointerleave'].forEach(t=>cv.addEventListener(t, ()=>{ input.reel = false; }));
 window.addEventListener('keydown', e=>{
-  if(!modal.hidden){ if(e.key==='Escape') closeModal(); return; }
+  if(!modal.hidden){
+    if(e.key==='Escape'){ closeModal(); return; }
+    // 포획 결과 창: S = 바로 팔기, 스페이스·Enter = 계속 낚시 (꾹 누르고 있던 키의 자동 반복은 무시)
+    if(G.phase==='result' && !e.repeat && !(e.target && e.target.closest && e.target.closest('textarea,input'))){
+      if(e.code==='KeyS' && panel.querySelector('[data-act=quickSell]')){ e.preventDefault(); quickSell(); }
+      else if(e.code==='Space' || e.code==='Enter' || e.code==='NumpadEnter'){ e.preventDefault(); closeModal(); }
+    }
+    return;
+  }
+  // 포획 연출 중 S: 연출을 건너뛰고 바로 팔기
+  if(e.code==='KeyS' && G.phase==='landing' && !e.repeat){ e.preventDefault(); finishLanding(); if(panel.querySelector('[data-act=quickSell]')) quickSell(); return; }
   if(e.code==='Space'){ e.preventDefault(); input.reel = true; if(!e.repeat) action(); }
   else SFX.unlock();
   if(e.code==='ArrowUp' || e.code==='KeyW'){ e.preventDefault(); input.lift = true; }
