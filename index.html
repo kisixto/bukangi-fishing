@@ -886,7 +886,7 @@ function emit(ev){
 function finishTutorial(){
   S.tutorial.done = true; S.money += CONFIG.tutorial.reward; save(); refreshHud(); renderTut();
   openPanel('튜토리얼 완료', `<div class="catch"><h3>본 게임 시작!</h3>
-    <p>보상으로 <span class="price">${won(CONFIG.tutorial.reward)}원</span>을 받았어요.<br>이 돈으로 <b>하천</b> 낚시터를 바로 해금할 수 있어요. 낚시터 화면에서 해금하세요.<br>아주 드물게 낚이는 <b style="color:${CONFIG.specialGrade.color}">부캉이</b>를 잡으면 부산에 갈 수 있어요.</p>
+    <p>보상으로 <span class="price">${won(CONFIG.tutorial.reward)}원</span>을 받았어요.<br>이 돈으로 <b>하천</b> 낚시터를 바로 해금할 수 있어요. 낚시터 화면에서 해금하세요.<br>아주 드물게 낚이는 부산 북항의 흑상어 <b style="color:${CONFIG.specialGrade.color}">부캉이</b>를 잡으면 부산에 갈 수 있어요.</p>
     <div class="foot" style="justify-content:center"><button class="btn hot" data-act="openStage">낚시터 고르기</button><button class="btn" data-act="close">계속 낚시</button></div></div>`);
 }
 function skipTutorial(){ S.tutorial.step = TUTORIAL.length; finishTutorial(); }
@@ -1009,7 +1009,7 @@ function render(){
   if(G.phase==='reeling'){
     const fp = fishPos(), L = clamp((G.catch.kind==='bukangi'?40:G.catch.len)/150, 0.15, 1)*CW*0.22+24;
     ctx.save(); ctx.globalAlpha = 0.45;
-    if(G.catch.kind==='bukangi') drawBukangi(ctx, fp.x, fp.y, L*0.6, true);
+    if(G.catch.kind==='bukangi') drawBukangi(ctx, fp.x, fp.y, L*0.3, true);
     else drawFish(ctx, fp.x, fp.y, L, G.catch.id, { facing:1, silhouette:true, wiggle:Math.sin(G.time*(8+G.R.force*10))*0.12 });
     ctx.restore();
   }
@@ -1828,7 +1828,7 @@ function drawLanding(){
   // 물고기 (튀어 오르며 몸부림)
   ctx.save(); ctx.translate(p.x,p.y);
   ctx.rotate(p.k<1 ? lerp(-0.9, 0, p.k) : Math.sin(G.time*14)*0.08*Math.max(0,1-p.hold*0.8));
-  if(c.kind==='bukangi') drawBukangi(ctx, 0, 0, p.size*0.55, false);
+  if(c.kind==='bukangi') drawBukangi(ctx, 0, 0, p.size*0.42, false, -1);
   else drawFish(ctx, 0, 0, p.size, c.id, { facing:-1 });
   ctx.restore();
   // 등급 이름
@@ -1964,20 +1964,44 @@ function drawFish(c, x, y, L, id, o={}){
   }
   c.restore();
 }
-// 부캉이: 부엉이를 닮은 부산의 행운 마스코트
-function drawBukangi(c, x, y, r, sil){
-  c.save(); c.translate(x,y);
-  c.fillStyle = sil ? '#0d2530' : '#8a6a4a';
-  c.beginPath(); c.moveTo(-r*0.7,-r*0.6); c.lineTo(-r*0.55,-r*1.15); c.lineTo(-r*0.25,-r*0.75); c.fill();
-  c.beginPath(); c.moveTo(r*0.7,-r*0.6); c.lineTo(r*0.55,-r*1.15); c.lineTo(r*0.25,-r*0.75); c.fill();
-  c.beginPath(); c.ellipse(0,0,r*0.85,r,0,0,Math.PI*2); c.fill();
+// 부캉이: 부산 북항에 사는 흑상어. r은 크기 기준값(몸길이 약 4r), 오른쪽을 보고 그림
+function drawBukangi(c, x, y, r, sil, facing=1){
+  c.save(); c.translate(x,y); c.scale(facing,1);
+  const body = sil ? '#0d2530' : '#2f353b', top = sil ? '#0d2530' : '#3e464d', fin = sil ? '#0d2530' : '#262b30';
+  // 꼬리지느러미 (위 엽이 큰 상어 꼬리)
+  c.fillStyle = fin; c.beginPath();
+  c.moveTo(-r*1.45, -r*0.08); c.quadraticCurveTo(-r*1.75, -r*0.55, -r*2.05, -r*1.0); c.quadraticCurveTo(-r*1.9, -r*0.35, -r*1.85, -r*0.02);
+  c.quadraticCurveTo(-r*1.95, r*0.3, -r*1.9, r*0.55); c.quadraticCurveTo(-r*1.65, r*0.25, -r*1.45, r*0.12); c.closePath(); c.fill();
+  // 등지느러미
+  c.beginPath(); c.moveTo(-r*0.25, -r*0.4); c.quadraticCurveTo(-r*0.05, -r*0.95, -r*0.2, -r*1.15); c.quadraticCurveTo(r*0.35, -r*0.7, r*0.45, -r*0.38); c.closePath(); c.fill();
+  // 작은 둘째 등지느러미·뒷지느러미
+  c.beginPath(); c.moveTo(-r*1.2, -r*0.18); c.lineTo(-r*1.22, -r*0.42); c.lineTo(-r*1.0, -r*0.22); c.closePath(); c.fill();
+  c.beginPath(); c.moveTo(-r*1.05, r*0.2); c.lineTo(-r*1.15, r*0.42); c.lineTo(-r*0.85, r*0.24); c.closePath(); c.fill();
+  // 몸통 (뾰족한 주둥이, 늘씬한 유선형)
+  const bodyPath = ()=>{ c.beginPath(); c.moveTo(-r*1.5, -r*0.06);
+    c.bezierCurveTo(-r*0.9, -r*0.42, r*0.6, -r*0.55, r*1.55, -r*0.28);
+    c.quadraticCurveTo(r*2.05, -r*0.12, r*2.05, r*0.02);
+    c.quadraticCurveTo(r*1.9, r*0.3, r*1.3, r*0.36);
+    c.bezierCurveTo(r*0.4, r*0.48, -r*0.8, r*0.36, -r*1.5, r*0.1); c.closePath(); };
+  bodyPath(); c.fillStyle = body; c.fill();
   if(!sil){
-    c.fillStyle='#f1dfbf'; c.beginPath(); c.ellipse(0,r*0.3,r*0.55,r*0.6,0,0,Math.PI*2); c.fill();
-    c.fillStyle='#c79a5a'; for(let i=0;i<3;i++){ c.beginPath(); c.arc(-r*0.2+i*r*0.2, r*0.35, r*0.08, 0, Math.PI); c.stroke(); }
-    [-1,1].forEach(s=>{ c.fillStyle='#ffd04a'; c.beginPath(); c.arc(s*r*0.33,-r*0.28,r*0.26,0,Math.PI*2); c.fill(); c.fillStyle='#1a1a1a'; c.beginPath(); c.arc(s*r*0.33,-r*0.28,r*0.13,0,Math.PI*2); c.fill(); c.fillStyle='#fff'; c.beginPath(); c.arc(s*r*0.29,-r*0.33,r*0.05,0,Math.PI*2); c.fill(); });
-    c.fillStyle='#ff8a3c'; c.beginPath(); c.moveTo(-r*0.09,-r*0.08); c.lineTo(r*0.09,-r*0.08); c.lineTo(0,r*0.1); c.fill();
-    c.fillStyle='#1f5a8a'; roundRectC(c,-r*0.32,r*0.62,r*0.64,r*0.26,r*0.08); c.fill();
-    c.fillStyle='#fff'; c.font=`${Math.round(r*0.22)}px ${FD}`; c.textAlign='center'; c.textBaseline='middle'; c.fillText('BUSAN',0,r*0.76);
+    c.save(); bodyPath(); c.clip();
+    c.fillStyle = top; c.fillRect(-r*2, -r*0.6, r*4.2, r*0.32);                         // 등쪽 하이라이트
+    c.fillStyle = '#e9e6de'; c.beginPath(); c.moveTo(-r*1.5, r*0.12);                     // 흰 배
+    c.bezierCurveTo(-r*0.5, r*0.05, r*0.8, r*0.08, r*2.0, r*0.06); c.lineTo(r*2.1, r*0.6); c.lineTo(-r*1.6, r*0.6); c.closePath(); c.fill();
+    c.restore();
+    // 가슴지느러미
+    c.fillStyle = fin; c.beginPath(); c.moveTo(r*0.55, r*0.2); c.quadraticCurveTo(r*0.25, r*0.65, r*0.05, r*0.85); c.quadraticCurveTo(r*0.45, r*0.55, r*0.95, r*0.3); c.closePath(); c.fill();
+    // 아가미 틈
+    c.strokeStyle = 'rgba(15,20,25,.7)'; c.lineWidth = Math.max(1, r*0.04); c.lineCap = 'round';
+    for(let i=0;i<4;i++){ const gx = r*(1.0 + i*0.1); c.beginPath(); c.moveTo(gx, -r*0.12); c.quadraticCurveTo(gx+r*0.04, r*0.02, gx, r*0.16); c.stroke(); }
+    // 눈과 입
+    c.fillStyle = '#0b0d0f'; c.beginPath(); c.arc(r*1.52, -r*0.1, Math.max(1.2, r*0.075), 0, Math.PI*2); c.fill();
+    c.fillStyle = '#fff'; c.beginPath(); c.arc(r*1.5, -r*0.125, Math.max(0.5, r*0.025), 0, Math.PI*2); c.fill();
+    c.strokeStyle = '#5a4a48'; c.lineWidth = Math.max(1, r*0.035); c.beginPath(); c.moveTo(r*1.45, r*0.2); c.quadraticCurveTo(r*1.65, r*0.27, r*1.85, r*0.17); c.stroke();
+    // 부산 북항 인식표 (크게 그릴 때만)
+    if(r > 18){ c.fillStyle = '#1f5a8a'; roundRectC(c, -r*0.08, -r*0.72, r*0.42, r*0.2, r*0.05); c.fill();
+      c.save(); c.translate(r*0.13, -r*0.615); c.scale(facing,1); c.fillStyle = '#fff'; c.font = `${Math.round(r*0.14)}px ${FD}`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('북항', 0, 0); c.restore(); }
   }
   c.restore();
 }
@@ -1986,7 +2010,7 @@ function paintMini(canvas, id, silhouette){
   const r = canvas.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio||1);
   canvas.width = Math.round(r.width*dpr); canvas.height = Math.round(r.height*dpr);
   const c = canvas.getContext('2d'); c.setTransform(dpr,0,0,dpr,0,0);
-  if(id==='bukangi') drawBukangi(c, r.width/2, r.height/2+2, r.height*0.38, silhouette);
+  if(id==='bukangi') drawBukangi(c, r.width/2, r.height/2+2, Math.min(r.width*0.22, r.height*0.55), silhouette);
   else drawFish(c, r.width/2, r.height/2, Math.min(r.width*0.9, r.height*2.2), id, { silhouette });
 }
 
@@ -2034,7 +2058,7 @@ function showCatch(c, record, rewards){
   const rw = rewards && rewards.length ? `<div class="rewardbox"><b>도감 완성 보상</b><br>${rewards.join('<br>')}</div>` : '';
   const body = c.kind==='bukangi'
     ? `<div class="catch"><canvas data-fish="bukangi"></canvas><div>${gradeChip(gi)}</div><h3>부캉이!</h3>
-       <p>바다의 행운, 부캉이를 낚았어요.<br><b>부산 이용권</b> 1장을 받았어요. (보유 ${S.tickets}장)</p>${rw}
+       <p>부산 북항에 산다는 흑상어, 부캉이를 낚았어요.<br><b>부산 이용권</b> 1장을 받았어요. (보유 ${S.tickets}장)</p>${rw}
        <div class="foot" style="justify-content:center"><button class="btn hot" data-act="openStage">부산으로</button><button class="btn" data-act="close">계속 낚시 <kbd>Space</kbd></button></div></div>`
     : `<div class="catch"><canvas data-fish="${c.id}"></canvas><div>${gradeChip(gi)}</div><h3>${c.name}</h3>
        ${record ? '<div class="record">최대 크기 갱신!</div>' : (S.dex[c.id].count===1 ? '<div class="record">도감 등록!</div>' : '')}
@@ -2184,7 +2208,7 @@ function openDex(){
   }).join('');
   const got = [...all].filter(id=>S.dex[id]).length;
   const bk = S.dex.bukangi;
-  const special = `<div class="dexh">특별</div><div class="dexg"><div class="dex"><canvas data-fish="bukangi" data-sil="${bk?0:1}"></canvas><b>${bk?'부캉이':'???'}</b><span class="s">${bk ? `${bk.count}번 만남 · 부산 이용권` : '아주 드물게 낚인다는 소문'}</span></div></div>`;
+  const special = `<div class="dexh">특별</div><div class="dexg"><div class="dex"><canvas data-fish="bukangi" data-sil="${bk?0:1}"></canvas><b>${bk?'부캉이 (흑상어)':'???'}</b><span class="s">${bk ? `${bk.count}번 만남 · 부산 이용권` : '부산 북항에 산다는 흑상어'}</span></div></div>`;
   resetArm = false;
   openPanel(`도감 <span style="font-size:15px;color:var(--muted)">${got}/${all.size}</span>`, html + special + `<div class="foot"><button class="btn" data-act="openTransfer">기록 옮기기</button><button class="btn" data-act="reset">기록 초기화</button></div>`);
 }
