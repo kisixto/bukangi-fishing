@@ -206,7 +206,7 @@ const CONFIG = {
   methodMismatch: { zoneMul:0.88, forceMul:1.12 },
   methodSpawnBonus: 1.5,       // 현재 방식을 선호하는 물고기 출현 가중치 배수
   stageAffinityWait: { match:0.75, mismatch:1.1 }, // 낚시터 추천 방식이면 입질이 빨리 옴
-  bite: { waitMin:2.0, waitMax:5.0, nibbleMax:3 },
+  bite: { waitMin:2.0, waitMax:5.0, nibbleMax:3, retrieveHold:0.8 },   // retrieveHold: 릴낚시 입질 대기 중 이만큼(초) 꾹 누르면 채비 회수
   floatHook: { windowEasy:0.65, windowHard:0.3, perfectPortion:0.4 },     // 찌 잠김 반응 시간(초)
   gaugeHook: { speedEasy:0.8, speedHard:1.9, zoneEasy:0.28, zoneHard:0.12, timeout:3.5, perfectPortion:0.35 },
   reel: {
@@ -598,8 +598,15 @@ function updateWait(dt){
     w.nibbles.forEach((n,i)=>{ if(G.t>=n && !w['r'+i]){ w['r'+i]=1; ripple(G.castX*W(), surfY()); SFX.nibble(); } });
     if(G.t>=w.at && !w.dipFx){ w.dipFx=1; ripple(G.castX*W(), surfY()); ripple(G.castX*W(), surfY()); SFX.bite(); buzz(60); }
     if(G.t >= w.at + w.window) lose('찌가 다시 떠올랐어요. 놓쳤다!');
-  } else if(G.t >= w.at){ setPhase('bite'); SFX.alert(); buzz(60); }
+  } else {
+    // 릴낚시: 입질 전 감기를 꾹 누르면 채비를 감아 들임 (짧게 톡 누르는 건 무시)
+    if(input.reel){ w.retr = (w.retr||0) + dt; w.tickT = (w.tickT||0) - dt; if(w.tickT<=0){ w.tickT = 0.075; SFX.tick(); }
+      if(w.retr >= CONFIG.bite.retrieveHold){ retrieveLine(); return; } }
+    else w.retr = Math.max(0, (w.retr||0) - dt*2);
+    if(G.t >= w.at){ setPhase('bite'); SFX.alert(); buzz(60); }
+  }
 }
+function retrieveLine(){ setPhase('idle'); toast('채비를 거둬들였어요'); }
 function beginGauge(){
   const c = CONFIG.gaugeHook, d = G.catch.diff;
   const zW = Math.min(0.5, lerp(c.zoneEasy, c.zoneHard, d)*(1+perk('hook')));
@@ -625,7 +632,7 @@ function action(){
         const w = G.wait;
         if(G.t>=w.at && G.t<w.at+w.window){ hookSuccess((G.t-w.at) < w.window*CONFIG.floatHook.perfectPortion); }
         else lose('너무 일찍 챔질했어요. 물고기가 놀라 도망갔다');
-      } else toast('아직 입질이 없어요');
+      }   // 릴낚시는 꾹 눌러 채비 회수 (updateWait에서 처리)
       break;
     case 'hookGauge': {
       const g = G.gauge, inZ = g.pos>=g.zStart && g.pos<=g.zStart+g.zW;
@@ -1705,7 +1712,8 @@ function drawLine(g, tip){
   else if(G.phase==='reeling'){ const fp = fishPos(); ex = fp.x; ey = fp.y; sag = Math.max(0, 0.4 - G.R.T)*40; }
   else if(G.phase==='lost'){ ex = tip.x + 10; ey = tip.y + 40; }
   else if(G.phase==='landing'){ const p = landPos(); ex = p.x - p.size*0.4; ey = p.y; sag = 0; }
-  else { ex = cx; ey = surfY(); sag = 18; }
+  else { const k = (G.phase==='waiting' && S.method==='reel' && G.wait) ? clamp((G.wait.retr||0)/CONFIG.bite.retrieveHold, 0, 1) : 0;
+    ex = lerp(cx, tip.x + 24, k); ey = surfY(); sag = 18*(1-k); }
   ctx.beginPath(); ctx.moveTo(tip.x, tip.y); ctx.quadraticCurveTo((tip.x+ex)/2, Math.max(tip.y,ey)+sag, ex, ey); ctx.stroke();
   // 찌 / 루어
   if(S.method==='float' && (G.phase==='waiting' || G.phase==='casting')) drawBobber(ex, ey);
@@ -1864,7 +1872,7 @@ function hintText(){
   if(p==='travel') return '';
   if(p==='aiming') return '한 번 더 눌러 던지세요';
   if(p==='idle') return S.net.length>=netSize() ? '살림망이 가득! 상점에서 판매하세요' : (f?'찌를 던지세요':'채비를 던지세요') + ` · 살림망 ${S.net.length}/${netSize()}`;
-  if(p==='waiting') return f ? '찌가 쑥 잠길 때 챔질! 톡톡은 속임수' : '입질을 기다리는 중…';
+  if(p==='waiting') return f ? '찌가 쑥 잠길 때 챔질! 톡톡은 속임수 · 미리 누르면 놓쳐요' : '입질을 기다리는 중… · 꾹 누르면 채비 회수';
   if(p==='reeling') return f ? '감기를 눌렀다 뗐다 하며 장력을 초록 구간에' : '들기로 끌어오고, 대를 내리며 감기';
   return '';
 }
@@ -1955,7 +1963,7 @@ function syncControls(){
   $('mFloat').setAttribute('aria-pressed', String(!isReel));
   $('mReel').setAttribute('aria-pressed', String(isReel));
   $('mFloat').disabled = $('mReel').disabled = p!=='idle';
-  const labels = { travel:'건너뛰기', aiming:'던지기!', landing:'…', idle:'던지기', casting:'…', waiting: isReel?'입질 대기':'챔질!', bite:'입질!', hookGauge:'챔질!', reeling:'감기 (누르고 있기)', lost:'…', result:'…' };
+  const labels = { travel:'건너뛰기', aiming:'던지기!', landing:'…', idle:'던지기', casting:'…', waiting: isReel?'꾹 눌러 채비 회수':'챔질!', bite:'입질!', hookGauge:'챔질!', reeling:'감기 (누르고 있기)', lost:'…', result:'…' };
   a.textContent = labels[p];
   a.disabled = ['casting','bite','lost','result'].includes(p);
   if(p==='landing'){ a.disabled = false; a.textContent = '넘기기'; }
