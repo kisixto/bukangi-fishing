@@ -43,6 +43,11 @@ button:focus-visible{outline:2px solid var(--float);outline-offset:2px}
 .timer{font-family:var(--f-display);color:var(--bobber);font-variant-numeric:tabular-nums}
 .gear{display:flex;gap:4px;flex-wrap:wrap}
 .chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;background:var(--ink-2);border:1px solid var(--ink-3);font-size:12px;white-space:nowrap}
+.evchip{background:#4a2f12;border-color:#a8682a;color:#ffd9a0;animation:evpulse 2s ease-in-out infinite}
+@keyframes evpulse{50%{border-color:#ffb45a}}
+.autosell .seg{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.autosell .seg .chip{cursor:pointer;color:inherit;font:inherit;font-size:12px}
+.autosell .seg .chip.on{background:var(--float,#ff5a3c);border-color:transparent;color:#fff;font-weight:700}
 .chip i{font-style:normal;color:var(--muted)}
 .ticket{background:#3a2140;border-color:#6a3a72;color:#ffc6e2}
 .envchip{background:#22405a;border-color:#3a6a8e}
@@ -187,7 +192,6 @@ button:focus-visible{outline:2px solid var(--float);outline-offset:2px}
 </style>
 </head>
 <body>
-
 <div id="app">
   <header class="hud">
     <div class="money" id="hudMoney">0<small>원</small></div>
@@ -293,23 +297,30 @@ const CONFIG = {
     maxOfflineHours: 24,
     levels: [
       { name:'그물 없음',     cost:0,      interval:0,  cap:0,  quality:0,    luck:0 },
-      { name:'작은 그물',     cost:5000,   interval:90, cap:4,  quality:-0.5, luck:0 },
-      { name:'자망',          cost:20000,  interval:75, cap:6,  quality:0,    luck:0.1 },
-      { name:'나일론 정치망', cost:60000,  interval:60, cap:8,  quality:0.5,  luck:0.2 },
-      { name:'대형 정치망',   cost:150000, interval:45, cap:10, quality:1.0,  luck:0.35 },
-      { name:'황금 그물',     cost:400000, interval:30, cap:12, quality:1.6,  luck:0.5 },
+      { name:'작은 그물',     cost:4000,   interval:90, cap:4,  quality:-0.5, luck:0 },
+      { name:'자망',          cost:16000,  interval:75, cap:6,  quality:0,    luck:0.1 },
+      { name:'나일론 정치망', cost:50000,  interval:60, cap:8,  quality:0.5,  luck:0.2 },
+      { name:'대형 정치망',   cost:125000, interval:45, cap:10, quality:1.0,  luck:0.35 },
+      { name:'황금 그물',     cost:340000, interval:30, cap:12, quality:1.6,  luck:0.5 },
     ],
   },
   // 희귀 변종: 황금(×5) / 알비노(×3). 미끼 행운·안개가 확률을 올림
   variants: { baseChance:0.01, luckBonus:0.01, gold:{ name:'황금', mul:5, share:0.4 }, albino:{ name:'알비노', mul:3, share:0.6 } },
-  // 크기 메달: 몸길이 범위의 몇 % 지점 이상이면 메달. 처음 받을 때 기준가 × 배수만큼 보상
-  medals: [ { name:'동메달', at:0.70, reward:2, color:'#d89a63' }, { name:'은메달', at:0.85, reward:5, color:'#c9d1d6' }, { name:'금메달', at:0.95, reward:15, color:'#ffcf4a' } ],
+  // 크기 메달: 몸길이 범위의 몇 % 지점 이상이면 메달. 처음 받을 때 기준가 × 배수만큼 보상 (예전 2/5/15배 → 크게 낮춤)
+  medals: [ { name:'동메달', at:0.70, reward:0.2, color:'#d89a63' }, { name:'은메달', at:0.85, reward:0.5, color:'#c9d1d6' }, { name:'금메달', at:0.95, reward:1, color:'#ffcf4a' } ],
   // 시간대·날씨: 실제 시각으로 진행 (하루 12분, 날씨는 3분마다 바뀔 수 있음)
   world: {
     dayMinutes:12, weatherMinutes:3,
     weatherOdds:{ clear:0.6, rain:0.25, fog:0.15 },
     nightFish:['galchi','jangeo','megi','bollak','noraemi','redtail','lingcod','eungalchi'], nightMul:1.3, nightBias:0.3, nightPrice:1.5,   // nightPrice: 밤에 잡은 야행성 물고기 가격 배수
     rainBias:0.25, rainWait:0.8, fogBukangi:2, fogVariant:2,
+    // 날씨 이벤트: 날씨가 바뀌는 3분 구간마다 chance 확률로 하나가 생김 (낚시터마다 다름). weathers: 생길 수 있는 날씨
+    events: { chance:0.5, list:{
+      school:  { name:'물고기 떼',     weathers:['clear','rain','fog','snow'], mul:3, desc:'떼가 몰려왔어요 · 그 물고기 출현 3배' },
+      storm:   { name:'거센 물살',     weathers:['rain','snow'], diff:0.15, price:1.2, desc:'물고기 힘이 세져 잡기 어렵지만 판매가 ×1.2' },
+      feeding: { name:'먹이 활동',     weathers:['clear'], wait:0.65, desc:'입질이 훨씬 빨라져요' },
+      deep:    { name:'안개 속 대물',  weathers:['fog'], bias:0.5, wait:1.25, desc:'좋은 물고기가 늘지만 입질이 느려요' },
+    } },
   },
   // 맵별 보스: 그 맵에서 need마리 잡으면 다음 입질이 보스. 3단계 장력 싸움. diff: 난이도(뒤 맵일수록 높음, 단계별 추가 당김에도 곱해짐)
   bosses: {
@@ -323,7 +334,8 @@ const CONFIG = {
   },
   bossFight: { reelMul:0.7, loseKeep:0.6, phaseForce:[0.0, 0.08, 0.14], diveEvery:[0, 4.5, 3.2], diveForce:0.28, diveTime:1.6, warn:0.7, burstMul:[1, 1.2, 1.6] },
   // 오늘의 의뢰: 하루 3개, 보상은 열린 맵 중 가장 좋은 곳의 1마리 기대가 × 배수
-  quests: { perDay:3, rewardMul:[10, 16], allDoneTicket:1 },
+  // 의뢰 내용·보상은 지금까지 연 가장 먼 낚시터 기준. 새 낚시터를 열면 아직 못 끝낸 의뢰가 바뀜. 모두 끝내면 대물 미끼 보너스(부산 이용권은 주지 않음)
+  quests: { perDay:3, rewardMul:[10, 16], allDoneBait:5, recentStages:2 },
   // 수족관: 전시한 물고기 가격 합 × hourly 만큼 시간당 관람 수입 (꺼 둔 동안 최대 24시간)
   aquarium: { hourly:0.1, maxOfflineHours:24, levels:[
     { name:'수조 없음', cost:0, cap:0 }, { name:'작은 어항', cost:20000, cap:3 }, { name:'거실 수조', cost:60000, cap:5 },
@@ -340,16 +352,18 @@ const CONFIG = {
   prestige: { priceBonus:0.10, bossBonus:0.10, startMoney:150 },
   // 낚시터 도감을 모두 채우면 받는 작은 편의 효과 (중복 없이 1회)
   dexRewards: {
-    indoor: { perk:'net',   value:2,   text:'살림망 +2칸' },
+    indoor: { perk:'castSlow', value:0.15, text:'캐스팅 게이지 15% 느려짐' },
     river:  { perk:'hook',  value:0.1, text:'챔질 판정 10% 넓어짐' },
     pier:   { perk:'slack', value:0.3, text:'느슨함 허용 +0.3초' },
     boat:   { perk:'wait',  value:0.1, text:'입질 대기 10% 단축' },
-    stream: { perk:'net',   value:1,    text:'살림망 +1칸' },
+    stream: { perk:'sell',  value:0.05, text:'판매가 +5%' },
     dokdo:  { perk:'hook',  value:0.05, text:'챔질 판정 5% 넓어짐' },
     amazon: { perk:'slack', value:0.2,  text:'느슨함 허용 +0.2초' },
     alaska: { perk:'wait',  value:0.05, text:'입질 대기 5% 단축' },
     busan:  { perk:'busan', value:30,  text:'부산 이용 시간 +30초' },
   },
+  // 자동 판매: 이미 잡아 본 종류 중 정한 등급 이하이고 기록(크기·가격·등급·메달)을 넘지 않으면 잡자마자 판매. 변종·보스는 제외
+  autoSell: { defaultMax:1 },   // -1 끔, 0 일반까지, 1 고급까지, 2 희귀까지, 3 영웅까지
 
   gear: {
     rod:  { label:'낚싯대', short:'대', levels:[
@@ -496,7 +510,7 @@ function defaultSave(){
   return { money:0, gear:{rod:0,reel:0,line:0,bait:0}, unlocked:{indoor:true}, stage:'indoor', prevStage:'indoor',
            tickets:0, busanLeft:0, net:[], dex:{}, dexDone:{}, tutorial:{done:false, step:0}, method:'float', sound:true, autoNet:{ lv:0, prog:0, fish:[], last:0 }, stats:defaultStats(),
            boss:{ meter:{}, beaten:{} }, quests:{ day:'', list:[], streak:0, bonus:false }, buffs:{ big:0, buk:0 },
-           aquarium:{ lv:0, fish:[], bank:0, last:0 }, prestige:0, tourBest:{} };
+           aquarium:{ lv:0, fish:[], bank:0, last:0 }, prestige:0, tourBest:{}, autoSell:CONFIG.autoSell.defaultMax };
 }
 function defaultStats(){
   return { variants:0, medals:[0,0,0], bossWins:0, tourWins:0, questsDone:0, casts:0, bites:0, hooks:0, perfect:0, catches:0, netCatches:0, bukangi:0, earned:0, playSec:0,
@@ -557,8 +571,8 @@ function gradeInfo(c){ return c.kind==='bukangi' ? CONFIG.specialGrade : CONFIG.
 
 const netSize = ()=>CONFIG['keepNetSize'] + perk('net');
 const slackLimit = ()=>CONFIG.reel.slackLimit + perk('slack');
-function stageDexIds(st){ return st.id==='busan' ? st.fish.map(f=>f[0]).filter(id=>CONFIG.fish[id].busan) : st.fish.map(f=>f[0]); }
-function stageDexName(st){ return st.id==='busan' ? '부산 전용' : st.name; }
+function stageDexIds(st){ return st.fish.map(f=>f[0]); }   // 부산도 실제로 나오는 물고기 전부(전용 4종 + 참돔·방어·부시리)
+function stageDexName(st){ return st.name; }
 function perk(type){ let v = 0; for(const st of CONFIG.stages){ const r = CONFIG.dexRewards[st.id]; if(r && r.perk===type && S.dexDone[st.id]) v += r.value; } return v; }
 function checkDexRewards(){
   const got = [];
@@ -583,12 +597,29 @@ function getEnv(stage){
   if(weather==='rain' && stage.theme==='alaska') weather = 'snow';
   return { tod, weather, indoor:false, dayF:f };
 }
+// 날씨 이벤트: 날씨 구간(3분)마다, 낚시터마다 정해짐. 같은 시각·같은 낚시터면 누구에게나 같음
+function getEvent(stage){
+  stage = stage || curStage();
+  const env = getEnv(stage); if(env.indoor) return null;
+  const W = CONFIG.world, E = W.events, slot = Math.floor(Date.now() / (W.weatherMinutes*60000)), si = CONFIG.stages.indexOf(stage) + 1;
+  if(hash01(slot*3.17 + si*41.3) >= E.chance) return null;
+  const ok = Object.entries(E.list).filter(([,e])=>e.weathers.includes(env.weather));
+  if(!ok.length) return null;
+  const [type, ev] = ok[Math.floor(hash01(slot*7.91 + si*13.7)*ok.length)];
+  const out = Object.assign({ type, key:`${slot}|${stage.id}|${type}`, ends:(slot+1)*W.weatherMinutes*60000 }, ev);
+  if(type==='school'){ const pool = stage.fish.slice(0, Math.max(1, stage.fish.length-2));   // 가장 귀한 두 종은 떼로 안 옴
+    out.fish = pool[Math.floor(hash01(slot*5.3 + si*2.9)*pool.length)][0]; out.label = `${CONFIG.fish[out.fish].name} 떼`; }
+  else out.label = ev.name;
+  return out;
+}
+function eventText(ev){ return ev ? `${ev.label}: ${ev.type==='school' ? `${CONFIG.fish[ev.fish].name} ${ev.desc}` : ev.desc}` : ''; }
 const TOD_NAME = { dawn:'새벽', day:'낮', dusk:'저녁', night:'밤' }, WEATHER_NAME = { clear:'맑음', rain:'비', fog:'안개', snow:'눈보라' };
 function envTip(e){
   const t = [];
   if(e.tod==='night') t.push('밤: 갈치·장어·메기·볼락 같은 야행성 물고기가 조금 더 자주 나오고 값은 1.5배, 좋은 물고기 증가');
   if(e.weather==='rain' || e.weather==='snow') t.push('비·눈보라: 입질이 빨라지고 좋은 물고기 증가');
   if(e.weather==='fog') t.push('안개: 부캉이와 희귀 변종 확률 2배');
+  const ev = getEvent(); if(ev) t.push('이벤트 ' + eventText(ev));
   return t.join(' / ') || '특별한 효과 없음';
 }
 function rollCatch(stage, method, power=0.5, opt={}){
@@ -596,7 +627,8 @@ function rollCatch(stage, method, power=0.5, opt={}){
   const wet = env.weather==='rain' || env.weather==='snow', foggy = env.weather==='fog', night = env.tod==='night';
   const luck = opt.luck ?? gearLv('bait').luck;
   let castF = opt.quality ?? (clamp(power,0,1)-0.5)*2;   // -1 가까이 ~ +1 멀리 (그물은 1을 넘을 수 있음)
-  castF += (night ? W.nightBias : 0) + (wet ? W.rainBias : 0) + (opt.big ? CONFIG.baits.big.bias : 0);
+  const ev = getEvent(stage);
+  castF += (night ? W.nightBias : 0) + (wet ? W.rainBias : 0) + (opt.big ? CONFIG.baits.big.bias : 0) + (ev && ev.bias || 0);
   const bukMul = (foggy ? W.fogBukangi : 1) * (opt.buk ? CONFIG.baits.buk.mul : 1);
   if(!opt.noBukangi && stage.bukangi && Math.random() < CONFIG.bukangi.baseChance*(1+luck*CONFIG.bukangi.luckMul)*bukMul){
     return { kind:'bukangi', id:'bukangi', name:'부캉이', diff:CONFIG.bukangi.diff, method, len:0, price:0 };
@@ -606,6 +638,7 @@ function rollCatch(stage, method, power=0.5, opt={}){
     wt *= 1 + luck*gradeIndex(f.price)*0.35;           // 미끼 행운: 비싼 종 가중치↑
     if(f.method===method) wt *= CONFIG.methodSpawnBonus;
     if(night && W.nightFish.includes(id)) wt *= W.nightMul;
+    if(ev && ev.type==='school' && ev.fish===id) wt *= ev.mul;
     wt *= Math.pow(1+CONFIG.cast.gradeBias, castF*gradeIndex(f.price));   // 멀리 던질수록 비싼 종↑, 가까이면↓
     return {id, wt};
   });
@@ -616,7 +649,9 @@ function rollCatch(stage, method, power=0.5, opt={}){
   const t = Math.pow(Math.random(), Math.max(0.9, 1.8 - luck*0.6));   // 작은 개체가 흔함
   const len = Math.round((f.len[0] + (f.len[1]-f.len[0])*t)*10)/10;
   const avg = (f.len[0]+f.len[1])/2;
-  return makeFish(id, len, t, { luck, foggy, nightFresh: night && W.nightFish.includes(id) });
+  const c = makeFish(id, len, t, { luck, foggy, nightFresh: night && W.nightFish.includes(id), evPrice: ev && ev.price });
+  if(ev && ev.diff) c.diff = clamp(c.diff + ev.diff, 0, 1);
+  return c;
 }
 // 길이로 가격·등급·무게·난이도를 정하고, 희귀 변종과 환생 보너스를 적용
 function makeFish(id, len, t, o={}){
@@ -624,9 +659,10 @@ function makeFish(id, len, t, o={}){
   let price = Math.max(1, Math.round(f.price*Math.pow(len/avg,2))), variant = null;
   const vc = (V.baseChance + (o.luck||0)*V.luckBonus) * (o.foggy ? CONFIG.world.fogVariant : 1);
   if(o.nightFresh) price = Math.round(price * CONFIG.world.nightPrice);
+  if(o.evPrice) price = Math.round(price * o.evPrice);
   if(!f.boss && !o.noVariant && Math.random() < vc){ variant = Math.random() < V.gold.share ? 'gold' : 'albino'; price *= V[variant].mul; }
   const grade = gradeIndex(price);
-  price = Math.round(price * (1 + S.prestige*CONFIG.prestige.priceBonus));
+  price = Math.round(price * (1 + S.prestige*CONFIG.prestige.priceBonus + perk('sell')));
   const weight = Math.round(0.012*Math.pow(len,3)*(f.shape==='long'?0.35:f.shape==='tuna'?1.3:f.shape==='flat'?0.8:1));
   const diff = f.boss ? 1 : clamp(f.power*0.7 + grade*0.05 + t*0.12, 0, 1);
   const name = (variant ? V[variant].name+' ' : '') + f.name;
@@ -717,6 +753,7 @@ const HAPTIC = (()=>{
   };
 })();
 function buzz(pattern){ if(!S.sound) return; HAPTIC.play(pattern); }
+const TOUCH = !!(window.matchMedia && matchMedia('(pointer: coarse)').matches);
 const REDUCED = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
 
 /* ===================== 4. FISHING ===================== */
@@ -732,7 +769,7 @@ function tryCast(){
   setPhase('aiming');
 }
 function updateAim(dt){
-  const a = G.aim; a.pos += a.dir*CONFIG.cast.speed*dt;
+  const a = G.aim; a.pos += a.dir*CONFIG.cast.speed*(1-perk('castSlow'))*dt;
   if(a.pos>1){ a.pos = 2-a.pos; a.dir = -1; }
   if(a.pos<0){ a.pos = -a.pos; a.dir = 1; }
 }
@@ -755,7 +792,8 @@ function releaseCast(){
 function beginWait(){
   const st = curStage(), aff = st.affinity===S.method ? CONFIG.stageAffinityWait.match : CONFIG.stageAffinityWait.mismatch;
   const env = getEnv(st), wet = env.weather==='rain' || env.weather==='snow';
-  const at = rand(CONFIG.bite.waitMin, CONFIG.bite.waitMax)*aff*(1-perk('wait'))*(wet ? CONFIG.world.rainWait : 1);
+  const ev = getEvent(st);
+  const at = rand(CONFIG.bite.waitMin, CONFIG.bite.waitMax)*aff*(1-perk('wait'))*(wet ? CONFIG.world.rainWait : 1)*(ev && ev.wait || 1);
   const nibbles = [];
   if(S.method==='float'){
     const n = Math.floor(Math.random()*(CONFIG.bite.nibbleMax+1));
@@ -923,14 +961,16 @@ function landCatch(){
   const c = G.catch;
   const fp = fishPos(); splash(fp.x, fp.surf, 24);
   let record = false;
-  G.newBest = null;
+  G.newBest = null; G.autoSold = 0;
   if(c.kind==='bukangi'){
     S.tickets++; S.stats.bukangi++; questEvent('catch', c);
     const e = S.dex.bukangi || (S.dex.bukangi = {count:0, maxLen:0, best:-1});
     e.count++;
   } else {
-    G.lastNet = fishItem(c);
-    S.net.push(G.lastNet);
+    G.autoSold = autoSellOK(c) ? c.price : 0;
+    G.lastNet = G.autoSold ? null : fishItem(c);
+    if(G.autoSold){ S.money += c.price; S.stats.earned += c.price; S.stats.autoSold = (S.stats.autoSold||0) + 1; questEvent('earn', c.price); }
+    else S.net.push(G.lastNet);
     record = registerDex(c);
     if(c.boss){ const sid = c.bossStage, first = !S.boss.beaten[c.id]; S.boss.beaten[c.id] = (S.boss.beaten[c.id]||0) + 1; S.boss.meter[sid] = 0; S.stats.bossWins++; G.bossFirst = first; }
     G.newBest = recordCatch(c, false);
@@ -1087,18 +1127,22 @@ function dayKey(d=new Date()){ return `${d.getFullYear()}-${String(d.getMonth()+
 function seededRng(str){ let h = 1779033703 ^ str.length; for(let i=0;i<str.length;i++){ h = Math.imul(h ^ str.charCodeAt(i), 3432918353); h = h<<13 | h>>>19; }
   return ()=>{ h = Math.imul(h ^ h>>>16, 2246822507); h = Math.imul(h ^ h>>>13, 3266489909); h ^= h>>>16; return (h>>>0)/4294967296; }; }
 function stageExpected(st){ const tw = st.fish.reduce((a,[,w])=>a+w,0); return st.fish.reduce((a,[id,w])=>a + w*CONFIG.fish[id].price*0.87, 0)/tw; }
-function questStages(){ const l = CONFIG.stages.filter(st=>!st.ticket && st.id!=='indoor' && S.unlocked[st.id]); return l.length ? l : [stageById('indoor')]; }
-function genQuests(day){
-  const rnd = seededRng(day + '|' + S.prestige), pick = a => a[Math.floor(rnd()*a.length)], ri = (a,b)=> a + Math.floor(rnd()*(b-a+1));
+// 의뢰는 지금까지 연 낚시터 중 가장 먼 곳(최근 2곳) 기준. 진행도(tier) = 연 낚시터 중 가장 뒤 번호
+function questStages(){ const l = CONFIG.stages.filter(st=>!st.ticket && st.id!=='indoor' && S.unlocked[st.id]); return l.length ? l.slice(-CONFIG.quests.recentStages) : [stageById('indoor')]; }
+function questTier(){ return CONFIG.stages.reduce((m,st,i)=> !st.ticket && S.unlocked[st.id] ? i : m, 0); }
+function genQuests(day, n = CONFIG.quests.perDay, skipTypes = []){
+  const rnd = seededRng(day + '|' + S.prestige + '|' + questTier() + '|' + skipTypes.join()), pick = a => a[Math.floor(rnd()*a.length)], ri = (a,b)=> a + Math.floor(rnd()*(b-a+1));
   const stages = questStages(), best = stages[stages.length-1], bestExp = stageExpected(best);
-  const types = ['species','grade','method','streak','perfect','earn'].sort(()=>rnd()-0.5).slice(0, CONFIG.quests.perDay);
+  const pickStage = ()=> rnd() < 0.65 ? best : pick(stages);   // 가장 먼 낚시터 위주
+  const types = ['species','grade','method','streak','perfect','earn'].filter(t=>!skipTypes.includes(t)).sort(()=>rnd()-0.5).slice(0, n);
+  const rw = exp => Math.max(100, Math.round(exp*(CONFIG.quests.rewardMul[0] + rnd()*(CONFIG.quests.rewardMul[1]-CONFIG.quests.rewardMul[0]))/10)*10);
   return types.map(type=>{
-    const q = { type, prog:0, done:false, claimed:false, reward: Math.max(100, Math.round(bestExp*(CONFIG.quests.rewardMul[0] + rnd()*(CONFIG.quests.rewardMul[1]-CONFIG.quests.rewardMul[0]))/10)*10) };
-    if(type==='species'){ const st = pick(stages), tw = st.fish.reduce((a,[,w])=>a+w,0), pool = st.fish.filter(([,w])=>w/tw>=0.1); q.stage = st.id; q.fish = pick(pool.length?pool:st.fish)[0]; q.n = ri(3,5); }
-    if(type==='grade'){ const st = pick(stages), idx = CONFIG.stages.indexOf(st); q.stage = st.id; q.grade = idx>=5 ? 3 : idx>=3 ? 2 : 1; q.n = 2; }
-    if(type==='method'){ q.method = rnd()<0.5 ? 'float' : 'reel'; let pool = stages.flatMap(st=>st.fish.map(([id])=>id)).filter(id=>CONFIG.fish[id].method===q.method);
-      if(!pool.length){ q.method = q.method==='float' ? 'reel' : 'float'; pool = stages.flatMap(st=>st.fish.map(([id])=>id)).filter(id=>CONFIG.fish[id].method===q.method); }
-      q.fish = pick(pool); const f = CONFIG.fish[q.fish]; q.len = Math.round(f.len[0] + (f.len[1]-f.len[0])*0.55); q.n = 1; }
+    const q = { type, prog:0, done:false, claimed:false, reward: rw(bestExp) };
+    if(type==='species'){ const st = pickStage(), tw = st.fish.reduce((a,[,w])=>a+w,0), pool = st.fish.filter(([,w])=>w/tw>=0.1); q.stage = st.id; q.fish = pick(pool.length?pool:st.fish)[0]; q.n = ri(3,5); q.reward = rw(stageExpected(st)); }
+    if(type==='grade'){ const st = pickStage(), idx = CONFIG.stages.indexOf(st); q.stage = st.id; q.grade = idx>=5 ? 3 : idx>=3 ? 2 : 1; q.n = 2; q.reward = rw(stageExpected(st)*1.2); }
+    if(type==='method'){ const st = pickStage(); q.stage = st.id; q.method = rnd()<0.5 ? 'float' : 'reel'; let pool = st.fish.map(([id])=>id).filter(id=>CONFIG.fish[id].method===q.method);
+      if(!pool.length){ q.method = q.method==='float' ? 'reel' : 'float'; pool = st.fish.map(([id])=>id).filter(id=>CONFIG.fish[id].method===q.method); }
+      q.fish = pick(pool); const f = CONFIG.fish[q.fish]; q.len = Math.round(f.len[0] + (f.len[1]-f.len[0])*0.55); q.n = 1; q.reward = rw(stageExpected(st)); }
     if(type==='streak') q.n = ri(4,6);
     if(type==='perfect') q.n = ri(3,5);
     if(type==='earn') q.n = Math.round(bestExp*25/10)*10;
@@ -1109,12 +1153,22 @@ function questText(q){
   const f = q.fish && CONFIG.fish[q.fish], st = q.stage && stageById(q.stage);
   return q.type==='species' ? `${st.name}에서 ${f.name} ${q.n}마리 낚기`
     : q.type==='grade' ? `${st.name}에서 ${CONFIG.grades[q.grade].name} 등급 이상 ${q.n}마리 낚기`
-    : q.type==='method' ? `${CONFIG.methods[q.method]}로 ${f.name} ${q.len}cm 이상 낚기`
+    : q.type==='method' ? `${st ? st.name+'에서 ' : ''}${CONFIG.methods[q.method]}로 ${f.name} ${q.len}cm 이상 낚기`
     : q.type==='streak' ? `놓치지 않고 연속으로 ${q.n}마리 낚기`
     : q.type==='perfect' ? `완벽한 챔질 ${q.n}번`
     : `물고기를 팔아 ${won(q.n)}원 벌기`;
 }
-function ensureQuests(){ const d = dayKey(); if(S.quests.day !== d){ S.quests = { day:d, list:genQuests(d), streak:0, bonus:false }; save(); refreshHud(); } }
+function ensureQuests(){
+  const d = dayKey(), tier = questTier();
+  if(S.quests.day !== d){ S.quests = { day:d, tier, list:genQuests(d), streak:0, bonus:false }; save(); refreshHud(); return; }
+  if(S.quests.tier !== tier){   // 새 낚시터를 열면 아직 못 끝낸 의뢰를 새 진행도에 맞게 바꿈 (끝낸 의뢰는 그대로)
+    const keep = S.quests.list.filter(q=>q.done), fresh = genQuests(d, CONFIG.quests.perDay - keep.length, keep.map(q=>q.type));
+    const changed = S.quests.tier!=null && fresh.length > 0;
+    S.quests.list = S.quests.list.map(q=> q.done ? q : fresh.shift()).filter(Boolean);
+    S.quests.tier = tier; save(); refreshHud();
+    if(changed) toast('새 낚시터에 맞춰 의뢰가 바뀌었어요');
+  }
+}
 function questEvent(kind, data){
   if(!S.tutorial.done) return;
   ensureQuests();
@@ -1127,7 +1181,7 @@ function questEvent(kind, data){
     if(kind==='catch' && data.kind==='fish'){
       if(q.type==='species' && data.id===q.fish && S.stage===q.stage) q.prog++;
       if(q.type==='grade' && S.stage===q.stage && data.grade>=q.grade) q.prog++;
-      if(q.type==='method' && S.method===q.method && data.id===q.fish && data.len>=q.len) q.prog++;
+      if(q.type==='method' && S.method===q.method && data.id===q.fish && data.len>=q.len && (!q.stage || S.stage===q.stage)) q.prog++;
     }
     if(kind==='catch' && q.type==='streak') q.prog = Math.max(q.prog, Q.streak);
     if(kind==='perfect' && q.type==='perfect') q.prog++;
@@ -1141,7 +1195,7 @@ function claimQuest(i){
   const q = S.quests.list[i]; if(!q || !q.done || q.claimed) return;
   q.claimed = true; S.money += q.reward; S.stats.questsDone++; SFX.coin();
   let msg = `의뢰 보상 +${won(q.reward)}원`;
-  if(!S.quests.bonus && S.quests.list.every(x=>x.claimed)){ S.quests.bonus = true; S.tickets += CONFIG.quests.allDoneTicket; msg += ` · 오늘 의뢰 모두 완료! 부산 이용권 +${CONFIG.quests.allDoneTicket}`; SFX.reward(); }
+  if(!S.quests.bonus && S.quests.list.every(x=>x.claimed)){ S.quests.bonus = true; S.buffs.big += CONFIG.quests.allDoneBait; msg += ` · 오늘 의뢰 모두 완료! 대물 미끼 +${CONFIG.quests.allDoneBait}회`; SFX.reward(); }
   save(); refreshHud(); toast(msg); openQuests();
 }
 function openQuests(){
@@ -1151,7 +1205,7 @@ function openQuests(){
   const rows = Q.list.map((q,i)=>`<div class="qrow ${q.claimed?'claimed':''}"><div><div class="t">${questText(q)}</div><div class="s" style="color:var(--muted);font-size:12px">${q.type==='earn' ? `${won(Math.min(q.prog,q.n))} / ${won(q.n)}원` : `${Math.min(q.prog,q.n)} / ${q.n}`} · 보상 <span class="price">${won(q.reward)}원</span></div></div>
       ${q.claimed ? '<span class="s" style="color:var(--muted)">받음</span>' : `<button class="btn ${q.done?'hot':''}" data-act="claimQuest" data-v="${i}" ${q.done?'':'disabled'}>${q.done?'받기':'진행 중'}</button>`}
       <div class="qbar"><i style="width:${Math.min(100, q.prog/q.n*100)}%"></i></div></div>`).join('');
-  openPanel('오늘의 의뢰', `<div data-questpanel></div>${rows}<p class="rnote">세 의뢰를 모두 받으면 부산 이용권 ${CONFIG.quests.allDoneTicket}장을 더 줘요${Q.bonus?' (오늘은 받음)':''}. 새 의뢰까지 ${h}시간 ${m}분. 그물로 잡은 물고기는 의뢰에 들어가지 않아요.</p>`);
+  openPanel('오늘의 의뢰', `<div data-questpanel></div>${rows}<p class="rnote">세 의뢰를 모두 받으면 대물 미끼 ${CONFIG.quests.allDoneBait}회를 더 줘요${Q.bonus?' (오늘은 받음)':''}. 의뢰는 지금까지 연 가장 먼 낚시터 기준이라, 새 낚시터를 열면 아직 못 끝낸 의뢰가 바뀌어요. 새 의뢰까지 ${h}시간 ${m}분. 그물로 잡은 물고기는 의뢰에 들어가지 않아요.</p>`);
 }
 
 /* 보스 대물 */
@@ -1161,6 +1215,13 @@ function bossReady(sid){ const b = bossOf(sid); return !!b && bossMeter(sid) >= 
 function addBossMeter(sid, n){ const b = bossOf(sid); if(!b) return; const was = bossReady(sid);
   S.boss.meter[sid] = Math.min(b.need, bossMeter(sid) + n);
   if(!was && bossReady(sid)) toast(`${b.name}의 기척이 느껴져요! 다음 입질을 노리세요`); }
+// 낚시터 도감을 다 채우면 기척 패널을 눌러 언제든 보스를 부를 수 있음 → 다음에 던지면 보스전
+function canSummonBoss(sid = S.stage){ const b = bossOf(sid); return !!b && S.tutorial.done && !!S.dexDone[sid] && !bossReady(sid) && !(G.catch && G.catch.boss && ['casting','waiting','bite','hookGauge','reeling'].includes(G.phase)); }
+function summonBoss(){
+  const sid = S.stage; if(!canSummonBoss(sid)) return;
+  const b = bossOf(sid); S.boss.meter[sid] = b.need; save(); SFX.alert(); buzz([30,40,30]);
+  toast(`${josa(b.name,'을','를')} 불렀어요! 다음에 던지면 보스전`);
+}
 function makeBoss(sid){
   const b = bossOf(sid), t = Math.pow(Math.random(), 1.2), len = Math.round((b.len[0] + (b.len[1]-b.len[0])*t)*10)/10;
   const c = makeFish(b.id, len, t, { noVariant:true }); c.bossStage = sid; c.diff = b.diff; return c;
@@ -1183,6 +1244,15 @@ function recordCatch(c, byNet){
   queueRankSync();
   return out.length ? out : null;
 }
+// 자동 판매 조건: 튜토리얼 뒤, 이미 잡아 본 종류, 정한 등급 이하, 변종·보스 아님, 그 종류의 최대 크기·최고가·최고 등급·메달을 넘지 않음
+function autoSellOK(c){
+  if(!S.tutorial.done || S.autoSell==null || S.autoSell<0 || c.kind!=='fish' || c.boss || c.variant) return false;
+  const e = S.dex[c.id]; if(!e || !e.count) return false;
+  if(c.grade > S.autoSell || c.grade > e.best || c.len > e.maxLen) return false;
+  if(e.maxPrice!=null && c.price > e.maxPrice) return false;
+  if(medalFor(c.id, c.len) > (e.medal||0)) return false;
+  return true;
+}
 function medalFor(id, len){
   const f = CONFIG.fish[id]; if(!f || f.boss) return 0;
   let m = 0; CONFIG.medals.forEach((md,i)=>{ if(len >= f.len[0] + (f.len[1]-f.len[0])*md.at) m = i+1; });
@@ -1193,11 +1263,11 @@ function registerDex(c){
   // 메달: 처음 받는 단계마다 보상 (동→금을 한 번에 넘으면 모두 받음)
   const m = medalFor(c.id, c.len), had = e.medal||0;
   G.medalNew = null;
-  if(m > had){ let reward = 0; for(let k=had; k<m; k++){ reward += CONFIG.fish[c.id].price * CONFIG.medals[k].reward; S.stats.medals[k]++; }
+  if(m > had){ let reward = 0; for(let k=had; k<m; k++){ reward += Math.max(1, Math.round(CONFIG.fish[c.id].price * CONFIG.medals[k].reward)); S.stats.medals[k]++; }
     e.medal = m; S.money += reward; G.medalNew = { tier:m, reward }; }
   if(c.variant){ e.variants = e.variants || {}; if(!e.variants[c.variant]){ e.variants[c.variant] = true; } S.stats.variants++; }
   const record = e.count>0 && c.len>e.maxLen;
-  e.count++; e.maxLen = Math.max(e.maxLen, c.len); e.best = Math.max(e.best, c.grade);
+  e.count++; e.maxLen = Math.max(e.maxLen, c.len); e.best = Math.max(e.best, c.grade); e.maxPrice = Math.max(e.maxPrice||0, c.price);
   return record;
 }
 // 실제 시간(Date.now) 기준으로 진행 → 탭을 숨기거나 게임을 꺼 둔 시간도 반영
@@ -1213,15 +1283,17 @@ function netAdvance(){
   while(A.prog >= L.interval && A.fish.length < L.cap){
     A.prog -= L.interval;
     const c = rollCatch(netStage(), null, 0.5, { quality:L.quality, luck:L.luck, noBukangi:true });
-    A.fish.push(fishItem(c));
+    if(autoSellOK(c)){ S.money += c.price; S.stats.earned += c.price; S.stats.autoSold = (S.stats.autoSold||0) + 1; G.netSold = (G.netSold||0) + c.price; }
+    else A.fish.push(fishItem(c));
     registerDex(c); recordCatch(c, true); caught++;
   }
   if(A.fish.length >= L.cap) A.prog = 0;
   return caught;
 }
 function netTick(){
-  const before = S.autoNet.fish.length, caught = netAdvance();
+  const before = S.autoNet.fish.length; G.netSold = 0; const caught = netAdvance();
   if(!caught) return;
+  if(G.netSold && S.autoNet.fish.length===before){ save(); refreshHud(); toast(`그물 물고기 자동 판매 +${won(G.netSold)}원`); SFX.coin(); return; }
   const rw = checkDexRewards(); save(); refreshHud();
   const g = geo(); netBuoys(g).forEach(b=>splash(b.x, b.y, 3));
   SFX.nibble(); setTimeout(()=>SFX.nibble(), 120);
@@ -1427,10 +1499,12 @@ function rodTip(g){
   if(G.hookFx>0) ang -= G.hookFx*0.4;
   return { x:g.handX+Math.cos(ang)*g.rodLen, y:g.handY+Math.sin(ang)*g.rodLen, ang };
 }
+// 물고기 위치: 거리 1 = 찌 자리, 거리 0 = 낚싯대 끝 아래 물가 앞(낚시꾼 발밑까지 끌려오지 않음)
 function fishPos(){
   const g = geo(), d = G.R ? G.R.dist : 1;
-  const x = clamp(g.handX + (G.castX*CW - g.handX)*Math.min(d,1.25), g.handX+20, CW-20);
-  const sy = lerp(g.wl + CH*0.2, surfY(), clamp(d,0,1));
+  const nearX = Math.min(G.castX*CW - 10, Math.max(g.handX + g.rodLen*0.62, g.charX + CW*0.14));
+  const x = clamp(nearX + (G.castX*CW - nearX)*Math.min(d,1.25), nearX, CW-20);
+  const sy = lerp(g.wl + CH*0.1, surfY(), clamp(d,0,1));
   const y = sy + 24 + Math.sin(G.time*2.2)*6;
   return { x, y, surf:sy };
 }
@@ -2329,15 +2403,22 @@ function drawLanding(){
 }
 function hexA(hex, a){ const h = hex.replace('#',''); const n = parseInt(h.length===3 ? h.split('').map(x=>x+x).join('') : h, 16); return `rgba(${n>>16&255},${n>>8&255},${n&255},${clamp(a,0,1)})`; }
 function drawBossMeter(){
+  G.bossBtn = null;
   const b = bossOf(S.stage); if(!b || !S.tutorial.done) return;
-  const m = bossMeter(S.stage), ready = m >= b.need, x = 16, y = 16, w = Math.min(190, CW*0.42);
-  panelBox(x-6, y-6, w+12, 40);
+  const m = bossMeter(S.stage), ready = m >= b.need, x = 16, y = 16, w = Math.min(190, CW*0.42), call = canSummonBoss();
+  panelBox(x-6, y-6, w+12, call ? 58 : 40);
   ctx.font=`600 12px ${FB}`; ctx.textBaseline='middle'; ctx.textAlign='left';
   ctx.fillStyle = ready ? (Math.sin(G.time*6)>0 ? '#ffcf4a' : '#ff8a7a') : '#f4ecd9';
   ctx.fillText(ready ? `${b.name} 출현! 던지세요` : `${b.name}의 기척`, x, y+6, ready ? w : w-46);
   ctx.fillStyle='#22525e'; ctx.fillRect(x, y+18, w, 6);
   ctx.fillStyle = ready ? '#ff5a3c' : '#ffd04a'; ctx.fillRect(x, y+18, w*Math.min(1, m/b.need), 6);
   if(!ready){ ctx.fillStyle='#9fbcc0'; ctx.textAlign='right'; ctx.fillText(`${Math.floor(m)}/${b.need}`, x+w, y+6); ctx.textAlign='left'; }
+  if(call){   // 도감 완성 낚시터: 눌러서 보스 부르기
+    const bx = x, by = y+30, bw = w, bh = 18, pulse = 0.75 + Math.sin(G.time*4)*0.25;
+    ctx.fillStyle = `rgba(255,90,60,${0.8*pulse})`; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(bx, by, bw, bh, 9) : ctx.rect(bx, by, bw, bh); ctx.fill();
+    ctx.fillStyle = '#fff6e8'; ctx.textAlign='center'; ctx.font=`700 12px ${FB}`; ctx.fillText(TOUCH ? '눌러서 보스 부르기' : '눌러서 보스 부르기 (B)', bx+bw/2, by+bh/2+1, bw-8); ctx.textAlign='left';
+    G.bossBtn = { x:x-6, y:y-6, w:w+12, h:58 };
+  }
 }
 function drawAtmosphere(){
   const e = getEnv(); if(e.indoor) return;
@@ -2571,6 +2652,7 @@ function refreshHud(){
     + (S.autoNet.lv>0 ? `<button class="chip netchip ${S.autoNet.fish.length>=netLv().cap?'full':''}" data-act="openNet" title="그물 열기"><i>그물</i>${S.autoNet.fish.length}/${netLv().cap}</button>` : '')
     + (S.tickets>0 ? `<span class="chip ticket" title="부산 이용권">부산 이용권 ×${S.tickets}</span>` : '')
     + (()=>{ const e = getEnv(); return e.indoor ? '' : `<span class="chip envchip env-${e.tod}" title="${envTip(e)}">${TOD_NAME[e.tod]} · ${WEATHER_NAME[e.weather]}</span>`; })()
+    + (()=>{ const ev = getEvent(); return ev ? `<span class="chip evchip" title="${eventText(ev)}">${ev.label}</span>` : ''; })()
     + (S.prestige>0 ? `<span class="chip buffchip" title="판매가 +${Math.round(S.prestige*CONFIG.prestige.priceBonus*100)}%">환생 ${S.prestige}</span>` : '')
     + (S.buffs.big>0 ? `<span class="chip buffchip" title="${CONFIG.baits.big.desc}">대물 미끼 ${S.buffs.big}</span>` : '')
     + (S.buffs.buk>0 ? `<span class="chip buffchip" title="${CONFIG.baits.buk.desc}">부캉이 미끼 ${S.buffs.buk}</span>` : '');
@@ -2613,8 +2695,8 @@ function showCatch(c, record, rewards){
        ${G.newBest ? `<div class="record">개인 최고 기록! ${G.newBest.includes('len') ? '가장 큰 물고기' : ''}${G.newBest.length>1 ? ' · ' : ''}${G.newBest.includes('price') ? '가장 비싼 물고기' : ''}</div>` : record ? '<div class="record">최대 크기 갱신!</div>' : (S.dex[c.id].count===1 ? '<div class="record">도감 등록!</div>' : '')}
        <div class="stats"><div>크기<b>${c.len}cm</b></div><div>무게<b>${fmtWeight(c.weight)}</b></div><div>가격<b class="price">${won(c.price)}원</b></div></div>
        ${c.boss ? `<div class="record">${G.bossFirst ? '첫 격파! 수족관 트로피 벽에 트로피가 걸려요' : `${S.boss.beaten[c.id]}번째 격파`}</div>` : ''}${c.variant ? `<div class="record" style="color:#ffcf4a">${CONFIG.variants[c.variant].name} 변종! 가격 ×${CONFIG.variants[c.variant].mul}</div>` : ''}${G.medalNew ? `<div class="record" style="color:${CONFIG.medals[G.medalNew.tier-1].color}">${CONFIG.medals[G.medalNew.tier-1].name} 획득! 보상 +${won(G.medalNew.reward)}원</div>` : ''}
-       <p class="s" style="color:var(--muted);font-size:12px">살림망 ${S.net.length}/${netSize()}</p>${rw}
-       <div class="foot" style="justify-content:center"><button class="btn" data-act="quickSell">바로 팔기 +${won(c.price)}원 <kbd>S</kbd></button><button class="btn hot" data-act="close">계속 낚시 <kbd>Space</kbd></button></div></div>`;
+       <p class="s" style="color:var(--muted);font-size:12px">${G.autoSold ? `<b style="color:var(--paper)">자동 판매 +${won(G.autoSold)}원</b> · 기록을 넘지 않은 ${CONFIG.grades[S.autoSell].name} 이하 물고기라 바로 팔았어요` : `살림망 ${S.net.length}/${netSize()}`}</p>${rw}
+       <div class="foot" style="justify-content:center">${G.autoSold ? '' : `<button class="btn" data-act="quickSell">바로 팔기 +${won(c.price)}원 <kbd>S</kbd></button>`}<button class="btn hot" data-act="close">계속 낚시 <kbd>Space</kbd></button></div></div>`;
   openPanel(c.kind==='bukangi' ? '특별한 손맛' : c.boss ? '보스 격파!' : '포획 성공', body);
 }
 
@@ -2634,7 +2716,10 @@ function openShop(tab){
   else if(shopTab==='sell'){
     const total = S.net.reduce((a,f)=>a+f.price,0);
     const aq = S.aquarium, aqRoom = aqCap() - aq.fish.length;
-    body = `<div class="bar-top"><span>살림망 ${S.net.length}/${netSize()} · 합계 <span class="price">${won(total)}원</span></span><button class="btn hot" data-act="sellAll" ${S.net.length?'':'disabled'}>모두 판매</button></div>`
+    const asOpts = [[-1,'끄기'],[0,'일반까지'],[1,'고급까지'],[2,'희귀까지'],[3,'영웅까지']];
+    body = `<div class="row autosell"><div class="main"><div class="t">자동 판매</div><div class="s">이미 잡아 본 물고기 중 고른 등급 이하이고, 그 종류의 최대 크기·최고가·최고 등급·메달을 넘지 않으면 잡자마자 팔아요. 변종·보스는 팔지 않아요. 그물에도 적용돼요.</div>
+        <div class="seg">${asOpts.map(([v,l])=>`<button class="chip ${S.autoSell===v?'on':''}" data-act="autoSell" data-v="${v}" aria-pressed="${S.autoSell===v}">${l}</button>`).join('')}</div></div></div>`
+      + `<div class="bar-top"><span>살림망 ${S.net.length}/${netSize()} · 합계 <span class="price">${won(total)}원</span></span><button class="btn hot" data-act="sellAll" ${S.net.length?'':'disabled'}>모두 판매</button></div>`
       + (S.net.length ? S.net.map((f,i)=>`<div class="row"><canvas class="minicv" data-fish="${f.id}" data-var="${f.variant||''}"></canvas><div class="main"><div class="t">${f.name} ${gradeChip(CONFIG.grades[f.grade])}</div><div class="s">${f.len}cm · ${fmtWeight(f.weight)}</div></div><span class="price">${won(f.price)}원</span>${aq.lv>0 ? `<button class="btn" data-act="toAqua" data-v="${i}" ${aqRoom>0?'':'disabled'} title="수족관에 전시">전시</button>` : ''}<button class="btn" data-act="sell" data-v="${i}">판매</button></div>`).join('')
         : `<div class="empty">살림망이 비어 있어요. 물고기를 낚아오세요.</div>`);
   } else {
@@ -2691,7 +2776,7 @@ function openStage(){
     else if(cur) btn = `<button class="btn" disabled>현재 위치</button>`;
     else if(un) btn = `<button class="btn" data-act="goStage" data-v="${st.id}">이동</button>`;
     else btn = `<button class="btn hot" data-act="unlock" data-v="${st.id}" ${S.money>=st.cost?'':'disabled'}>해금 ${won(st.cost)}원</button>`;
-    return `<div class="scard ${cur?'cur':''} ${st.ticket?'busan':''}"><span class="no">${st.ticket ? '스페셜 스테이지' : 'STAGE '+st.no}</span><h3>${st.name}</h3>${methodTag(st.affinity)}<p>${st.desc}</p><p>${st.ticket ? '부산 전용 도감' : '도감'} ${known}/${ids.length}종${rw ? ` · 완성 보상: ${rw.text}${S.dexDone[st.id] ? ' (받음)' : ''}` : ''}</p>${btn}</div>`;
+    return `<div class="scard ${cur?'cur':''} ${st.ticket?'busan':''}"><span class="no">${st.ticket ? '스페셜 스테이지' : 'STAGE '+st.no}</span><h3>${st.name}</h3>${methodTag(st.affinity)}<p>${st.desc}</p><p>도감 ${known}/${ids.length}종${st.ticket ? ` (전용 ${ids.filter(id=>CONFIG.fish[id].busan).length}종 포함)` : ''}${rw ? ` · 완성 보상: ${rw.text}${S.dexDone[st.id] ? ' (받음)' : ''}` : ''}</p>${btn}</div>`;
   }).join('') + `</div>`;
   openPanel('낚시터', body);
 }
@@ -2704,7 +2789,7 @@ function goStage(id){
 }
 function unlock(id){
   const st = stageById(id); if(S.money<st.cost) return;
-  S.money -= st.cost; S.unlocked[id] = true; save(); refreshHud(); SFX.upgrade(); goStage(id);
+  S.money -= st.cost; S.unlocked[id] = true; save(); if(S.tutorial.done) ensureQuests(); refreshHud(); SFX.upgrade(); goStage(id);
 }
 let resetArm = false;
 let xferPending = null;
@@ -2773,7 +2858,7 @@ function statsHtml(){
     ['챔질 성공률', pct(st.hooks, st.bites), `입질 ${won(st.bites)} · 완벽 ${won(st.perfect)}`], ['끌어올리기 성공률', pct(st.catches, st.hooks), `놓침 ${won(lostTot)}`],
     ['판매로 번 돈', won(st.earned)+'원'], ['플레이 시간', fmtTime(st.playSec)],
     ['크기 메달', `${st.medals[2]}금 ${st.medals[1]}은 ${st.medals[0]}동`], ['희귀 변종', won(st.variants)+'마리'],
-    ['보스 격파', won(st.bossWins)+'번'], ['대회 우승', won(st.tourWins)+'번'], ['의뢰 완료', won(st.questsDone)+'개'],
+    ['자동 판매', won(st.autoSold||0)+'마리'], ['보스 격파', won(st.bossWins)+'번'], ['대회 우승', won(st.tourWins)+'번'], ['의뢰 완료', won(st.questsDone)+'개'],
   ].map(([l,v,s])=>`<div class="stile"><span class="lbl">${l}</span><b>${v}</b>${s?`<span class="s">${s}</span>`:''}</div>`).join('');
   const gmax = Math.max(1, ...st.grades);
   const gbars = CONFIG.grades.map((g,i)=>`<div class="sbar"><span>${g.name}</span><i style="--w:${(st.grades[i]||0)/gmax*100}%;--c:${g.color}"></i><em>${won(st.grades[i]||0)}</em></div>`).join('')
@@ -2856,6 +2941,7 @@ document.addEventListener('click', e=>{
     case 'aquaRelease': aquaRelease(+v); break;
     case 'sell': sellAt(+v); break;
     case 'sellAll': sellAll(); break;
+    case 'autoSell': S.autoSell = +v; save(); toast(+v<0 ? '자동 판매를 껐어요' : `${CONFIG.grades[+v].name} 등급까지 자동 판매해요`); openShop('sell'); break;
     case 'quickSell': quickSell(); break;
     case 'netUpgrade': netUpgrade(); break;
     case 'openNet': openNetPanel(); break;
@@ -2896,7 +2982,10 @@ function holdButton(el, key, onDown){
 }
 holdButton($('btnAct'), 'reel', action);
 holdButton($('btnLift'), 'lift');
-cv.addEventListener('pointerdown', e=>{ if(!modal.hidden) return; input.reel = true; action(); });
+cv.addEventListener('pointerdown', e=>{ if(!modal.hidden) return;
+  const r = cv.getBoundingClientRect(), px = e.clientX - r.left, py = e.clientY - r.top, B = G.bossBtn;
+  if(B && px>=B.x && px<=B.x+B.w && py>=B.y && py<=B.y+B.h){ summonBoss(); return; }
+  input.reel = true; action(); });
 ['pointerup','pointercancel','pointerleave'].forEach(t=>cv.addEventListener(t, ()=>{ input.reel = false; }));
 window.addEventListener('keydown', e=>{
   if(!modal.hidden){
@@ -2913,6 +3002,7 @@ window.addEventListener('keydown', e=>{
   if(e.code==='Space'){ e.preventDefault(); input.reel = true; if(!e.repeat) action(); }
   else SFX.unlock();
   if(e.code==='ArrowUp' || e.code==='KeyW'){ e.preventDefault(); input.lift = true; }
+  if(e.code==='KeyB' && !e.repeat) summonBoss();
   if(e.code==='Digit1') setMethod('float');
   if(e.code==='Digit2') setMethod('reel');
 });
@@ -2957,7 +3047,9 @@ function frame(now){
     if(G.envKey && k !== G.envKey && G.envKey.split('|')[2]===S.stage && !e.indoor){ const [pt,pw] = G.envKey.split('|');
       if(pw !== e.weather) toast(e.weather==='clear' ? '날씨가 개었어요' : `${WEATHER_NAME[e.weather]}${e.weather==='fog'?'가 꼈어요':'가 내리기 시작했어요'}`);
       else if(pt !== e.tod) toast(`${TOD_NAME[e.tod]}이 되었어요`); }
-    if(k !== G.envKey){ G.envKey = k; refreshHud(); } }
+    if(k !== G.envKey){ G.envKey = k; refreshHud(); }
+    const ev = getEvent(), ek = ev ? ev.key : '';
+    if(ek !== G.evKey){ if(ev && G.evKey!==undefined) { toast(`날씨 이벤트! ${eventText(ev)}`); SFX.alert(); } G.evKey = ek; refreshHud(); } }
   G.hookFx = Math.max(0, G.hookFx - dt*3);
   G.particles.forEach(p=>{ p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=420*dt; p.life-=dt; });
   G.particles = G.particles.filter(p=>p.life>0);
@@ -2989,5 +3081,6 @@ window.claude?.hot?.snapshot?.(()=>({ S }));
 const boot = data => { if(data && data.S) S = Object.assign(defaultSave(), data.S); start(); };
 window.claude?.hot?.ready ? window.claude.hot.ready(boot) : boot(window.claude?.hot?.data ?? {});
 </script>
+
 </body>
 </html>
