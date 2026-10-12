@@ -322,15 +322,15 @@ const CONFIG = {
       deep:    { name:'안개 속 대물',  weathers:['fog'], bias:0.5, wait:1.25, desc:'좋은 물고기가 늘지만 입질이 느려요' },
     } },
   },
-  // 맵별 보스: 그 맵에서 need마리 잡으면 다음 입질이 보스. 3단계 장력 싸움. diff: 난이도(뒤 맵일수록 높음, 단계별 추가 당김에도 곱해짐)
+  // 맵별 보스: 그 맵에서 need마리 잡으면 다음 입질이 보스. 3단계 장력 싸움(단계는 올라가기만 함). diff: 난이도(뒤 맵일수록 높음, 단계별 추가 당김에도 곱해짐). 찌·릴 어느 방식이든 맞는 방식 보너스
   bosses: {
-    stream: { id:'boss_stream', base:'kkeokji',  name:'여울 대장 꺽지',   len:[45,60],   price:1500,   need:30, diff:0.74 },
-    river:  { id:'boss_river',  base:'megi',     name:'왕메기',          len:[180,240], price:4000,   need:30, diff:0.8 },
-    pier:   { id:'boss_pier',   base:'doldom',   name:'방파제 돌돔왕',    len:[90,120],  price:9000,   need:30, diff:0.86 },
-    dokdo:  { id:'boss_dokdo',  base:'hokdom',   name:'독도 혹돔왕',      len:[120,160], price:20000,  need:30, diff:0.9 },
-    boat:   { id:'boss_boat',   base:'chamchi',  name:'바다의 폭군 참다랑어', len:[300,380], price:60000, need:30, diff:0.94 },
-    amazon: { id:'boss_amazon', base:'arapaima', name:'괴물 피라루쿠',     len:[350,450], price:100000, need:30, diff:0.98 },
-    alaska: { id:'boss_alaska', base:'halibut',  name:'전설의 핼리벗',     len:[300,380], price:160000, need:30, diff:1.0 },
+    stream: { id:'boss_stream', base:'kkeokji',  name:'여울 대장 꺽지',   len:[45,60],   price:1500,   need:30, diff:0.62 },
+    river:  { id:'boss_river',  base:'megi',     name:'왕메기',          len:[180,240], price:4000,   need:30, diff:0.66 },
+    pier:   { id:'boss_pier',   base:'doldom',   name:'방파제 돌돔왕',    len:[90,120],  price:9000,   need:30, diff:0.74 },
+    dokdo:  { id:'boss_dokdo',  base:'hokdom',   name:'독도 혹돔왕',      len:[120,160], price:20000,  need:30, diff:0.84 },
+    boat:   { id:'boss_boat',   base:'chamchi',  name:'바다의 폭군 참다랑어', len:[300,380], price:60000, need:30, diff:0.91 },
+    amazon: { id:'boss_amazon', base:'arapaima', name:'괴물 피라루쿠',     len:[350,450], price:100000, need:30, diff:0.96 },
+    alaska: { id:'boss_alaska', base:'halibut',  name:'전설의 핼리벗',     len:[300,380], price:160000, need:30, diff:0.99 },
   },
   bossFight: { reelMul:0.7, loseKeep:0.6, phaseForce:[0.0, 0.08, 0.14], diveEvery:[0, 4.5, 3.2], diveForce:0.28, diveTime:1.6, warn:0.7, burstMul:[1, 1.2, 1.6] },
   // 오늘의 의뢰: 하루 3개, 보상은 열린 맵 중 가장 좋은 곳의 1마리 기대가 × 배수
@@ -869,7 +869,8 @@ function hookSuccess(perfect){
 }
 function startReel(perfect){
   const c = CONFIG.reel, f = G.catch, d = f.diff;
-  const match = f.method===S.method ? CONFIG.methodMatch : CONFIG.methodMismatch;
+  // 보스는 어느 방식이든 '맞는 방식' 보너스 (찌낚시로도 잡을 수 있게)
+  const match = f.boss || f.method===S.method ? CONFIG.methodMatch : CONFIG.methodMismatch;
   const zoneW = gearLv('rod').zone*(1 - d*c.zoneShrinkByDiff)*match.zoneMul;
   G.R = {
     dist: (perfect ? c.perfectStartDist : 1)*lerp(CONFIG.cast.startDistNear, CONFIG.cast.startDistFar, G.castPower ?? 0.5), T:0.35, hp:gearLv('line').hp, hpMax:gearLv('line').hp,
