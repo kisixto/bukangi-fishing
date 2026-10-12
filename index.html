@@ -218,7 +218,7 @@ button:focus-visible{outline:2px solid var(--float);outline-offset:2px}
     </div>
     <button class="act" id="btnAct">던지기</button>
     <button class="lift" id="btnLift" hidden>들기</button>
-    <div class="keys">스페이스: 던지기·챔질·감기<br>↑ 또는 W: 들기 · S: 바로 팔기</div>
+    <div class="keys">스페이스: 던지기·챔질·감기<br>Shift·↑·W: 들기 · S: 바로 팔기</div>
   </footer>
 </div>
 <div class="modal" id="modal" hidden><div class="panel" id="panel" role="dialog" aria-modal="true"></div></div>
@@ -3017,6 +3017,12 @@ function keyIs(e, code){
   const k = (e.key||'').toLowerCase();
   return m.k.includes(k) || (!e.code && (e.keyCode===m.n || e.which===m.n));
 }
+// 들기 키: ↑ · W(ㅈ) · Shift. Shift와 ↑는 한글 입력기의 영향을 받지 않음.
+// 한글 입력기는 키를 누르고 있는 동안 떼기 이벤트를 중간중간 끼워 보내기도 해서, 떼기는 잠깐(0.15초) 기다렸다 반영
+let liftRelT = 0;
+const isLiftKey = e => e.code==='ArrowUp' || e.key==='ArrowUp' || e.key==='Shift' || e.code==='ShiftLeft' || e.code==='ShiftRight' || keyIs(e,'KeyW');
+function liftDown(){ clearTimeout(liftRelT); input.lift = true; }
+function liftUp(){ clearTimeout(liftRelT); liftRelT = setTimeout(()=>{ input.lift = false; }, 150); }
 window.addEventListener('keydown', e=>{
   if(!modal.hidden){
     if(e.key==='Escape'){ closeModal(); return; }
@@ -3031,16 +3037,16 @@ window.addEventListener('keydown', e=>{
   if(keyIs(e,'KeyS') && G.phase==='landing' && !e.repeat){ e.preventDefault(); finishLanding(); if(panel.querySelector('[data-act=quickSell]')) quickSell(); return; }
   if(keyIs(e,'Space')){ e.preventDefault(); input.reel = true; if(!e.repeat) action(); }
   else SFX.unlock();
-  if(e.code==='ArrowUp' || keyIs(e,'KeyW')){ e.preventDefault(); input.lift = true; }
+  if(isLiftKey(e)){ e.preventDefault(); liftDown(); }
   if(keyIs(e,'KeyB') && !e.repeat) summonBoss();
   if(keyIs(e,'Digit1')) setMethod('float');
   if(keyIs(e,'Digit2')) setMethod('reel');
 });
 window.addEventListener('keyup', e=>{
   if(keyIs(e,'Space')) input.reel = false;
-  if(e.code==='ArrowUp' || keyIs(e,'KeyW')) input.lift = false;
+  if(isLiftKey(e)) liftUp();
 });
-window.addEventListener('blur', ()=>{ input.reel = input.lift = false; });
+window.addEventListener('blur', ()=>{ clearTimeout(liftRelT); input.reel = input.lift = false; });
 // 연타로 생기는 선택을 브라우저 단에서도 막음 (CSS를 무시하는 일부 모바일 브라우저 대비)
 const inField = e=>{ const t = e.target && e.target.nodeType===1 ? e.target : e.target && e.target.parentElement; return !!(t && t.closest('textarea,input')); };
 document.addEventListener('selectstart', e=>{ if(!inField(e)) e.preventDefault(); });
