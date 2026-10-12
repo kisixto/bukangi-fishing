@@ -335,7 +335,7 @@ const CONFIG = {
   bossFight: { reelMul:0.7, loseKeep:0.6, phaseForce:[0.0, 0.08, 0.14], diveEvery:[0, 4.5, 3.2], diveForce:0.28, diveTime:1.6, warn:0.7, burstMul:[1, 1.2, 1.6] },
   // 오늘의 의뢰: 하루 3개, 보상은 열린 맵 중 가장 좋은 곳의 1마리 기대가 × 배수
   // 의뢰 내용·보상은 지금까지 연 가장 먼 낚시터 기준. 새 낚시터를 열면 아직 못 끝낸 의뢰가 바뀜. 모두 끝내면 대물 미끼 보너스(부산 이용권은 주지 않음)
-  quests: { perDay:3, rewardMul:[10, 16], allDoneBait:5, recentStages:2 },
+  quests: { perDay:3, rewardMul:[4, 7], allDoneBait:5, recentStages:2 },
   // 수족관: 전시한 물고기 가격 합 × hourly 만큼 시간당 관람 수입 (꺼 둔 동안 최대 24시간)
   aquarium: { hourly:0.1, maxOfflineHours:24, levels:[
     { name:'수조 없음', cost:0, cap:0 }, { name:'작은 어항', cost:20000, cap:3 }, { name:'거실 수조', cost:60000, cap:5 },
@@ -509,7 +509,7 @@ const SAVE_KEY = 'bukangi-fishing-v1';
 function defaultSave(){
   return { money:0, gear:{rod:0,reel:0,line:0,bait:0}, unlocked:{indoor:true}, stage:'indoor', prevStage:'indoor',
            tickets:0, busanLeft:0, net:[], dex:{}, dexDone:{}, tutorial:{done:false, step:0}, method:'float', sound:true, autoNet:{ lv:0, prog:0, fish:[], last:0 }, stats:defaultStats(),
-           boss:{ meter:{}, beaten:{} }, quests:{ day:'', list:[], streak:0, bonus:false }, buffs:{ big:0, buk:0 },
+           boss:{ meter:{}, beaten:{}, called:{} }, quests:{ day:'', list:[], streak:0, bonus:false }, buffs:{ big:0, buk:0 },
            aquarium:{ lv:0, fish:[], bank:0, last:0 }, prestige:0, tourBest:{}, autoSell:CONFIG.autoSell.defaultMax };
 }
 function defaultStats(){
@@ -782,7 +782,7 @@ function releaseCast(){
   const useBig = S.buffs.big>0, useBuk = S.buffs.buk>0;
   if(useBig) S.buffs.big--; if(useBuk) S.buffs.buk--;
   G.catch = bossReady(S.stage) ? makeBoss(S.stage) : rollCatch(curStage(), S.method, pw, { big:useBig, buk:useBuk });
-  if(G.catch.boss) toast('물속에서 거대한 그림자가 움직여요…');
+  if(G.catch.boss){ toast('물속에서 거대한 그림자가 움직여요…'); if(S.boss.called) delete S.boss.called[S.stage]; }
   setPhase('casting');
   SFX.cast();
   if(pw >= c.perfectFrom){ toast(`최대 캐스팅! ${G.castM}m`); buzz([20,30,20]); }
@@ -1160,7 +1160,8 @@ function questText(q){
 }
 function ensureQuests(){
   const d = dayKey(), tier = questTier();
-  if(S.quests.day !== d){ S.quests = { day:d, tier, list:genQuests(d), streak:0, bonus:false }; save(); refreshHud(); return; }
+  if(S.quests.day !== d){ S.quests = { day:d, tier, rv:2, list:genQuests(d), streak:0, bonus:false }; save(); refreshHud(); return; }
+  if(S.quests.rv !== 2){ S.quests.rv = 2; S.quests.list.forEach(q=>{ if(!q.claimed) q.reward = Math.max(100, Math.round(q.reward*0.42/10)*10); }); save(); }   // 의뢰 보상 하향(10~16배 → 4~7배) 전에 받은 의뢰도 맞춤
   if(S.quests.tier !== tier){   // 새 낚시터를 열면 아직 못 끝낸 의뢰를 새 진행도에 맞게 바꿈 (끝낸 의뢰는 그대로)
     const keep = S.quests.list.filter(q=>q.done), fresh = genQuests(d, CONFIG.quests.perDay - keep.length, keep.map(q=>q.type));
     const changed = S.quests.tier!=null && fresh.length > 0;
@@ -1217,10 +1218,19 @@ function addBossMeter(sid, n){ const b = bossOf(sid); if(!b) return; const was =
   if(!was && bossReady(sid)) toast(`${b.name}의 기척이 느껴져요! 다음 입질을 노리세요`); }
 // 낚시터 도감을 다 채우면 기척 패널을 눌러 언제든 보스를 부를 수 있음 → 다음에 던지면 보스전
 function canSummonBoss(sid = S.stage){ const b = bossOf(sid); return !!b && S.tutorial.done && !!S.dexDone[sid] && !bossReady(sid) && !(G.catch && G.catch.boss && ['casting','waiting','bite','hookGauge','reeling'].includes(G.phase)); }
+// 직접 부른 보스는 던지기 전까지 취소 가능 (부르기 전 기척으로 되돌림)
+function canCancelBoss(sid = S.stage){ return S.tutorial.done && S.boss.called && S.boss.called[sid]!=null && bossReady(sid); }
 function summonBoss(){
-  const sid = S.stage; if(!canSummonBoss(sid)) return;
-  const b = bossOf(sid); S.boss.meter[sid] = b.need; save(); SFX.alert(); buzz([30,40,30]);
-  toast(`${josa(b.name,'을','를')} 불렀어요! 다음에 던지면 보스전`);
+  const sid = S.stage;
+  if(canCancelBoss(sid)){ cancelBoss(); return; }
+  if(!canSummonBoss(sid)) return;
+  const b = bossOf(sid); S.boss.called[sid] = bossMeter(sid); S.boss.meter[sid] = b.need; save(); SFX.alert(); buzz([30,40,30]);
+  toast(`${josa(b.name,'을','를')} 불렀어요! 다음에 던지면 보스전 (다시 누르면 취소)`);
+}
+function cancelBoss(){
+  const sid = S.stage; if(!canCancelBoss(sid)) return;
+  S.boss.meter[sid] = S.boss.called[sid]; delete S.boss.called[sid]; save(); SFX.coin();
+  toast(`${josa(bossOf(sid).name,'을','를')} 부르지 않기로 했어요`);
 }
 function makeBoss(sid){
   const b = bossOf(sid), t = Math.pow(Math.random(), 1.2), len = Math.round((b.len[0] + (b.len[1]-b.len[0])*t)*10)/10;
@@ -1890,7 +1900,7 @@ WATERFX.river = (wl)=>{ drawGlints(CW*0.72, wl, '255,250,225', 16); };
 
 /* ---- 독도 ---- */
 BG.dokdo = (wl)=>{
-  drawSun(CW*0.22, wl*0.28, Math.max(12, Math.min(CW,CH)*0.04));
+  drawSun(CW*0.4, wl*0.28, Math.max(12, Math.min(CW,CH)*0.04));
   drawClouds(wl, 3, 0.75, 6);
   const isl = (cx, base, w, h, peaks, rock, green)=>{
     ctx.fillStyle = rock; ctx.beginPath(); ctx.moveTo(cx-w/2, base);
@@ -1908,10 +1918,14 @@ BG.dokdo = (wl)=>{
   // 동도 (낮고 평평, 시설·태극기)
   const ex = CW*0.8, ew = CW*0.2;
   isl(ex, wl, ew, h*0.7, [[-1,0.05],[-0.7,0.5],[-0.4,0.8],[-0.1,0.9],[0.3,0.88],[0.6,0.7],[0.85,0.35],[1,0.05]], '#75685a', '#7f9a52');
-  const topY = wl - h*0.7*0.9;
-  ctx.fillStyle='#e8e6e0'; ctx.fillRect(ex - ew*0.12, topY - 10, ew*0.14, 10); ctx.fillStyle='#3f6f9a'; ctx.fillRect(ex - ew*0.12, topY - 12, ew*0.14, 3);
-  ctx.fillStyle='#f4f2ec'; ctx.fillRect(ex + ew*0.12, topY - 18, 5, 18); ctx.fillStyle='#ffd04a'; ctx.fillRect(ex + ew*0.12, topY - 21, 5, 4);   // 등대
-  const fx = ex - ew*0.28, fy = topY - 4;   // 태극기
+  // 동도 윤곽선 위 높이 (시설·깃대를 땅에 붙이기 위해)
+  const EP = [[-1,0.05],[-0.7,0.5],[-0.4,0.8],[-0.1,0.9],[0.3,0.88],[0.6,0.7],[0.85,0.35],[1,0.05]];
+  const groundY = x => { const px = (x - ex)/(ew/2); for(let i=1;i<EP.length;i++){ const [x0,y0] = EP[i-1], [x1,y1] = EP[i]; if(px <= x1){ const k = clamp((px-x0)/(x1-x0),0,1); return wl - lerp(y0,y1,k)*h*0.7; } } return wl; };
+  const bx0 = ex - ew*0.12, bx1 = bx0 + ew*0.14, by = Math.max(groundY(bx0), groundY(bx1)) + 2;
+  ctx.fillStyle='#e8e6e0'; ctx.fillRect(bx0, by - 10, bx1-bx0, 10); ctx.fillStyle='#3f6f9a'; ctx.fillRect(bx0, by - 12, bx1-bx0, 3);
+  const lx = ex + ew*0.12, ly = Math.max(groundY(lx), groundY(lx+5)) + 2;
+  ctx.fillStyle='#f4f2ec'; ctx.fillRect(lx, ly - 18, 5, 18); ctx.fillStyle='#ffd04a'; ctx.fillRect(lx, ly - 21, 5, 4);   // 등대
+  const fx = ex - ew*0.28, fy = groundY(fx) + 3;   // 태극기: 깃대 밑동을 비탈에 꽂음
   ctx.strokeStyle='#e8e6e0'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(fx, fy); ctx.lineTo(fx, fy-30); ctx.stroke();
   const wave = Math.sin(G.time*4)*1.5, fw = 22, fh = 15, fl = fx+1, ft = fy-30;
   ctx.fillStyle='#fbfbf8'; ctx.beginPath(); ctx.moveTo(fl, ft); ctx.quadraticCurveTo(fl+fw/2, ft+wave, fl+fw, ft); ctx.lineTo(fl+fw, ft+fh); ctx.quadraticCurveTo(fl+fw/2, ft+fh+wave, fl, ft+fh); ctx.fill();
@@ -1923,20 +1937,25 @@ BG.dokdo = (wl)=>{
   ctx.fillStyle='#222'; [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([sx,sy])=>ctx.fillRect(tx + sx*fw*0.32 - 2, ty + sy*fh*0.3 - 1.5, 4, 3));
   drawBirds(wl, 5, '#3a4a52', 0.28);
 };
-WATERFX.dokdo = (wl)=>{ drawGlints(CW*0.22, wl, '255,252,235', 22); };
+WATERFX.dokdo = (wl)=>{ const g = geo(); drawGlints(Math.max(CW*0.4, g.charX + Math.max(60, CW*0.08) + 90), wl, '255,252,235', 22); };   // 햇빛 반짝임이 갯바위 옆에 몰리지 않게
 PLAT.dokdo = (g)=>{
   const { wl, platY, charX, s } = g, w = charX + Math.max(60, CW*0.08);
   // 갯바위
   ctx.fillStyle='#3e3834'; ctx.beginPath(); ctx.moveTo(0,platY+2); ctx.lineTo(w*0.3,platY-3); ctx.lineTo(w*0.7,platY); ctx.lineTo(w,platY+4); ctx.lineTo(w+18,wl+6); ctx.lineTo(w+30,wl+CH*0.06); ctx.lineTo(w+6,CH); ctx.lineTo(0,CH); ctx.fill();
   ctx.fillStyle='#57504a'; ctx.beginPath(); ctx.moveTo(0,platY+2); ctx.lineTo(w*0.3,platY-3); ctx.lineTo(w*0.7,platY); ctx.lineTo(w,platY+4); ctx.lineTo(w*0.9,platY+12); ctx.lineTo(0,platY+14); ctx.fill();
   ctx.fillStyle='rgba(255,255,255,.12)'; ctx.fillRect(0, platY-1, w*0.7, 2);
-  // 따개비
-  ctx.fillStyle='#d8d2c4'; for(let i=0;i<14;i++){ const x = (i*37)%(w+20), y = wl + 2 + (i*13)%(CH*0.08); ctx.beginPath(); ctx.arc(x, y, 1.6, 0, Math.PI*2); ctx.fill(); }
-  ctx.fillStyle='#2f4a3a'; ctx.fillRect(0, wl-1, w+20, 4);   // 해초 띠
-  // 부서지는 파도
-  for(let i=0;i<7;i++){ const surge = Math.sin(G.time*1.7 + i); const x = w + 6 + i*6, y = wl + 6 + i*3;
-    ctx.fillStyle=`rgba(255,255,255,${clamp(0.25+surge*0.5,0,0.9)})`; ctx.beginPath(); ctx.ellipse(x, y + surge*2, 8, 2.5, 0.4, 0, Math.PI*2); ctx.fill();
-    if(surge>0.9){ ctx.beginPath(); ctx.arc(x+4, y-8-surge*5, 2, 0, Math.PI*2); ctx.fill(); } }
+  // 바위 결 (불규칙한 균열·얼룩, 점선처럼 보이지 않게 낮은 대비)
+  ctx.strokeStyle='rgba(0,0,0,.18)'; ctx.lineWidth=1.5;
+  for(let i=0;i<5;i++){ const x = w*(0.12 + i*0.19) + hash01(i*3.1)*10, y = platY + 18 + hash01(i*7.7)*CH*0.05;
+    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 6 + hash01(i)*8, y + 10 + hash01(i*2.3)*12); ctx.lineTo(x + 2, y + 22 + hash01(i*5.1)*14); ctx.stroke(); }
+  ctx.fillStyle='rgba(47,74,58,.55)'; ctx.fillRect(0, wl-1, w+16, 3);   // 물때 자국
+  // 바위에 부딪히는 파도: 물이 닿는 곳에서만 밀려왔다 빠지는 거품
+  const cx = w + 17, surge = (Math.sin(G.time*1.3) + 1)/2, back = (Math.sin(G.time*1.3 - 1.2) + 1)/2;
+  ctx.fillStyle=`rgba(255,255,255,${0.45 + surge*0.35})`;
+  for(let i=0;i<4;i++){ ctx.beginPath(); ctx.ellipse(cx + 4 + i*7 + surge*3, wl + 1.5 + i*0.5, 9 - i*1.5, 1.8, 0, 0, Math.PI*2); ctx.fill(); }
+  ctx.strokeStyle=`rgba(255,255,255,${0.35*(1-back)})`; ctx.lineWidth=1.2;   // 빠져나가는 거품 줄
+  ctx.beginPath(); ctx.moveTo(cx + 8, wl + 3); ctx.quadraticCurveTo(cx + 20 + back*14, wl + 5, cx + 28 + back*30, wl + 3.5); ctx.stroke();
+  if(surge > 0.85 && !REDUCED){ ctx.fillStyle=`rgba(255,255,255,${(surge-0.85)*5})`; for(let i=0;i<4;i++){ ctx.beginPath(); ctx.arc(cx + 2 + i*4, wl - 3 - (surge-0.85)*40*(0.6 + hash01(i)*0.6), 1.6, 0, Math.PI*2); ctx.fill(); } }
 };
 
 /* ---- 배낚시 ---- */
@@ -2405,7 +2424,7 @@ function hexA(hex, a){ const h = hex.replace('#',''); const n = parseInt(h.lengt
 function drawBossMeter(){
   G.bossBtn = null;
   const b = bossOf(S.stage); if(!b || !S.tutorial.done) return;
-  const m = bossMeter(S.stage), ready = m >= b.need, x = 16, y = 16, w = Math.min(190, CW*0.42), call = canSummonBoss();
+  const m = bossMeter(S.stage), ready = m >= b.need, x = 16, y = 16, w = Math.min(190, CW*0.42), cancel = canCancelBoss() && G.phase==='idle', call = canSummonBoss() || cancel;
   panelBox(x-6, y-6, w+12, call ? 58 : 40);
   ctx.font=`600 12px ${FB}`; ctx.textBaseline='middle'; ctx.textAlign='left';
   ctx.fillStyle = ready ? (Math.sin(G.time*6)>0 ? '#ffcf4a' : '#ff8a7a') : '#f4ecd9';
@@ -2415,8 +2434,9 @@ function drawBossMeter(){
   if(!ready){ ctx.fillStyle='#9fbcc0'; ctx.textAlign='right'; ctx.fillText(`${Math.floor(m)}/${b.need}`, x+w, y+6); ctx.textAlign='left'; }
   if(call){   // 도감 완성 낚시터: 눌러서 보스 부르기
     const bx = x, by = y+30, bw = w, bh = 18, pulse = 0.75 + Math.sin(G.time*4)*0.25;
-    ctx.fillStyle = `rgba(255,90,60,${0.8*pulse})`; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(bx, by, bw, bh, 9) : ctx.rect(bx, by, bw, bh); ctx.fill();
-    ctx.fillStyle = '#fff6e8'; ctx.textAlign='center'; ctx.font=`700 12px ${FB}`; ctx.fillText(TOUCH ? '눌러서 보스 부르기' : '눌러서 보스 부르기 (B)', bx+bw/2, by+bh/2+1, bw-8); ctx.textAlign='left';
+    ctx.fillStyle = cancel ? 'rgba(90,110,120,.9)' : `rgba(255,90,60,${0.8*pulse})`; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(bx, by, bw, bh, 9) : ctx.rect(bx, by, bw, bh); ctx.fill();
+    const lbl = cancel ? '눌러서 부르기 취소' : '눌러서 보스 부르기';
+    ctx.fillStyle = '#fff6e8'; ctx.textAlign='center'; ctx.font=`700 12px ${FB}`; ctx.fillText(TOUCH ? lbl : lbl + ' (B)', bx+bw/2, by+bh/2+1, bw-8); ctx.textAlign='left';
     G.bossBtn = { x:x-6, y:y-6, w:w+12, h:58 };
   }
 }
@@ -2985,30 +3005,38 @@ holdButton($('btnLift'), 'lift');
 cv.addEventListener('pointerdown', e=>{ if(!modal.hidden) return;
   const r = cv.getBoundingClientRect(), px = e.clientX - r.left, py = e.clientY - r.top, B = G.bossBtn;
   if(B && px>=B.x && px<=B.x+B.w && py>=B.y && py<=B.y+B.h){ summonBoss(); return; }
-  input.reel = true; action(); });
-['pointerup','pointercancel','pointerleave'].forEach(t=>cv.addEventListener(t, ()=>{ input.reel = false; }));
+  // 화면을 눌러도 던지기·챔질·감기는 하지 않음 (메뉴를 누르다 잘못 던지는 일 방지). 이동·포획 연출 건너뛰기만 허용
+  if(G.phase==='travel' || G.phase==='landing') action(); });
+// 단축키: 한글 입력 상태(W→ㅈ, S→ㄴ, B→ㅠ)나 IME 처리 중이어도 같은 키로 인식
+const KEY_ALT = { KeyW:{ k:['w','ㅈ'], n:87 }, KeyS:{ k:['s','ㄴ'], n:83 }, KeyB:{ k:['b','ㅠ'], n:66 }, Space:{ k:[' '], n:32 }, Digit1:{ k:['1'], n:49 }, Digit2:{ k:['2'], n:50 } };
+function keyIs(e, code){
+  if(e.code===code) return true;
+  const m = KEY_ALT[code]; if(!m) return false;
+  const k = (e.key||'').toLowerCase();
+  return m.k.includes(k) || (!e.code && (e.keyCode===m.n || e.which===m.n));
+}
 window.addEventListener('keydown', e=>{
   if(!modal.hidden){
     if(e.key==='Escape'){ closeModal(); return; }
     // 포획 결과 창: S = 바로 팔기, 스페이스·Enter = 계속 낚시 (꾹 누르고 있던 키의 자동 반복은 무시)
     if(G.phase==='result' && !e.repeat && !(e.target && e.target.closest && e.target.closest('textarea,input'))){
-      if(e.code==='KeyS' && panel.querySelector('[data-act=quickSell]')){ e.preventDefault(); quickSell(); }
-      else if(e.code==='Space' || e.code==='Enter' || e.code==='NumpadEnter'){ e.preventDefault(); closeModal(); }
+      if(keyIs(e,'KeyS') && panel.querySelector('[data-act=quickSell]')){ e.preventDefault(); quickSell(); }
+      else if(keyIs(e,'Space') || e.code==='Enter' || e.code==='NumpadEnter'){ e.preventDefault(); closeModal(); }
     }
     return;
   }
   // 포획 연출 중 S: 연출을 건너뛰고 바로 팔기
-  if(e.code==='KeyS' && G.phase==='landing' && !e.repeat){ e.preventDefault(); finishLanding(); if(panel.querySelector('[data-act=quickSell]')) quickSell(); return; }
-  if(e.code==='Space'){ e.preventDefault(); input.reel = true; if(!e.repeat) action(); }
+  if(keyIs(e,'KeyS') && G.phase==='landing' && !e.repeat){ e.preventDefault(); finishLanding(); if(panel.querySelector('[data-act=quickSell]')) quickSell(); return; }
+  if(keyIs(e,'Space')){ e.preventDefault(); input.reel = true; if(!e.repeat) action(); }
   else SFX.unlock();
-  if(e.code==='ArrowUp' || e.code==='KeyW'){ e.preventDefault(); input.lift = true; }
-  if(e.code==='KeyB' && !e.repeat) summonBoss();
-  if(e.code==='Digit1') setMethod('float');
-  if(e.code==='Digit2') setMethod('reel');
+  if(e.code==='ArrowUp' || keyIs(e,'KeyW')){ e.preventDefault(); input.lift = true; }
+  if(keyIs(e,'KeyB') && !e.repeat) summonBoss();
+  if(keyIs(e,'Digit1')) setMethod('float');
+  if(keyIs(e,'Digit2')) setMethod('reel');
 });
 window.addEventListener('keyup', e=>{
-  if(e.code==='Space') input.reel = false;
-  if(e.code==='ArrowUp' || e.code==='KeyW') input.lift = false;
+  if(keyIs(e,'Space')) input.reel = false;
+  if(e.code==='ArrowUp' || keyIs(e,'KeyW')) input.lift = false;
 });
 window.addEventListener('blur', ()=>{ input.reel = input.lift = false; });
 // 연타로 생기는 선택을 브라우저 단에서도 막음 (CSS를 무시하는 일부 모바일 브라우저 대비)
