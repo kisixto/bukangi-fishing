@@ -348,8 +348,9 @@ const CONFIG = {
   },
   // 낚시 대회: 3분 동안 직접 잡은 물고기 총 무게. 참가비 = 그 맵 1마리 기대가 × feeMul
   tournament: { seconds:180, feeMul:10, prize:[6, 3, 1.5, 0], rivals:[['낚시왕 박',1.25],['강태공 김',1.0],['초보 이',0.7]] },
-  // 환생: 알래스카를 연 뒤 가능. 돈·장비·해금·그물이 초기화되고, 레벨마다 판매가 +10%·보스 기척 +10%
-  prestige: { priceBonus:0.10, bossBonus:0.10, startMoney:150 },
+  // 환생: 알래스카를 연 뒤 가능. 돈·장비·해금·그물이 초기화되고, 레벨마다 판매가 +10%,
+  // 장력 초록 구간 +0.02(낚싯대 구간에 더함)·돌진 흡수 +4%p (구간·흡수는 maxLevels 레벨까지만 쌓임)
+  prestige: { priceBonus:0.10, zoneBonus:0.02, absorbBonus:0.04, maxLevels:5, startMoney:150 },
   // 낚시터 도감을 모두 채우면 받는 작은 편의 효과 (중복 없이 1회)
   dexRewards: {
     indoor: { perk:'castSlow', value:0.15, text:'캐스팅 게이지 15% 느려짐' },
@@ -871,7 +872,7 @@ function startReel(perfect){
   const c = CONFIG.reel, f = G.catch, d = f.diff;
   // 보스는 어느 방식이든 '맞는 방식' 보너스 (찌낚시로도 잡을 수 있게)
   const match = f.boss || f.method===S.method ? CONFIG.methodMatch : CONFIG.methodMismatch;
-  const zoneW = gearLv('rod').zone*(1 - d*c.zoneShrinkByDiff)*match.zoneMul;
+  const zoneW = (gearLv('rod').zone + prestigeZone())*(1 - d*c.zoneShrinkByDiff)*match.zoneMul;   // 환생하면 구간이 넓어짐
   G.R = {
     dist: (perfect ? c.perfectStartDist : 1)*lerp(CONFIG.cast.startDistNear, CONFIG.cast.startDistFar, G.castPower ?? 0.5), T:0.35, hp:gearLv('line').hp, hpMax:gearLv('line').hp,
     slack:0, angle:0, time:0,
@@ -880,7 +881,7 @@ function startReel(perfect){
     wobA: 0.03 + d*0.08, wobF: 2 + d*3,
     burstT: rand(1,2), burstLeft:0, burstStr:0,
     reelSpeed: gearLv('reel').speed/(0.75 + d*0.9),
-    absorb: gearLv('rod').absorb, match: f.method===S.method, force:0,
+    absorb: Math.min(0.95, gearLv('rod').absorb + prestigeAbsorb()), match: f.method===S.method, force:0,
   };
   if(f.boss){ G.R.reelSpeed *= CONFIG.bossFight.reelMul; G.R.boss = { phase:1, diveT: 3, warn:0, dive:0, k: d*d*1.5 }; }
   setPhase('reeling');
@@ -1048,6 +1049,10 @@ function drawTour(){
 /* 환생: 돈·장비·해금·그물을 처음으로 돌리고 영구 보너스를 받음 */
 let prestigeArm = false;
 function canPrestige(){ return !!S.unlocked.alaska; }
+const prestigeLv = ()=>Math.min(S.prestige, CONFIG.prestige.maxLevels);
+const prestigeZone = ()=>prestigeLv()*CONFIG.prestige.zoneBonus;
+const prestigeAbsorb = ()=>prestigeLv()*CONFIG.prestige.absorbBonus;
+function prestigeText(lv){ const P = CONFIG.prestige, l = Math.min(lv, P.maxLevels); return `판매가 +${Math.round(lv*P.priceBonus*100)}% · 초록 구간 +${Math.round(l*P.zoneBonus*100)}%p · 돌진 흡수 +${Math.round(l*P.absorbBonus*100)}%`; }
 function doPrestige(btn){
   if(!canPrestige() || G.tour) return;
   if(!prestigeArm){ prestigeArm = true; btn.textContent = '정말요? 한 번 더 누르면 처음부터 다시 시작해요'; btn.classList.add('hot'); return; }
@@ -1055,7 +1060,7 @@ function doPrestige(btn){
   S.prestige++; S.money = P.startMoney; S.gear = { rod:0, reel:0, line:0, bait:0 }; S.unlocked = { indoor:true };
   S.stage = 'indoor'; S.prevStage = 'indoor'; S.busanLeft = 0; S.net = []; S.autoNet = { lv:0, prog:0, fish:[], last:0 }; S.buffs = { big:0, buk:0 }; S.boss.meter = {};
   save(); G.R = null; setPhase('idle'); closeModal(); refreshHud(); SFX.reward();
-  toast(`환생 ${S.prestige}! 판매가 +${Math.round(S.prestige*P.priceBonus*100)}% · 보스 기척 +${Math.round(S.prestige*P.bossBonus*100)}%`);
+  toast(`환생 ${S.prestige}! ${prestigeText(S.prestige)}`);
 }
 
 /* 특수 미끼 */
@@ -1247,7 +1252,7 @@ function recordCatch(c, byNet){
   const st = S.stats, out = [];
   if(byNet) st.netCatches++; else st.catches++;
   if(!byNet) questEvent('catch', c);
-  if(!byNet && !c.boss && S.stage!=='busan') addBossMeter(S.stage, 1 + S.prestige*CONFIG.prestige.bossBonus);
+  if(!byNet && !c.boss && S.stage!=='busan') addBossMeter(S.stage, 1);
   st.grades[c.grade] = (st.grades[c.grade]||0) + 1;
   const stage = netStage && byNet ? netStage().id : S.stage;
   const rec = { id:c.id, len:c.len, price:c.price, grade:c.grade, stage, at:Date.now() };
@@ -2675,7 +2680,7 @@ function refreshHud(){
     + (S.tickets>0 ? `<span class="chip ticket" title="부산 이용권">부산 이용권 ×${S.tickets}</span>` : '')
     + (()=>{ const e = getEnv(); return e.indoor ? '' : `<span class="chip envchip env-${e.tod}" title="${envTip(e)}">${TOD_NAME[e.tod]} · ${WEATHER_NAME[e.weather]}</span>`; })()
     + (()=>{ const ev = getEvent(); return ev ? `<span class="chip evchip" title="${eventText(ev)}">${ev.label}</span>` : ''; })()
-    + (S.prestige>0 ? `<span class="chip buffchip" title="판매가 +${Math.round(S.prestige*CONFIG.prestige.priceBonus*100)}%">환생 ${S.prestige}</span>` : '')
+    + (S.prestige>0 ? `<span class="chip buffchip" title="${prestigeText(S.prestige)}">환생 ${S.prestige}</span>` : '')
     + (S.buffs.big>0 ? `<span class="chip buffchip" title="${CONFIG.baits.big.desc}">대물 미끼 ${S.buffs.big}</span>` : '')
     + (S.buffs.buk>0 ? `<span class="chip buffchip" title="${CONFIG.baits.buk.desc}">부캉이 미끼 ${S.buffs.buk}</span>` : '');
   $('btnStage').disabled = !S.tutorial.done;
@@ -2745,7 +2750,7 @@ function openShop(tab){
       + (S.net.length ? S.net.map((f,i)=>`<div class="row"><canvas class="minicv" data-fish="${f.id}" data-var="${f.variant||''}"></canvas><div class="main"><div class="t">${f.name} ${gradeChip(CONFIG.grades[f.grade])}</div><div class="s">${f.len}cm · ${fmtWeight(f.weight)}</div></div><span class="price">${won(f.price)}원</span>${aq.lv>0 ? `<button class="btn" data-act="toAqua" data-v="${i}" ${aqRoom>0?'':'disabled'} title="수족관에 전시">전시</button>` : ''}<button class="btn" data-act="sell" data-v="${i}">판매</button></div>`).join('')
         : `<div class="empty">살림망이 비어 있어요. 물고기를 낚아오세요.</div>`);
   } else {
-    const statTxt = (k,l) => k==='rod' ? `장력 구간 ${Math.round(l.zone*100)}% · 흡수 ${Math.round(l.absorb*100)}%` : k==='reel' ? `감기 속도 ${l.speed.toFixed(2)}` : k==='line' ? `과부하 버팀 ${l.hp}초` : `희귀 행운 +${Math.round(l.luck*100)}%`;
+    const statTxt = (k,l) => k==='rod' ? `장력 구간 ${Math.round((l.zone+prestigeZone())*100)}% · 흡수 ${Math.round(Math.min(0.95,l.absorb+prestigeAbsorb())*100)}%${prestigeLv() ? ' (환생 보너스 포함)' : ''}` : k==='reel' ? `감기 속도 ${l.speed.toFixed(2)}` : k==='line' ? `과부하 버팀 ${l.hp}초` : `희귀 행운 +${Math.round(l.luck*100)}%`;
     body = Object.keys(CONFIG.gear).map(k=>{
       const G2 = CONFIG.gear[k], lv = S.gear[k], cur = G2.levels[lv], nx = G2.levels[lv+1];
       return `<div class="row"><div class="main"><div class="t">${G2.label} · ${cur.name} <span class="s">Lv${lv+1}</span></div><div class="s">${statTxt(k,cur)}${nx ? ` → <b style="color:var(--paper)">${nx.name}</b>: ${statTxt(k,nx)}` : ' · 최고 등급'}</div></div>`
@@ -2892,8 +2897,8 @@ function statsHtml(){
     <div class="bests">${bestCard('가장 큰 물고기', st.bestLen, st.bestLen ? st.bestLen.len+'cm' : '')}${bestCard('가장 비싼 물고기', st.bestPrice, st.bestPrice ? won(st.bestPrice.price)+'원' : '')}</div>
     <div class="scols"><div><div class="dexh">등급별 마릿수</div>${gbars}</div><div><div class="dexh">놓친 이유</div>${lbars}</div></div>
     <div class="dexh" style="margin-top:14px">환생 ${S.prestige ? `· ${S.prestige}회` : ''}</div>
-    <div class="row"><div class="main"><div class="t">${S.prestige ? `지금 보너스: 판매가 +${Math.round(S.prestige*CONFIG.prestige.priceBonus*100)}% · 보스 기척 +${Math.round(S.prestige*CONFIG.prestige.bossBonus*100)}%` : '처음부터 다시 시작하는 대신 영구 보너스를 받아요'}</div>
-      <div class="s">한 번 할 때마다 판매가 +${Math.round(CONFIG.prestige.priceBonus*100)}%, 보스 기척 +${Math.round(CONFIG.prestige.bossBonus*100)}%. 돈·장비·낚시터 해금·그물은 처음으로 돌아가고, 도감·메달·통계·수족관·트로피·부산 이용권은 남아요.${canPrestige() ? '' : ' 알래스카를 열면 할 수 있어요.'}</div></div>
+    <div class="row"><div class="main"><div class="t">${S.prestige ? `지금 보너스: ${prestigeText(S.prestige)}` : '처음부터 다시 시작하는 대신 영구 보너스를 받아요'}</div>
+      <div class="s">한 번 할 때마다 판매가 +${Math.round(CONFIG.prestige.priceBonus*100)}%, 장력 초록 구간 +${Math.round(CONFIG.prestige.zoneBonus*100)}%p, 릴낚시 돌진 흡수 +${Math.round(CONFIG.prestige.absorbBonus*100)}%(구간·흡수는 ${CONFIG.prestige.maxLevels}번째 환생까지). 다음 환생 후: ${prestigeText(S.prestige+1)}. 돈·장비·낚시터 해금·그물은 처음으로 돌아가고, 도감·메달·통계·수족관·트로피·부산 이용권은 남아요.${canPrestige() ? '' : ' 알래스카를 열면 할 수 있어요.'}</div></div>
       <button class="btn" data-act="prestige" ${canPrestige() && !G.tour ? '' : 'disabled'}>환생하기</button></div>
     ${st.backfilled ? '<p class="rnote">통계 기능이 생기기 전에 잡은 물고기는 잡은 마릿수와 가장 큰·비싼 물고기에만 들어가 있어요. 던진 횟수, 성공률, 등급별 마릿수, 놓친 이유, 번 돈은 지금부터 쌓여요.</p>' : ''}`;
 }
