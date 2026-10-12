@@ -332,7 +332,7 @@ const CONFIG = {
     amazon: { id:'boss_amazon', base:'arapaima', name:'괴물 피라루쿠',     len:[350,450], price:100000, need:30, diff:0.96 },
     alaska: { id:'boss_alaska', base:'halibut',  name:'전설의 핼리벗',     len:[300,380], price:160000, need:30, diff:0.99 },
   },
-  bossFight: { reelMul:0.7, loseKeep:0.6, phaseForce:[0.0, 0.08, 0.14], diveEvery:[0, 4.5, 3.2], diveForce:0.28, diveTime:1.6, warn:0.7, burstMul:[1, 1.2, 1.6] },
+  bossFight: { reelMul:0.7, loseKeep:0.6, phaseForce:[0.0, 0.08, 0.14], diveEvery:[0, 8, 6], diveForce:0.38, diveTime:1.1, warn:0.8, burstMul:[1, 1.2, 1.6] },
   // 오늘의 의뢰: 하루 3개, 보상은 열린 맵 중 가장 좋은 곳의 1마리 기대가 × 배수
   // 의뢰 내용·보상은 지금까지 연 가장 먼 낚시터 기준. 새 낚시터를 열면 아직 못 끝낸 의뢰가 바뀜. 모두 끝내면 대물 미끼 보너스(부산 이용권은 주지 않음)
   quests: { perDay:3, rewardMul:[4, 7], allDoneBait:5, recentStages:2 },
@@ -907,7 +907,7 @@ function updateReel(dt){
   if(R.boss){   // 보스: 거리에 따라 3단계, 2단계부터 경고 후 잠수(강한 당김)
     // 단계는 올라가기만 함: 한번 2·3단계에 들어가면 보스가 다시 멀어져도 앞 단계로 돌아가지 않음
     const B = R.boss, BF = CONFIG.bossFight, ph = Math.max(B.phase, R.dist > 0.66 ? 1 : R.dist > 0.33 ? 2 : 3);
-    if(ph !== B.phase){ B.phase = ph; toast(ph===2 ? '2단계! 보스가 잠수를 시작해요' : '마지막 단계! 몸부림이 거세져요'); SFX.alert(); buzz([40,40,40]); }
+    if(ph !== B.phase){ B.phase = ph; B.diveT = Math.max(B.diveT, 2.5); toast(ph===2 ? '2단계! 보스가 잠수를 시작해요' : '마지막 단계! 몸부림이 거세져요'); SFX.alert(); buzz([40,40,40]); }
     force += BF.phaseForce[ph-1]*B.k;
     if(BF.diveEvery[ph-1] > 0){
       if(B.dive > 0){ B.dive -= dt; force += BF.diveForce*B.k; if(Math.random()<0.3){ const fp = fishPos(); splash(fp.x, fp.surf, 2); } }
