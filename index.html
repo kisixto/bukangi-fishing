@@ -3017,12 +3017,11 @@ function keyIs(e, code){
   const k = (e.key||'').toLowerCase();
   return m.k.includes(k) || (!e.code && (e.keyCode===m.n || e.which===m.n));
 }
-// 들기 키: ↑ · W(ㅈ) · Shift. Shift와 ↑는 한글 입력기의 영향을 받지 않음.
-// 한글 입력기는 키를 누르고 있는 동안 떼기 이벤트를 중간중간 끼워 보내기도 해서, 떼기는 잠깐(0.15초) 기다렸다 반영
+// 들기 키: ↑ · W(ㅈ) · Shift. Shift와 ↑는 한글 입력기의 영향을 받지 않음. 떼면 바로 내려감
 let liftRelT = 0;
 const isLiftKey = e => e.code==='ArrowUp' || e.key==='ArrowUp' || e.key==='Shift' || e.code==='ShiftLeft' || e.code==='ShiftRight' || keyIs(e,'KeyW');
 function liftDown(){ clearTimeout(liftRelT); input.lift = true; }
-function liftUp(){ clearTimeout(liftRelT); liftRelT = setTimeout(()=>{ input.lift = false; }, 150); }
+function liftUp(){ clearTimeout(liftRelT); input.lift = false; }
 window.addEventListener('keydown', e=>{
   if(!modal.hidden){
     if(e.key==='Escape'){ closeModal(); return; }
