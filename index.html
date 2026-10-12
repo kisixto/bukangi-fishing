@@ -904,8 +904,9 @@ function updateReel(dt){
   let force = R.baseForce + Math.sin(R.time*R.wobF)*R.wobA + Math.sin(R.time*R.wobF*2.7)*R.wobA*0.5;
   if(R.burstLeft>0){ R.burstLeft -= dt; force += R.burstStr*(isReel ? 1 - R.absorb*R.angle : 1); }
   if(R.boss){   // 보스: 거리에 따라 3단계, 2단계부터 경고 후 잠수(강한 당김)
-    const B = R.boss, BF = CONFIG.bossFight, ph = R.dist > 0.66 ? 1 : R.dist > 0.33 ? 2 : 3;
-    if(ph !== B.phase){ B.phase = ph; toast(ph===2 ? '2단계! 보스가 잠수를 시작해요' : ph===3 ? '마지막 단계! 몸부림이 거세져요' : '보스가 힘을 되찾았어요'); SFX.alert(); buzz([40,40,40]); }
+    // 단계는 올라가기만 함: 한번 2·3단계에 들어가면 보스가 다시 멀어져도 앞 단계로 돌아가지 않음
+    const B = R.boss, BF = CONFIG.bossFight, ph = Math.max(B.phase, R.dist > 0.66 ? 1 : R.dist > 0.33 ? 2 : 3);
+    if(ph !== B.phase){ B.phase = ph; toast(ph===2 ? '2단계! 보스가 잠수를 시작해요' : '마지막 단계! 몸부림이 거세져요'); SFX.alert(); buzz([40,40,40]); }
     force += BF.phaseForce[ph-1]*B.k;
     if(BF.diveEvery[ph-1] > 0){
       if(B.dive > 0){ B.dive -= dt; force += BF.diveForce*B.k; if(Math.random()<0.3){ const fp = fishPos(); splash(fp.x, fp.surf, 2); } }
